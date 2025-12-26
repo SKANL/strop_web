@@ -121,3 +121,17 @@
     @apply bg-background text-foreground;
   }
 }
+
+/* Ocultar el botón nativo de revelar contraseña en navegadores */
+/* Microsoft Edge & IE */
+input::-ms-reveal,
+input::-ms-clear {
+  display: none;
+}
+
+/* Chrome, Safari, Opera */
+input::-webkit-credentials-auto-fill-button,
+input::-webkit-textfield-decoration-container {
+  visibility: hidden;
+  pointer-events: none;
+}

@@ -1,0 +1,206 @@
+---
+/**
+ * AuthLayout.astro
+ * Layout especializado para páginas de autenticación
+ * Diseño split-screen: branding a la izquierda, formulario a la derecha
+ */
+
+interface Props {
+  title: string;
+  description?: string;
+}
+
+const { title, description = "Gestión inteligente de obras de construcción" } = Astro.props;
+---
+
+<!doctype html>
+<html lang="es" class="h-full">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="description" content={description} />
+    <meta name="generator" content={Astro.generator} />
+    <title>{title} | Strop</title>
+  </head>
+  <body class="h-full overflow-hidden bg-background antialiased">
+    <!-- Contenedor maestro: Viewport Locking -->
+    <div class="flex h-dvh w-full overflow-hidden">
+      <!-- Panel izquierdo: Branding (fijo, sin scroll) -->
+      <div class="relative hidden h-full w-2/5 flex-col justify-between overflow-hidden bg-primary p-12 lg:flex">
+        <!-- Patrón decorativo de fondo -->
+        <div class="absolute inset-0 opacity-10">
+          <svg class="h-full w-full" viewBox="0 0 100 100" preserveAspectRatio="none">
+            <defs>
+              <pattern id="grid" width="10" height="10" patternUnits="userSpaceOnUse">
+                <path d="M 10 0 L 0 0 0 10" fill="none" stroke="currentColor" stroke-width="0.5"/>
+              </pattern>
+            </defs>
+            <rect width="100" height="100" fill="url(#grid)" class="text-primary-foreground"/>
+          </svg>
+        </div>
+
+        <!-- Logo y tagline -->
+        <div class="relative z-10">
+          <div class="flex items-center gap-3 mb-4">
+            <div class="flex h-12 w-12 items-center justify-center rounded-xl bg-primary-foreground/10 backdrop-blur">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                class="h-7 w-7 text-primary-foreground"
+              >
+                <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+                <polyline points="9 22 9 12 15 12 15 22"/>
+              </svg>
+            </div>
+            <span class="text-3xl font-bold text-primary-foreground tracking-tight">
+              Strop
+            </span>
+          </div>
+          <p class="text-lg text-primary-foreground/80 max-w-md">
+            La plataforma integral para gestionar obras de construcción con incidencias en tiempo real, trazabilidad completa y decisiones basadas en datos.
+          </p>
+        </div>
+
+        <!-- Características destacadas -->
+        <div class="relative z-10 space-y-6">
+          <div class="flex items-start gap-4">
+            <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-primary-foreground/10">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="h-5 w-5 text-primary-foreground">
+                <path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"/>
+                <circle cx="12" cy="13" r="3"/>
+              </svg>
+            </div>
+            <div>
+              <h3 class="font-semibold text-primary-foreground">Evidencia Fotográfica</h3>
+              <p class="text-sm text-primary-foreground/70">Captura incidencias con GPS y timestamp automático para registro inmutable.</p>
+            </div>
+          </div>
+
+          <div class="flex items-start gap-4">
+            <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-primary-foreground/10">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="h-5 w-5 text-primary-foreground">
+                <path d="M12 20V10"/>
+                <path d="M18 20V4"/>
+                <path d="M6 20v-4"/>
+              </svg>
+            </div>
+            <div>
+              <h3 class="font-semibold text-primary-foreground">Dashboard Ejecutivo</h3>
+              <p class="text-sm text-primary-foreground/70">KPIs en tiempo real de todos tus proyectos en una sola vista.</p>
+            </div>
+          </div>
+
+          <div class="flex items-start gap-4">
+            <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-primary-foreground/10">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="h-5 w-5 text-primary-foreground">
+                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+              </svg>
+            </div>
+            <div>
+              <h3 class="font-semibold text-primary-foreground">Auditoría Completa</h3>
+              <p class="text-sm text-primary-foreground/70">Bitácora digital inmutable para compliance y trazabilidad legal.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Testimonio / Social proof -->
+        <div class="relative z-10 rounded-xl bg-primary-foreground/5 backdrop-blur p-6 border border-primary-foreground/10">
+          <blockquote class="text-primary-foreground/90 italic">
+            "Strop transformó la manera en que gestionamos nuestras obras. Ahora tenemos visibilidad total de las incidencias desde cualquier lugar."
+          </blockquote>
+          <div class="mt-4 flex items-center gap-3">
+            <div class="h-10 w-10 rounded-full bg-primary-foreground/20 flex items-center justify-center">
+              <span class="text-sm font-medium text-primary-foreground">MR</span>
+            </div>
+            <div>
+              <p class="text-sm font-medium text-primary-foreground">Miguel Rodríguez</p>
+              <p class="text-xs text-primary-foreground/60">Director General, Construcciones del Norte</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Panel derecho: Contenido del formulario (scrollable) -->
+      <div class="flex h-full w-full flex-col overflow-y-auto lg:w-3/5">
+        <!-- Contenedor con padding dinámico para centrado -->
+        <div class="flex flex-col items-center gap-8 px-4 py-8 sm:px-6 lg:px-6 xl:px-8">
+          <!-- Logo móvil (visible solo en móvil) -->
+          <div class="text-center lg:hidden">
+            <div class="inline-flex items-center gap-2">
+              <div class="flex h-10 w-10 items-center justify-center rounded-lg bg-primary">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  class="h-6 w-6 text-primary-foreground"
+                >
+                  <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+                  <polyline points="9 22 9 12 15 12 15 22"/>
+                </svg>
+              </div>
+              <span class="text-2xl font-bold tracking-tight">Strop</span>
+            </div>
+          </div>
+
+          <!-- Contenido principal (slot) con centrado en desktop -->
+          <div class="w-full max-w-md lg:mt-auto">
+            <slot />
+          </div>
+
+          <!-- Footer con espaciador automático -->
+          <div class="w-full lg:mt-auto text-center text-sm text-muted-foreground">
+            <p>
+              © 2025 Strop. Todos los derechos reservados.
+            </p>
+            <div class="mt-2 flex justify-center gap-4">
+              <a href="/terminos" class="hover:text-foreground transition-colors">
+                Términos de servicio
+              </a>
+              <a href="/privacidad" class="hover:text-foreground transition-colors">
+                Política de privacidad
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>
+
+<style is:global>
+  @import "../styles/global.css";
+  
+  /* Scrollbar estilizado para el panel derecho */
+  .lg\:w-1/2::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  .lg\:w-1/2::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  .lg\:w-1/2::-webkit-scrollbar-thumb {
+    background: hsl(var(--muted-foreground) / 0.3);
+    border-radius: 3px;
+  }
+
+  .lg\:w-1/2::-webkit-scrollbar-thumb:hover {
+    background: hsl(var(--muted-foreground) / 0.5);
+  }
+
+  /* Para Firefox */
+  .lg\:w-1/2 {
+    scrollbar-color: hsl(var(--muted-foreground) / 0.3) transparent;
+    scrollbar-width: thin;
+  }
+</style>

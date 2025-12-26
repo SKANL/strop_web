@@ -1,0 +1,15 @@
+---
+/**
+ * login.astro
+ * Página de inicio de sesión
+ * Utiliza AuthLayout y el componente LoginForm como isla React
+ */
+import AuthLayout from "@/layouts/AuthLayout.astro";
+import LoginForm from "@/components/auth/LoginForm";
+import { Toaster } from "@/components/ui/sonner";
+---
+
+<AuthLayout title="Iniciar sesión">
+  <LoginForm client:load />
+  <Toaster client:load richColors position="top-right" />
+</AuthLayout>

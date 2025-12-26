@@ -1,0 +1,15 @@
+---
+/**
+ * register.astro
+ * Página de registro multi-step
+ * Utiliza AuthLayout y el componente RegisterForm como isla React
+ */
+import AuthLayout from "@/layouts/AuthLayout.astro";
+import RegisterForm from "@/components/auth/RegisterForm";
+import { Toaster } from "@/components/ui/sonner";
+---
+
+<AuthLayout title="Crear cuenta">
+  <RegisterForm client:load />
+  <Toaster client:load richColors position="top-right" />
+</AuthLayout>
