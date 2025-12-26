@@ -1,4 +1,4 @@
-// KPIGrid.tsx - Grid de tarjetas KPI para el Dashboard
+// KPIGrid.tsx - Grid de tarjetas KPI compactas para el Dashboard
 import { 
   FolderKanban, 
   AlertTriangle, 
@@ -16,53 +16,53 @@ interface KPIGridProps {
 
 export function KPIGrid({ data }: KPIGridProps) {
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
+    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
       <KPICard
-        title="Proyectos Activos"
+        title="Proyectos"
         value={data.activeProjects}
-        subtitle={`de ${data.totalProjects} totales`}
         icon={FolderKanban}
         variant="primary"
         delay={0}
+        tooltip={`${data.activeProjects} activos de ${data.totalProjects} totales`}
       />
       <KPICard
-        title="Incidencias Abiertas"
+        title="Abiertas"
         value={data.openIncidents}
-        subtitle={`de ${data.totalIncidents} totales`}
         icon={AlertTriangle}
         variant="warning"
         trend={{ value: 12, isPositive: false }}
         delay={0.05}
+        tooltip={`${data.openIncidents} incidencias abiertas de ${data.totalIncidents} totales`}
       />
       <KPICard
-        title="Incidencias Críticas"
+        title="Críticas"
         value={data.criticalIncidents}
-        subtitle="Requieren atención"
         icon={AlertOctagon}
         variant="destructive"
         delay={0.1}
+        tooltip="Incidencias críticas que requieren atención inmediata"
       />
       <KPICard
-        title="Resueltas esta Semana"
+        title="Resueltas"
         value={data.resolvedThisWeek}
-        subtitle="Últimos 7 días"
         icon={CheckCircle}
         trend={{ value: 8, isPositive: true }}
         delay={0.15}
+        tooltip="Incidencias resueltas en los últimos 7 días"
       />
       <KPICard
-        title="Tiempo Promedio"
+        title="Tiempo Res."
         value={data.avgResolutionTime}
-        subtitle="Resolución de incidencias"
         icon={Clock}
         delay={0.2}
+        tooltip="Tiempo promedio de resolución de incidencias"
       />
       <KPICard
-        title="Usuarios Activos"
+        title="Usuarios"
         value={data.totalUsers}
-        subtitle="En la organización"
         icon={Users}
         delay={0.25}
+        tooltip="Usuarios activos en la organización"
       />
     </div>
   );

@@ -15,7 +15,10 @@ export interface User {
   email: string;
   role: "OWNER" | "SUPERINTENDENT" | "RESIDENT" | "CABO";
   avatar?: string;
+  avatarUrl?: string;
   isActive: boolean;
+  phone?: string;
+  lastActiveAt?: string;
 }
 
 export interface Project {
@@ -30,6 +33,10 @@ export interface Project {
   openIncidents: number;
   criticalIncidents: number;
   membersCount: number;
+  budget?: number;
+  budgetSpent?: number;
+  description?: string;
+  coverImageUrl?: string;
 }
 
 export interface Incident {
@@ -41,8 +48,15 @@ export interface Incident {
   projectId: string;
   projectName: string;
   createdBy: string;
+  createdByAvatar?: string;
   createdAt: string;
   assignedTo?: string;
+  assignedToAvatar?: string;
+  closedAt?: string;
+  closingNote?: string;
+  gpsLat?: number;
+  gpsLng?: number;
+  photoUrl?: string;
 }
 
 export interface Notification {
@@ -58,6 +72,7 @@ export interface Activity {
   id: string;
   action: string;
   user: string;
+  userAvatar?: string;
   target: string;
   timestamp: string;
   type: "incident" | "project" | "user" | "system";
@@ -124,6 +139,9 @@ export const mockCurrentUser: User = {
   email: "juan.perez@constructora-demo.com",
   role: "OWNER",
   isActive: true,
+  avatarUrl: "https://api.dicebear.com/8.x/initials/svg?seed=JPG",
+  phone: "+52 55 1234 5678",
+  lastActiveAt: "2024-12-26T10:00:00",
 };
 
 export const mockKPIs: KPIData = {
@@ -150,6 +168,9 @@ export const mockProjects: Project[] = [
     openIncidents: 5,
     criticalIncidents: 1,
     membersCount: 12,
+    budget: 15000000,
+    budgetSpent: 6750000,
+    description: "Desarrollo de torre residencial de 25 pisos con amenidades premium.",
   },
   {
     id: "proj-002",
@@ -163,6 +184,9 @@ export const mockProjects: Project[] = [
     openIncidents: 8,
     criticalIncidents: 0,
     membersCount: 18,
+    budget: 28000000,
+    budgetSpent: 17360000,
+    description: "Centro comercial de 3 niveles con estacionamiento subterráneo.",
   },
   {
     id: "proj-003",
@@ -176,6 +200,9 @@ export const mockProjects: Project[] = [
     openIncidents: 4,
     criticalIncidents: 2,
     membersCount: 8,
+    budget: 45000000,
+    budgetSpent: 11250000,
+    description: "Complejo de 5 naves industriales con oficinas administrativas.",
   },
   {
     id: "proj-004",
@@ -189,6 +216,9 @@ export const mockProjects: Project[] = [
     openIncidents: 3,
     criticalIncidents: 0,
     membersCount: 15,
+    budget: 22000000,
+    budgetSpent: 17160000,
+    description: "Edificio corporativo de 12 pisos con certificación LEED.",
   },
   {
     id: "proj-005",
@@ -202,6 +232,9 @@ export const mockProjects: Project[] = [
     openIncidents: 3,
     criticalIncidents: 0,
     membersCount: 10,
+    budget: 85000000,
+    budgetSpent: 12750000,
+    description: "Hospital de especialidades con 200 camas y área de urgencias.",
   },
 ];
 
@@ -215,7 +248,10 @@ export const mockIncidents: Incident[] = [
     projectId: "proj-001",
     projectName: "Torre Residencial Norte",
     createdBy: "Carlos Mendoza",
+    createdByAvatar: "https://api.dicebear.com/8.x/initials/svg?seed=CM",
     createdAt: "2024-12-26T08:30:00",
+    gpsLat: 19.4326,
+    gpsLng: -99.1332,
   },
   {
     id: "inc-002",
@@ -226,8 +262,10 @@ export const mockIncidents: Incident[] = [
     projectId: "proj-002",
     projectName: "Centro Comercial Plaza Sur",
     createdBy: "María García",
+    createdByAvatar: "https://api.dicebear.com/8.x/initials/svg?seed=MG",
     createdAt: "2024-12-25T14:15:00",
     assignedTo: "Roberto Sánchez",
+    assignedToAvatar: "https://api.dicebear.com/8.x/initials/svg?seed=RS",
   },
   {
     id: "inc-003",
@@ -238,6 +276,7 @@ export const mockIncidents: Incident[] = [
     projectId: "proj-001",
     projectName: "Torre Residencial Norte",
     createdBy: "Ana López",
+    createdByAvatar: "https://api.dicebear.com/8.x/initials/svg?seed=AL",
     createdAt: "2024-12-25T11:45:00",
   },
   {
@@ -249,8 +288,10 @@ export const mockIncidents: Incident[] = [
     projectId: "proj-003",
     projectName: "Complejo Industrial Bajío",
     createdBy: "Pedro Ramírez",
+    createdByAvatar: "https://api.dicebear.com/8.x/initials/svg?seed=PR",
     createdAt: "2024-12-24T16:00:00",
     assignedTo: "Laura Torres",
+    assignedToAvatar: "https://api.dicebear.com/8.x/initials/svg?seed=LT",
   },
   {
     id: "inc-005",
@@ -261,6 +302,7 @@ export const mockIncidents: Incident[] = [
     projectId: "proj-003",
     projectName: "Complejo Industrial Bajío",
     createdBy: "Fernando Ortiz",
+    createdByAvatar: "https://api.dicebear.com/8.x/initials/svg?seed=FO",
     createdAt: "2024-12-24T09:20:00",
   },
   {
@@ -272,8 +314,12 @@ export const mockIncidents: Incident[] = [
     projectId: "proj-004",
     projectName: "Edificio Corporativo Polanco",
     createdBy: "Diana Herrera",
+    createdByAvatar: "https://api.dicebear.com/8.x/initials/svg?seed=DH",
     createdAt: "2024-12-23T13:30:00",
     assignedTo: "Juan Pérez García",
+    assignedToAvatar: "https://api.dicebear.com/8.x/initials/svg?seed=JPG",
+    closedAt: "2024-12-24T10:00:00",
+    closingNote: "Especificaciones enviadas por correo electrónico.",
   },
 ];
 
@@ -315,23 +361,25 @@ export const mockNotifications: Notification[] = [
 export const mockActivity: Activity[] = [
   {
     id: "act-001",
-    action: "Creó incidencia crítica",
+    action: "creó incidencia crítica en",
     user: "Carlos Mendoza",
+    userAvatar: "https://api.dicebear.com/8.x/initials/svg?seed=CM",
     target: "Torre Residencial Norte",
     timestamp: "Hace 2 horas",
     type: "incident",
   },
   {
     id: "act-002",
-    action: "Asignó incidencia a",
+    action: "asignó incidencia a",
     user: "María García",
+    userAvatar: "https://api.dicebear.com/8.x/initials/svg?seed=MG",
     target: "Roberto Sánchez",
     timestamp: "Hace 5 horas",
     type: "incident",
   },
   {
     id: "act-003",
-    action: "Actualizó progreso",
+    action: "actualizó progreso de",
     user: "Sistema",
     target: "Centro Comercial Plaza Sur (62%)",
     timestamp: "Hace 1 día",
@@ -339,29 +387,48 @@ export const mockActivity: Activity[] = [
   },
   {
     id: "act-004",
-    action: "Cerró incidencia",
+    action: "cerró incidencia",
     user: "Juan Pérez García",
+    userAvatar: "https://api.dicebear.com/8.x/initials/svg?seed=JPG",
     target: "Consulta de acabados - Polanco",
     timestamp: "Hace 1 día",
     type: "incident",
   },
   {
     id: "act-005",
-    action: "Agregó usuario",
+    action: "agregó usuario",
     user: "Admin",
     target: "Laura Torres (Residente)",
     timestamp: "Hace 2 días",
     type: "user",
   },
+  {
+    id: "act-006",
+    action: "subió documentación a",
+    user: "Ana López",
+    userAvatar: "https://api.dicebear.com/8.x/initials/svg?seed=AL",
+    target: "Torre Residencial Norte",
+    timestamp: "Hace 2 días",
+    type: "project",
+  },
+  {
+    id: "act-007",
+    action: "solicitó materiales para",
+    user: "Pedro Ramírez",
+    userAvatar: "https://api.dicebear.com/8.x/initials/svg?seed=PR",
+    target: "Complejo Industrial Bajío",
+    timestamp: "Hace 3 días",
+    type: "incident",
+  },
 ];
 
 export const mockUsers: User[] = [
-  { id: "user-001", name: "Juan Pérez García", email: "juan.perez@constructora-demo.com", role: "OWNER", isActive: true },
-  { id: "user-002", name: "Carlos Mendoza", email: "carlos.mendoza@constructora-demo.com", role: "SUPERINTENDENT", isActive: true },
-  { id: "user-003", name: "María García", email: "maria.garcia@constructora-demo.com", role: "RESIDENT", isActive: true },
-  { id: "user-004", name: "Roberto Sánchez", email: "roberto.sanchez@constructora-demo.com", role: "CABO", isActive: true },
-  { id: "user-005", name: "Ana López", email: "ana.lopez@constructora-demo.com", role: "RESIDENT", isActive: true },
-  { id: "user-006", name: "Pedro Ramírez", email: "pedro.ramirez@constructora-demo.com", role: "CABO", isActive: true },
-  { id: "user-007", name: "Laura Torres", email: "laura.torres@constructora-demo.com", role: "RESIDENT", isActive: true },
-  { id: "user-008", name: "Fernando Ortiz", email: "fernando.ortiz@constructora-demo.com", role: "SUPERINTENDENT", isActive: false },
+  { id: "user-001", name: "Juan Pérez García", email: "juan.perez@constructora-demo.com", role: "OWNER", isActive: true, avatarUrl: "https://api.dicebear.com/8.x/initials/svg?seed=JPG", phone: "+52 55 1234 5678" },
+  { id: "user-002", name: "Carlos Mendoza", email: "carlos.mendoza@constructora-demo.com", role: "SUPERINTENDENT", isActive: true, avatarUrl: "https://api.dicebear.com/8.x/initials/svg?seed=CM", phone: "+52 81 9876 5432" },
+  { id: "user-003", name: "María García", email: "maria.garcia@constructora-demo.com", role: "RESIDENT", isActive: true, avatarUrl: "https://api.dicebear.com/8.x/initials/svg?seed=MG" },
+  { id: "user-004", name: "Roberto Sánchez", email: "roberto.sanchez@constructora-demo.com", role: "CABO", isActive: true, avatarUrl: "https://api.dicebear.com/8.x/initials/svg?seed=RS" },
+  { id: "user-005", name: "Ana López", email: "ana.lopez@constructora-demo.com", role: "RESIDENT", isActive: true, avatarUrl: "https://api.dicebear.com/8.x/initials/svg?seed=AL" },
+  { id: "user-006", name: "Pedro Ramírez", email: "pedro.ramirez@constructora-demo.com", role: "CABO", isActive: true, avatarUrl: "https://api.dicebear.com/8.x/initials/svg?seed=PR" },
+  { id: "user-007", name: "Laura Torres", email: "laura.torres@constructora-demo.com", role: "RESIDENT", isActive: true, avatarUrl: "https://api.dicebear.com/8.x/initials/svg?seed=LT" },
+  { id: "user-008", name: "Fernando Ortiz", email: "fernando.ortiz@constructora-demo.com", role: "SUPERINTENDENT", isActive: false, avatarUrl: "https://api.dicebear.com/8.x/initials/svg?seed=FO" },
 ];

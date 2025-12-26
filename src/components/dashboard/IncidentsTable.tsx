@@ -1,8 +1,12 @@
-// IncidentsTable.tsx - Lista de incidencias recientes para el Dashboard
+// IncidentsTable.tsx - Lista de incidencias minimalista con HoverCard para detalles
 import { motion } from "framer-motion";
-import { AlertTriangle, ChevronRight, Clock } from "lucide-react";
+import { AlertTriangle, ChevronRight, Clock, MapPin, User } from "lucide-react";
 import type { Incident } from "@/lib/mock-dashboard";
-import { incidentTypeLabels, priorityLabels, statusLabels } from "@/lib/mock-dashboard";
+import { Card, CardHeader, CardTitle, CardContent, CardAction } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { HoverCard, HoverCardContent, HoverCardTrigger } from "@/components/ui/hover-card";
 
 interface IncidentsTableProps {
   incidents: Incident[];
@@ -10,22 +14,28 @@ interface IncidentsTableProps {
 }
 
 export function IncidentsTable({ incidents, maxItems = 6 }: IncidentsTableProps) {
-  const displayIncidents = incidents.slice(0, maxItems);
+  // Ordenar: CRITICAL primero, luego por fecha
+  const sortedIncidents = [...incidents].sort((a, b) => {
+    if (a.priority === "CRITICAL" && b.priority !== "CRITICAL") return -1;
+    if (a.priority !== "CRITICAL" && b.priority === "CRITICAL") return 1;
+    return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+  });
+  const displayIncidents = sortedIncidents.slice(0, maxItems);
 
-  const getPriorityStyles = (priority: Incident["priority"]) => {
+  const getPriorityVariant = (priority: Incident["priority"]) => {
     return priority === "CRITICAL" 
-      ? "bg-red-100 text-red-700" 
-      : "bg-gray-100 text-gray-600";
+      ? "bg-red-100 text-red-700 border-red-200" 
+      : "bg-gray-100 text-gray-600 border-gray-200";
   };
 
-  const getStatusStyles = (status: Incident["status"]) => {
+  const getStatusVariant = (status: Incident["status"]) => {
     switch (status) {
       case "OPEN":
-        return "bg-amber-100 text-amber-700";
+        return "bg-amber-100 text-amber-700 border-amber-200";
       case "ASSIGNED":
-        return "bg-blue-100 text-blue-700";
+        return "bg-blue-100 text-blue-700 border-blue-200";
       case "CLOSED":
-        return "bg-green-100 text-green-700";
+        return "bg-green-100 text-green-700 border-green-200";
     }
   };
 
@@ -43,72 +53,113 @@ export function IncidentsTable({ incidents, maxItems = 6 }: IncidentsTableProps)
     return date.toLocaleDateString("es-MX", { day: "numeric", month: "short" });
   };
 
+  const getInitials = (name: string) => {
+    return name.split(" ").map(n => n[0]).join("").substring(0, 2).toUpperCase();
+  };
+
   return (
-    <div className="bg-white rounded-3xl border border-gray-100 shadow-sm">
-      {/* Header */}
-      <div className="flex items-center justify-between p-6 pb-4">
-        <div className="flex items-center gap-3">
-          <div className="p-2.5 rounded-xl bg-amber-100">
-            <AlertTriangle className="h-5 w-5 text-amber-600" />
+    <Card className="rounded-3xl border-gray-200/60 shadow-sm py-0 gap-0">
+      <CardHeader className="p-4 pb-3 border-b-0">
+        <div className="flex items-center gap-2">
+          <div className="p-2 rounded-xl bg-amber-100">
+            <AlertTriangle className="h-4 w-4 text-amber-600" />
           </div>
-          <h3 className="text-lg font-bold text-gray-900">Incidencias Recientes</h3>
+          <CardTitle className="text-sm font-semibold text-gray-700">Incidencias Recientes</CardTitle>
         </div>
-        <a 
-          href="/dashboard/incidencias"
-          className="flex items-center gap-1 text-sm font-medium text-gray-500 hover:text-gray-900 transition-colors"
-        >
-          Ver todas
-          <ChevronRight className="h-4 w-4" />
-        </a>
-      </div>
+        <CardAction>
+          <a href="/dashboard/incidencias" className="text-xs text-gray-400 hover:text-gray-600 flex items-center gap-0.5">
+            Ver todas <ChevronRight className="h-3 w-3" />
+          </a>
+        </CardAction>
+      </CardHeader>
 
-      {/* Content */}
-      <div className="px-6 pb-6 space-y-2 max-h-100 overflow-y-auto">
-        {displayIncidents.map((incident, index) => (
-          <motion.a
-            key={incident.id}
-            href={`/dashboard/incidencias/${incident.id}`}
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.2, delay: index * 0.03 }}
-            className="block p-4 rounded-2xl border border-gray-100 hover:border-gray-200 hover:bg-gray-50/50 transition-all group"
-          >
-            {/* Row 1: Description + Priority */}
-            <div className="flex items-start justify-between gap-3 mb-2">
-              <div className="flex items-start gap-2 flex-1 min-w-0">
-                {incident.priority === "CRITICAL" && (
-                  <span className="h-2 w-2 mt-1.5 rounded-full bg-red-500 animate-pulse shrink-0" />
-                )}
-                <span className="text-sm font-medium text-gray-900 line-clamp-2 group-hover:text-blue-600 transition-colors">
-                  {incident.description}
-                </span>
-              </div>
-              <span className={`text-[10px] font-medium px-2 py-0.5 rounded-full shrink-0 ${getPriorityStyles(incident.priority)}`}>
-                {priorityLabels[incident.priority]}
-              </span>
-            </div>
+      <CardContent className="px-4 pb-4 pt-0">
+        <ScrollArea className="h-100 pr-2">
+          <div className="space-y-1">
+            {displayIncidents.map((incident, index) => (
+              <HoverCard key={incident.id} openDelay={300} closeDelay={100}>
+                <HoverCardTrigger asChild>
+                  <motion.a
+                    href={`/dashboard/incidencias/${incident.id}`}
+                    initial={{ opacity: 0, y: 5 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.15, delay: index * 0.02 }}
+                    className={`block p-2.5 rounded-lg border transition-all group cursor-pointer ${
+                      incident.priority === "CRITICAL" 
+                        ? "border-red-200 bg-red-50/40 hover:bg-red-50/70" 
+                        : "border-gray-100 hover:border-gray-200 hover:bg-gray-50/50"
+                    }`}
+                  >
+                    {/* Línea principal: Avatar + Descripción */}
+                    <div className="flex items-start gap-2">
+                      <Avatar className="h-6 w-6 shrink-0 mt-0.5">
+                        <AvatarImage src={incident.createdByAvatar} alt={incident.createdBy} />
+                        <AvatarFallback className="text-[9px] bg-gray-100">{getInitials(incident.createdBy)}</AvatarFallback>
+                      </Avatar>
 
-            {/* Row 2: Meta info */}
-            <div className="flex items-center gap-3 flex-wrap text-xs">
-              <span className="text-gray-500 truncate max-w-30">
-                {incident.projectName}
-              </span>
-              <span className="text-gray-300">•</span>
-              <span className="text-gray-400">
-                {incidentTypeLabels[incident.type]}
-              </span>
-              <span className="text-gray-300">•</span>
-              <span className={`text-[10px] font-medium px-2 py-0.5 rounded-full ${getStatusStyles(incident.status)}`}>
-                {statusLabels[incident.status]}
-              </span>
-              <span className="ml-auto flex items-center gap-1 text-gray-400">
-                <Clock className="h-3 w-3" />
-                {formatDate(incident.createdAt)}
-              </span>
-            </div>
-          </motion.a>
-        ))}
-      </div>
-    </div>
+                      <div className="flex-1 min-w-0">
+                        {/* Descripción - 2 líneas máximo */}
+                        <p className="text-xs text-gray-700 group-hover:text-gray-900 line-clamp-2 leading-relaxed">
+                          {incident.priority === "CRITICAL" && (
+                            <span className="inline-flex items-center gap-1 text-red-600 font-medium mr-1">
+                              <span className="h-1.5 w-1.5 rounded-full bg-red-500 animate-pulse" />
+                            </span>
+                          )}
+                          {incident.description}
+                        </p>
+                        
+                        {/* Meta inferior */}
+                        <div className="flex items-center gap-3 mt-1.5">
+                          <span className="text-[10px] text-gray-400">{incident.projectName}</span>
+                          <Badge variant="outline" className={`text-[8px] px-1.5 h-4 ${getStatusVariant(incident.status)}`}>
+                            {incident.status === "OPEN" ? "Abierta" : incident.status === "ASSIGNED" ? "Asignada" : "Cerrada"}
+                          </Badge>
+                          <span className="text-[10px] text-gray-400 ml-auto">{formatDate(incident.createdAt)}</span>
+                        </div>
+                      </div>
+                    </div>
+                  </motion.a>
+                </HoverCardTrigger>
+
+                {/* HoverCard con detalles completos */}
+                <HoverCardContent side="left" align="start" className="w-72 p-3">
+                  <div className="space-y-2">
+                    {/* Header */}
+                    <div className="flex items-start gap-2">
+                      <Avatar className="h-8 w-8">
+                        <AvatarImage src={incident.createdByAvatar} />
+                        <AvatarFallback>{getInitials(incident.createdBy)}</AvatarFallback>
+                      </Avatar>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-xs font-medium text-gray-900">{incident.createdBy}</p>
+                        <p className="text-[10px] text-gray-400">{formatDate(incident.createdAt)}</p>
+                      </div>
+                      <Badge className={`text-[9px] ${getPriorityVariant(incident.priority)}`}>
+                        {incident.priority === "CRITICAL" ? "Crítico" : "Normal"}
+                      </Badge>
+                    </div>
+
+                    {/* Descripción completa */}
+                    <p className="text-xs text-gray-700 leading-relaxed">{incident.description}</p>
+
+                    {/* Meta */}
+                    <div className="flex items-center gap-3 pt-1 border-t text-[10px] text-gray-500">
+                      <span className="flex items-center gap-1">
+                        <MapPin className="h-2.5 w-2.5" /> {incident.projectName}
+                      </span>
+                      {incident.assignedTo && (
+                        <span className="flex items-center gap-1">
+                          <User className="h-2.5 w-2.5" /> {incident.assignedTo}
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                </HoverCardContent>
+              </HoverCard>
+            ))}
+          </div>
+        </ScrollArea>
+      </CardContent>
+    </Card>
   );
 }

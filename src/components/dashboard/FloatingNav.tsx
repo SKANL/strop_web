@@ -95,8 +95,6 @@ export function FloatingNav({ currentPath = "/dashboard" }: FloatingNavProps) {
               exit={{ opacity: 0, y: -10 }}
               className="flex flex-col items-center gap-3 pb-4 w-full pt-2"
             >
-              {/* Separador */}
-              <div className="h-px w-8 bg-white/20" />
 
               {/* Icono Activo */}
               <div className="relative">
