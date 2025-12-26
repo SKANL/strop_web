@@ -1,0 +1,9 @@
+---
+// dashboard/index.astro - Página principal del Dashboard
+import DashboardLayout from "@/layouts/DashboardLayout.astro";
+import { DashboardContent } from "@/components/dashboard/DashboardContent";
+---
+
+<DashboardLayout title="Dashboard | Strop" description="Panel de control ejecutivo para Strop">
+  <DashboardContent client:load currentPath="/dashboard" />
+</DashboardLayout>

@@ -1,0 +1,41 @@
+---
+// DashboardLayout.astro - Layout principal para el Dashboard con TopBar y Floating Navigation
+interface Props {
+  title?: string;
+  description?: string;
+}
+
+const { title = "Dashboard | Strop", description = "Panel de administración Strop" } = Astro.props;
+---
+
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="description" content={description} />
+    <meta name="generator" content={Astro.generator} />
+    <title>{title}</title>
+  </head>
+  <body class="min-h-screen bg-background text-foreground antialiased">
+    <!-- Contenedor Principal -->
+    <div class="relative min-h-screen">
+      <!-- Contenido de la Página -->
+      <main class="min-h-screen">
+        <slot />
+      </main>
+    </div>
+  </body>
+</html>
+
+<style>
+  @import "../styles/global.css";
+
+  html,
+  body {
+    margin: 0;
+    width: 100%;
+    min-height: 100%;
+  }
+</style>

@@ -1,0 +1,14 @@
+---
+// dashboard/auditoria/index.astro - Página de Auditoría
+import DashboardLayout from "@/layouts/DashboardLayout.astro";
+import { PlaceholderPage } from "@/components/dashboard/PlaceholderPage";
+---
+
+<DashboardLayout title="Auditoría | Strop" description="Logs y registro de actividades">
+  <PlaceholderPage 
+    client:load 
+    title="Auditoría" 
+    description="Consulta los logs de todas las acciones críticas del sistema"
+    currentPath="/dashboard/auditoria" 
+  />
+</DashboardLayout>

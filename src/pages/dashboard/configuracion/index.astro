@@ -1,0 +1,14 @@
+---
+// dashboard/configuracion/index.astro - Página de Configuración
+import DashboardLayout from "@/layouts/DashboardLayout.astro";
+import { PlaceholderPage } from "@/components/dashboard/PlaceholderPage";
+---
+
+<DashboardLayout title="Configuración | Strop" description="Configuración del sistema">
+  <PlaceholderPage 
+    client:load 
+    title="Configuración" 
+    description="Configura las preferencias de tu organización y cuenta"
+    currentPath="/dashboard/configuracion" 
+  />
+</DashboardLayout>

@@ -1,0 +1,14 @@
+---
+// dashboard/usuarios/index.astro - Página de Usuarios
+import DashboardLayout from "@/layouts/DashboardLayout.astro";
+import { PlaceholderPage } from "@/components/dashboard/PlaceholderPage";
+---
+
+<DashboardLayout title="Usuarios | Strop" description="Gestión de usuarios de la organización">
+  <PlaceholderPage 
+    client:load 
+    title="Usuarios" 
+    description="Administra los usuarios y roles de tu organización"
+    currentPath="/dashboard/usuarios" 
+  />
+</DashboardLayout>
