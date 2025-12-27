@@ -309,3 +309,30 @@ export function countMembersByRole(projectId: string): Record<ProjectRole, numbe
     CABO: members.filter((m) => m.assignedRole === "CABO").length,
   };
 }
+
+/**
+ * Obtiene miembros de un proyecto con datos completos para UI
+ */
+export function getProjectMembersWithDetailsUI(projectId: string): import("./types").ProjectMemberWithDetails[] {
+  const members = getProjectMembers(projectId);
+  
+  return members.map((member) => {
+    const user = getUserById(member.userId);
+    const assignedByUser = getUserById(member.assignedBy);
+    
+    return {
+      id: member.id,
+      projectId: member.projectId,
+      userId: member.userId,
+      userName: user?.fullName || "Usuario desconocido",
+      userEmail: user?.email || "",
+      userAvatar: user?.profilePictureUrl,
+      userPhone: user?.phone,
+      assignedRole: member.assignedRole,
+      assignedAt: member.assignedAt,
+      assignedBy: member.assignedBy,
+      assignedByName: assignedByUser?.fullName,
+      assignedByAvatar: assignedByUser?.profilePictureUrl,
+    };
+  });
+}

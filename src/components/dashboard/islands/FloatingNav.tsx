@@ -1,4 +1,4 @@
-// islands/FloatingNav.tsx - Navegación flotante con client:idle
+// islands/FloatingNav.tsx - Navegación flotante con client:idle (shadcn optimized)
 "use client";
 
 import { useState } from "react";
@@ -11,6 +11,15 @@ import {
   ClipboardCheck,
   X,
 } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Separator } from "@/components/ui/separator";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import { cn } from "@/lib/utils";
 
 interface NavItem {
   id: string;
@@ -60,15 +69,26 @@ export function FloatingNav({ currentPath = "/dashboard" }: FloatingNavProps) {
       }}
     >
       <div className="flex flex-col w-full">
+        {/* Header con logo */}
         <div
           onClick={() => setIsOpen(!isOpen)}
-          className={`w-full flex items-center transition-all relative shrink-0 cursor-pointer hover:bg-white/5 border-b border-white/10 ${
+          className={cn(
+            "w-full flex items-center transition-all relative shrink-0 cursor-pointer hover:bg-white/5 border-b border-white/10",
             isOpen ? "h-16 px-4 justify-between" : "h-16 justify-center"
-          }`}
+          )}
         >
-          <div className="w-10 h-10 bg-white rounded-full flex items-center justify-center text-black font-extrabold text-lg shadow-lg shrink-0 z-20 transition-transform active:scale-95">
-            S
-          </div>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <div className="w-10 h-10 bg-white rounded-full flex items-center justify-center text-black font-extrabold text-lg shadow-lg shrink-0 z-20 transition-transform active:scale-95">
+                S
+              </div>
+            </TooltipTrigger>
+            {!isOpen && (
+              <TooltipContent side="right" className="bg-slate-900 text-white border-slate-700">
+                <p>Strop Admin</p>
+              </TooltipContent>
+            )}
+          </Tooltip>
 
           <AnimatePresence>
             {isOpen && (
@@ -76,14 +96,21 @@ export function FloatingNav({ currentPath = "/dashboard" }: FloatingNavProps) {
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
-                className="p-1.5 rounded-full hover:bg-white/10 transition-colors"
               >
-                <X size={16} className="text-gray-400" />
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-8 w-8 rounded-full hover:bg-white/10 text-gray-400 hover:text-white"
+                >
+                  <X className="h-4 w-4" />
+                  <span className="sr-only">Cerrar menú</span>
+                </Button>
               </motion.div>
             )}
           </AnimatePresence>
         </div>
 
+        {/* Icono activo cuando está cerrado */}
         <AnimatePresence>
           {!isOpen && (
             <motion.div
@@ -92,18 +119,29 @@ export function FloatingNav({ currentPath = "/dashboard" }: FloatingNavProps) {
               exit={{ opacity: 0, y: -10 }}
               className="flex flex-col items-center gap-3 pb-4 w-full pt-2"
             >
-              <div className="relative">
-                <ActiveIcon size={24} className="text-blue-400" strokeWidth={2} />
-                {activeItem.badge && activeItem.badge > 0 && (
-                  <span className="absolute -top-1 -right-2 h-4 w-4 bg-red-500 text-[10px] font-bold rounded-full flex items-center justify-center shadow-lg">
-                    {activeItem.badge}
-                  </span>
-                )}
-              </div>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <div className="relative cursor-pointer">
+                    <ActiveIcon size={24} className="text-blue-400" strokeWidth={2} />
+                    {activeItem.badge && activeItem.badge > 0 && (
+                      <Badge 
+                        variant="destructive" 
+                        className="absolute -top-2 -right-3 h-4 min-w-4 px-1 text-[10px] font-bold"
+                      >
+                        {activeItem.badge}
+                      </Badge>
+                    )}
+                  </div>
+                </TooltipTrigger>
+                <TooltipContent side="right" className="bg-slate-900 text-white border-slate-700">
+                  <p>{activeItem.label}</p>
+                </TooltipContent>
+              </Tooltip>
             </motion.div>
           )}
         </AnimatePresence>
 
+        {/* Navegación expandida */}
         <AnimatePresence>
           {isOpen && (
             <motion.div
@@ -118,42 +156,53 @@ export function FloatingNav({ currentPath = "/dashboard" }: FloatingNavProps) {
                 const Icon = item.icon;
 
                 return (
-                  <a
+                  <Button
                     key={item.id}
-                    href={item.href}
-                    onClick={(e) => e.stopPropagation()}
-                    className={`group relative flex items-center gap-3 px-4 py-3 rounded-2xl transition-all duration-200 no-underline ${
+                    variant="ghost"
+                    asChild
+                    className={cn(
+                      "relative justify-start gap-3 h-12 px-4 rounded-2xl transition-all duration-200",
                       isActive
-                        ? "bg-blue-600/30 text-white"
+                        ? "bg-blue-600/30 text-white hover:bg-blue-600/40"
                         : "text-gray-400 hover:bg-white/5 hover:text-white"
-                    }`}
-                  >
-                    {isActive && (
-                      <motion.div
-                        layoutId="navActiveIndicator"
-                        className="absolute inset-0 border border-blue-500/50 rounded-2xl"
-                        transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
-                      />
                     )}
-                    <div className="shrink-0 relative z-10">
-                      <Icon size={20} strokeWidth={isActive ? 2.5 : 2} />
-                      {item.badge && item.badge > 0 && (
-                        <span className="absolute -top-1 -right-2 h-4 w-4 bg-red-500 text-[10px] font-bold rounded-full flex items-center justify-center text-white shadow-lg">
-                          {item.badge}
-                        </span>
+                  >
+                    <a href={item.href} onClick={(e) => e.stopPropagation()}>
+                      {isActive && (
+                        <motion.div
+                          layoutId="navActiveIndicator"
+                          className="absolute inset-0 border border-blue-500/50 rounded-2xl"
+                          transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
+                        />
                       )}
-                    </div>
-                    <span className={`text-sm font-medium whitespace-nowrap z-10 ${isActive ? "text-white font-semibold" : ""}`}>
-                      {item.label}
-                    </span>
-                  </a>
+                      <div className="shrink-0 relative z-10">
+                        <Icon className="h-5 w-5" strokeWidth={isActive ? 2.5 : 2} />
+                        {item.badge && item.badge > 0 && (
+                          <Badge 
+                            variant="destructive" 
+                            className="absolute -top-2 -right-3 h-4 min-w-4 px-1 text-[10px] font-bold"
+                          >
+                            {item.badge}
+                          </Badge>
+                        )}
+                      </div>
+                      <span className={cn(
+                        "text-sm whitespace-nowrap z-10",
+                        isActive ? "font-semibold" : "font-medium"
+                      )}>
+                        {item.label}
+                      </span>
+                    </a>
+                  </Button>
                 );
               })}
 
-              <div className="h-px w-full bg-white/10 my-2" />
+              <Separator className="my-2 bg-white/10" />
 
               <div className="px-3 py-2">
-                <span className="text-xs text-gray-500 font-medium">Strop v2.0</span>
+                <Badge variant="secondary" className="bg-white/5 text-gray-500 hover:bg-white/10">
+                  Strop v2.0
+                </Badge>
               </div>
             </motion.div>
           )}

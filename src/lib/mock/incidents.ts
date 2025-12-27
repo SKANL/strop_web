@@ -6,6 +6,8 @@
 import type { Incident, IncidentWithDetails } from "./types";
 import { getUserById } from "./users";
 import { getProjectById } from "./projects";
+import { getPhotosByIncident } from "./photos";
+import { getCommentsByIncident } from "./comments";
 
 // ============================================
 // CONSTANTE: ID de organización por defecto
@@ -249,9 +251,9 @@ export function getIncidentsByOrganization(organizationId: string): Incident[] {
 }
 
 /**
- * Obtiene incidencias de un proyecto
+ * Obtiene incidencias de un proyecto (solo datos base)
  */
-export function getIncidentsByProject(projectId: string): Incident[] {
+function getIncidentsByProjectBase(projectId: string): Incident[] {
   return mockIncidents.filter(
     (incident) => incident.projectId === projectId && !incident.deletedAt
   );
@@ -335,4 +337,32 @@ export function getIncidentKPIs(organizationId: string): {
     critical: incidents.filter((i) => i.priority === "CRITICAL" && i.status !== "CLOSED").length,
     resolvedThisWeek,
   };
+}
+
+/**
+ * Obtiene incidencias de un proyecto con detalles para UI
+ */
+export function getIncidentsByProject(projectId: string): IncidentWithDetails[] {
+  const projectIncidents = mockIncidents.filter(
+    (incident) => incident.projectId === projectId && !incident.deletedAt
+  );
+  
+  return projectIncidents.map((incident) => {
+    const creator = getUserById(incident.createdBy);
+    const assignee = incident.assignedTo ? getUserById(incident.assignedTo) : undefined;
+    const project = getProjectById(incident.projectId);
+    const photos = getPhotosByIncident(incident.id);
+    const comments = getCommentsByIncident(incident.id);
+    
+    return {
+      ...incident,
+      projectName: project?.name || "Proyecto desconocido",
+      createdByName: creator?.fullName || "Usuario desconocido",
+      createdByAvatar: creator?.profilePictureUrl,
+      assignedToName: assignee?.fullName,
+      assignedToAvatar: assignee?.profilePictureUrl,
+      photosCount: photos?.length || 0,
+      commentsCount: comments?.length || 0,
+    };
+  });
 }

@@ -447,3 +447,21 @@ export interface ActivityUI {
   timestamp: string;
   type: "incident" | "project" | "user" | "system";
 }
+
+/**
+ * Miembro de proyecto con datos denormalizados (para UI)
+ */
+export interface ProjectMemberWithDetails {
+  id: string;
+  projectId: string;
+  userId: string;
+  userName: string;
+  userEmail: string;
+  userAvatar?: string;
+  userPhone?: string;
+  assignedRole: ProjectRole;
+  assignedAt: string;
+  assignedBy: string;
+  assignedByName?: string;
+  assignedByAvatar?: string;
+}
