@@ -1,4 +1,4 @@
-// StatsWidget.tsx - Widget de estadísticas con Charts de shadcn
+// islands/StatsWidget.tsx - Widget de estadísticas con Charts
 "use client";
 
 import { TrendingUp, TrendingDown } from "lucide-react";
@@ -15,22 +15,20 @@ interface StatsWidgetProps {
   projectProgress: { name: string; progress: number }[];
 }
 
-export function StatsWidget({ 
+export function StatsWidget({
   weeklyResolved = 15,
   weeklyCreated = 12,
   criticalActive = 3,
   avgResolutionDays = 2.5,
-  projectProgress = []
+  projectProgress = [],
 }: Partial<StatsWidgetProps>) {
   const netChange = weeklyResolved - weeklyCreated;
   const isPositive = netChange >= 0;
-  
-  // Calcular promedio de progreso
-  const avgProgress = projectProgress.length > 0 
+
+  const avgProgress = projectProgress.length > 0
     ? Math.round(projectProgress.reduce((sum, p) => sum + p.progress, 0) / projectProgress.length)
     : 45;
 
-  // Datos para el gráfico de barras semanal
   const weeklyData = [
     { day: "L", value: 8 },
     { day: "M", value: 12 },
@@ -48,7 +46,6 @@ export function StatsWidget({
     },
   } satisfies ChartConfig;
 
-  // Datos para el gráfico radial
   const radialData = [
     { name: "progress", value: avgProgress, fill: "hsl(var(--chart-2))" },
   ];
@@ -63,8 +60,8 @@ export function StatsWidget({
       <CardHeader className="p-4 pb-2">
         <div className="flex items-center justify-between">
           <CardTitle className="text-sm font-semibold text-gray-700">Resumen</CardTitle>
-          <Badge 
-            variant="outline" 
+          <Badge
+            variant="outline"
             className={`text-[10px] px-1.5 h-5 border-0 gap-0.5 ${
               isPositive ? "bg-green-100 text-green-700" : "bg-red-100 text-red-600"
             }`}
@@ -77,7 +74,6 @@ export function StatsWidget({
 
       <CardContent className="p-4 pt-0">
         <div className="grid grid-cols-2 gap-4">
-          {/* Gráfico de barras - Incidencias resueltas */}
           <div className="space-y-1">
             <div className="flex items-baseline gap-1.5">
               <span className="text-2xl font-bold text-gray-900">{weeklyResolved}</span>
@@ -95,7 +91,6 @@ export function StatsWidget({
             </div>
           </div>
 
-          {/* Gráfico radial - Avance general */}
           <div className="flex flex-col items-center justify-center">
             <ChartContainer config={radialChartConfig} className="h-24 w-24">
               <RadialBarChart
@@ -134,7 +129,6 @@ export function StatsWidget({
           </div>
         </div>
 
-        {/* Métricas secundarias compactas */}
         <div className="grid grid-cols-2 gap-2 mt-3 pt-3 border-t border-gray-100">
           <div className="flex items-center gap-2 p-2 rounded-xl bg-red-50/60">
             <span className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse" />

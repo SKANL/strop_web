@@ -1,7 +1,9 @@
-// ProjectsWidget.tsx - Widget de proyectos minimalista con shadcn
-import { motion } from "framer-motion";
+// islands/ProjectsWidget.tsx - Widget de proyectos (movido a island)
+"use client";
+
+import { motion } from "motion/react";
 import { FolderKanban, ChevronRight, Users, AlertTriangle } from "lucide-react";
-import type { Project } from "@/lib/mock-dashboard";
+import type { ProjectUI } from "@/lib/mock";
 import { Card, CardHeader, CardTitle, CardContent, CardAction } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
@@ -9,14 +11,14 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 
 interface ProjectsWidgetProps {
-  projects: Project[];
+  projects: ProjectUI[];
   maxItems?: number;
 }
 
 export function ProjectsWidget({ projects, maxItems = 5 }: ProjectsWidgetProps) {
   const displayProjects = projects.slice(0, maxItems);
 
-  const getStatusVariant = (status: Project["status"]) => {
+  const getStatusVariant = (status: ProjectUI["status"]) => {
     switch (status) {
       case "ACTIVE":
         return "bg-green-100 text-green-700 border-green-200";
@@ -26,9 +28,6 @@ export function ProjectsWidget({ projects, maxItems = 5 }: ProjectsWidgetProps) 
         return "bg-blue-100 text-blue-700 border-blue-200";
     }
   };
-
-  // Progreso siempre usa el mismo color para simplicidad visual
-  const getProgressColor = () => "[&>div]:bg-blue-500";
 
   return (
     <Card className="rounded-3xl border-gray-200/60 shadow-sm py-0 gap-0">
@@ -75,16 +74,14 @@ export function ProjectsWidget({ projects, maxItems = 5 }: ProjectsWidgetProps) 
                   </Badge>
                 </div>
 
-                {/* Progress compacto */}
                 <div className="flex items-center gap-2 mb-2">
                   <Progress 
                     value={project.progress} 
-                    className={`h-1 flex-1 bg-gray-100 ${getProgressColor()}`}
+                    className="h-1 flex-1 bg-gray-100 [&>div]:bg-blue-500"
                   />
                   <span className="text-[10px] font-semibold text-gray-700 w-8 text-right">{project.progress}%</span>
                 </div>
 
-                {/* Stats en línea */}
                 <div className="flex items-center gap-3 text-[10px] text-gray-400">
                   <span className="flex items-center gap-0.5"><Users className="h-2.5 w-2.5" /> {project.membersCount}</span>
                   <span className="flex items-center gap-0.5"><AlertTriangle className="h-2.5 w-2.5" /> {project.openIncidents}</span>

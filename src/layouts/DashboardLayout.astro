@@ -1,5 +1,7 @@
 ---
 // DashboardLayout.astro - Layout principal para el Dashboard con TopBar y Floating Navigation
+import { ClientRouter } from 'astro:transitions';
+
 interface Props {
   title?: string;
   description?: string;
@@ -17,6 +19,8 @@ const { title = "Dashboard | Strop", description = "Panel de administración Str
     <meta name="description" content={description} />
     <meta name="generator" content={Astro.generator} />
     <title>{title}</title>
+    <!-- View Transitions para navegación suave sin recarga completa -->
+    <ClientRouter />
   </head>
   <body class="min-h-screen bg-background text-foreground antialiased">
     <!-- Contenedor Principal -->

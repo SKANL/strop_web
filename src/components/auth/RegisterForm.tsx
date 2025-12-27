@@ -7,7 +7,7 @@
  */
 
 import { useState, useEffect } from "react";
-import { useForm, FormProvider } from "react-hook-form";
+import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
 
@@ -45,7 +45,7 @@ import {
   type PlanFormData,
   type RegisterFormData,
 } from "@/lib/auth-schemas";
-import { mockRegister, checkSubdomainAvailability } from "@/lib/mock-auth";
+import { mockRegister, checkSubdomainAvailability } from "@/lib/mock";
 
 // Iconos
 const LoaderIcon = ({ className = "h-4 w-4" }: { className?: string }) => (

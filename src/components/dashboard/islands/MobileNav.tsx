@@ -1,4 +1,4 @@
-// MobileNav.tsx - Navegación móvil con Sheet de shadcn
+// islands/MobileNav.tsx - Navegación móvil
 "use client";
 
 import { useState } from "react";

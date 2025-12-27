@@ -10,6 +10,6 @@ import { Toaster } from "@/components/ui/sonner";
 ---
 
 <AuthLayout title="Iniciar sesión">
-  <LoginForm client:load />
-  <Toaster client:load richColors position="top-right" />
+  <LoginForm client:idle />
+  <Toaster client:idle richColors position="top-right" />
 </AuthLayout>

@@ -1,22 +1,24 @@
-// RightSidebar.tsx - Panel lateral derecho con componentes shadcn
+// islands/RightSidebar.tsx - Panel lateral derecho
+"use client";
+
 import { useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
-import { 
-  Bell, 
-  LogOut, 
+import { motion, AnimatePresence } from "motion/react";
+import {
+  Bell,
+  LogOut,
   User,
   Building2,
   AlertTriangle,
   Info,
   Settings,
-  X
+  X,
 } from "lucide-react";
-import { 
-  mockCurrentUser, 
-  mockNotifications, 
-  mockOrganization,
-  roleLabels 
-} from "@/lib/mock-dashboard";
+import {
+  mockCurrentUserUI,
+  mockNotifications,
+  mockOrganizationUI,
+  roleLabels,
+} from "@/lib/mock";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -26,7 +28,7 @@ import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip
 
 export function RightSidebar() {
   const [isExpanded, setIsExpanded] = useState(false);
-  const firstName = mockCurrentUser.name.split(" ")[0];
+  const firstName = mockCurrentUserUI.name.split(" ")[0];
   const unreadCount = mockNotifications.filter(n => !n.read).length;
 
   const getNotificationIcon = (type: string) => {
@@ -70,31 +72,28 @@ export function RightSidebar() {
       }}
     >
       <div className="flex flex-col w-full">
-        {/* Header - Click para abrir/cerrar */}
         <div
           onClick={() => setIsExpanded(!isExpanded)}
           className={`w-full flex items-center transition-all shrink-0 cursor-pointer hover:bg-gray-50 border-b border-gray-200 ${
             isExpanded ? "h-16 px-4 justify-between" : "h-16 justify-center"
           }`}
         >
-          {/* Avatar con shadcn */}
           <Tooltip>
             <TooltipTrigger asChild>
               <Avatar className="h-10 w-10 shrink-0 ring-2 ring-white shadow-md">
-                <AvatarImage src={mockCurrentUser.avatarUrl} alt={mockCurrentUser.name} />
+                <AvatarImage src={mockCurrentUserUI.avatarUrl} alt={mockCurrentUserUI.name} />
                 <AvatarFallback className="bg-linear-to-br from-blue-500 to-purple-600 text-white font-bold text-sm">
-                  {getInitials(mockCurrentUser.name)}
+                  {getInitials(mockCurrentUserUI.name)}
                 </AvatarFallback>
               </Avatar>
             </TooltipTrigger>
             {!isExpanded && (
               <TooltipContent side="left">
-                <p>{mockCurrentUser.name}</p>
+                <p>{mockCurrentUserUI.name}</p>
               </TooltipContent>
             )}
           </Tooltip>
 
-          {/* Info usuario (solo expandido) */}
           <AnimatePresence>
             {isExpanded && (
               <motion.div
@@ -103,15 +102,14 @@ export function RightSidebar() {
                 exit={{ opacity: 0 }}
                 className="flex-1 ml-4 mr-2"
               >
-                <p className="font-semibold text-gray-900 text-sm">{mockCurrentUser.name}</p>
+                <p className="font-semibold text-gray-900 text-sm">{mockCurrentUserUI.name}</p>
                 <Badge variant="outline" className="text-[10px] px-1.5 py-0 h-4 bg-blue-50 text-blue-700 border-blue-200">
-                  {roleLabels[mockCurrentUser.role]}
+                  {roleLabels[mockCurrentUserUI.role]}
                 </Badge>
               </motion.div>
             )}
           </AnimatePresence>
 
-          {/* Botón cerrar (solo expandido) */}
           <AnimatePresence>
             {isExpanded && (
               <motion.div
@@ -127,7 +125,6 @@ export function RightSidebar() {
           </AnimatePresence>
         </div>
 
-        {/* Estado COLAPSADO: Notificaciones debajo del avatar */}
         <AnimatePresence>
           {!isExpanded && (
             <motion.div
@@ -136,10 +133,8 @@ export function RightSidebar() {
               exit={{ opacity: 0, y: -10 }}
               className="flex flex-col items-center gap-3 pb-4 w-full pt-2"
             >
-              {/* Separador */}
               <Separator className="w-8" />
 
-              {/* Icono Notificaciones */}
               <Tooltip>
                 <TooltipTrigger asChild>
                   <div className="relative cursor-pointer">
@@ -159,7 +154,6 @@ export function RightSidebar() {
           )}
         </AnimatePresence>
 
-        {/* Contenido Expandido */}
         <AnimatePresence>
           {isExpanded && (
             <motion.div
@@ -169,16 +163,14 @@ export function RightSidebar() {
               transition={{ duration: 0.2, delay: 0.05 }}
               className="flex flex-col px-4 py-3"
             >
-              {/* Organización */}
               <div className="flex items-center gap-3 px-3 py-2.5 rounded-xl bg-gray-50/80 border border-gray-100 mb-4">
                 <Building2 className="h-4 w-4 text-gray-400 shrink-0" />
-                <span className="text-xs text-gray-600 truncate font-medium">{mockOrganization.name}</span>
+                <span className="text-xs text-gray-600 truncate font-medium">{mockOrganizationUI.name}</span>
                 <Badge variant="outline" className="ml-auto text-[9px] px-1.5 py-0 h-4 bg-purple-50 text-purple-700 border-purple-200">
-                  {mockOrganization.plan}
+                  {mockOrganizationUI.plan}
                 </Badge>
               </div>
 
-              {/* Notificaciones */}
               <div className="mb-4">
                 <div className="flex items-center justify-between mb-3">
                   <div className="flex items-center gap-2">
@@ -193,90 +185,62 @@ export function RightSidebar() {
                     </Badge>
                   )}
                 </div>
-                
+
                 <ScrollArea className="h-44">
                   <div className="space-y-1.5 pr-2">
-                    {mockNotifications.slice(0, 4).map((notification, index) => {
+                    {mockNotifications.slice(0, 4).map((notification) => {
                       const Icon = getNotificationIcon(notification.type);
                       return (
-                        <motion.div
+                        <div
                           key={notification.id}
-                          initial={{ opacity: 0, x: 10 }}
-                          animate={{ opacity: 1, x: 0 }}
-                          transition={{ delay: index * 0.05 }}
-                          className={`flex items-start gap-2.5 p-2.5 rounded-xl cursor-pointer transition-colors ${
-                            notification.read 
-                              ? "hover:bg-gray-50" 
-                              : "bg-blue-50/60 hover:bg-blue-50"
+                          className={`p-2 rounded-lg border ${
+                            notification.read
+                              ? "bg-gray-50 border-gray-100"
+                              : "bg-blue-50/50 border-blue-100"
                           }`}
                         >
-                          <div className={`p-1.5 rounded-lg shrink-0 ${getNotificationColor(notification.type)}`}>
-                            <Icon className="h-3.5 w-3.5" />
+                          <div className="flex items-start gap-2">
+                            <div
+                              className={`p-1.5 rounded shrink-0 ${getNotificationColor(
+                                notification.type
+                              )}`}
+                            >
+                              <Icon className="h-3 w-3" />
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <p className="text-[10px] font-medium text-gray-900 line-clamp-2">
+                                {notification.title}
+                              </p>
+                              <p className="text-[9px] text-gray-500 mt-0.5">
+                                {notification.time}
+                              </p>
+                            </div>
                           </div>
-                          <div className="flex-1 min-w-0">
-                            <p className={`text-xs leading-snug ${
-                              notification.read ? "text-gray-600" : "text-gray-900 font-semibold"
-                            }`}>
-                              {notification.message.length > 50 
-                                ? notification.message.substring(0, 50) + "..." 
-                                : notification.message}
-                            </p>
-                            <span className="text-[10px] text-gray-400 mt-0.5 block">{notification.time}</span>
-                          </div>
-                          {!notification.read && (
-                            <span className="w-2 h-2 rounded-full bg-blue-500 shrink-0 mt-1" />
-                          )}
-                        </motion.div>
+                        </div>
                       );
                     })}
                   </div>
                 </ScrollArea>
-                
-                <Button 
-                  variant="ghost" 
-                  className="w-full mt-2.5 h-9 text-xs font-semibold text-blue-600 hover:text-blue-700 hover:bg-blue-50"
-                  asChild
-                >
-                  <a href="/dashboard/notificaciones">
-                    Ver todas las notificaciones
-                  </a>
-                </Button>
               </div>
 
-              {/* Separador */}
-              <Separator className="mb-3" />
+              <Separator className="my-2" />
 
-              {/* Acciones */}
-              <div className="space-y-1">
+              <div className="flex gap-2 pt-2">
                 <Button
-                  variant="ghost"
-                  className="w-full justify-start h-10 px-3 hover:bg-gray-50"
-                  asChild
+                  variant="outline"
+                  size="sm"
+                  className="flex-1 h-9 text-xs rounded-lg"
                 >
-                  <a href="/dashboard/perfil" onClick={(e) => e.stopPropagation()}>
-                    <User className="h-4 w-4 mr-3 text-gray-400" />
-                    <span className="text-sm text-gray-700 font-medium">Mi Perfil</span>
-                  </a>
+                  <Settings className="h-3.5 w-3.5 mr-1.5" />
+                  Configuración
                 </Button>
                 <Button
-                  variant="ghost"
-                  className="w-full justify-start h-10 px-3 hover:bg-gray-50"
-                  asChild
+                  variant="outline"
+                  size="sm"
+                  className="flex-1 h-9 text-xs rounded-lg text-red-600 hover:text-red-700"
                 >
-                  <a href="/dashboard/configuracion" onClick={(e) => e.stopPropagation()}>
-                    <Settings className="h-4 w-4 mr-3 text-gray-400" />
-                    <span className="text-sm text-gray-700 font-medium">Configuración</span>
-                  </a>
-                </Button>
-                <Button 
-                  variant="ghost"
-                  className="w-full justify-start h-10 px-3 hover:bg-red-50 group"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                  }}
-                >
-                  <LogOut className="h-4 w-4 mr-3 text-gray-400 group-hover:text-red-500" />
-                  <span className="text-sm text-gray-700 group-hover:text-red-600 font-medium">Cerrar Sesión</span>
+                  <LogOut className="h-3.5 w-3.5 mr-1.5" />
+                  Salir
                 </Button>
               </div>
             </motion.div>

@@ -4,6 +4,7 @@
  * Layout especializado para páginas de autenticación
  * Diseño split-screen: branding a la izquierda, formulario a la derecha
  */
+import { ClientRouter } from 'astro:transitions';
 
 interface Props {
   title: string;
@@ -22,6 +23,8 @@ const { title, description = "Gestión inteligente de obras de construcción" } 
     <meta name="description" content={description} />
     <meta name="generator" content={Astro.generator} />
     <title>{title} | Strop</title>
+    <!-- View Transitions para navegación suave entre páginas de auth -->
+    <ClientRouter />
   </head>
   <body class="h-full overflow-hidden bg-background antialiased">
     <!-- Contenedor maestro: Viewport Locking -->
@@ -127,7 +130,7 @@ const { title, description = "Gestión inteligente de obras de construcción" } 
       </div>
 
       <!-- Panel derecho: Contenido del formulario (scrollable) -->
-      <div class="flex h-full w-full flex-col overflow-y-auto lg:w-3/5">
+      <div class="auth-panel-scrollbar flex h-full w-full flex-col overflow-y-auto lg:w-3/5">
         <!-- Contenedor con padding dinámico para centrado -->
         <div class="flex flex-col items-center gap-8 px-4 py-8 sm:px-6 lg:px-6 xl:px-8">
           <!-- Logo móvil (visible solo en móvil) -->
@@ -181,25 +184,25 @@ const { title, description = "Gestión inteligente de obras de construcción" } 
   @import "../styles/global.css";
   
   /* Scrollbar estilizado para el panel derecho */
-  .lg\:w-1/2::-webkit-scrollbar {
+  .auth-panel-scrollbar::-webkit-scrollbar {
     width: 6px;
   }
 
-  .lg\:w-1/2::-webkit-scrollbar-track {
+  .auth-panel-scrollbar::-webkit-scrollbar-track {
     background: transparent;
   }
 
-  .lg\:w-1/2::-webkit-scrollbar-thumb {
+  .auth-panel-scrollbar::-webkit-scrollbar-thumb {
     background: hsl(var(--muted-foreground) / 0.3);
     border-radius: 3px;
   }
 
-  .lg\:w-1/2::-webkit-scrollbar-thumb:hover {
+  .auth-panel-scrollbar::-webkit-scrollbar-thumb:hover {
     background: hsl(var(--muted-foreground) / 0.5);
   }
 
   /* Para Firefox */
-  .lg\:w-1/2 {
+  .auth-panel-scrollbar {
     scrollbar-color: hsl(var(--muted-foreground) / 0.3) transparent;
     scrollbar-width: thin;
   }

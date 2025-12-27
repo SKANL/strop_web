@@ -1,7 +1,9 @@
-// IncidentsTable.tsx - Lista de incidencias minimalista con HoverCard para detalles
-import { motion } from "framer-motion";
+// islands/IncidentsTable.tsx - Tabla de incidencias (movida a island)
+"use client";
+
+import { motion } from "motion/react";
 import { AlertTriangle, ChevronRight, Clock, MapPin, User } from "lucide-react";
-import type { Incident } from "@/lib/mock-dashboard";
+import type { IncidentUI } from "@/lib/mock";
 import { Card, CardHeader, CardTitle, CardContent, CardAction } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -9,12 +11,11 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { HoverCard, HoverCardContent, HoverCardTrigger } from "@/components/ui/hover-card";
 
 interface IncidentsTableProps {
-  incidents: Incident[];
+  incidents: IncidentUI[];
   maxItems?: number;
 }
 
 export function IncidentsTable({ incidents, maxItems = 6 }: IncidentsTableProps) {
-  // Ordenar: CRITICAL primero, luego por fecha
   const sortedIncidents = [...incidents].sort((a, b) => {
     if (a.priority === "CRITICAL" && b.priority !== "CRITICAL") return -1;
     if (a.priority !== "CRITICAL" && b.priority === "CRITICAL") return 1;
@@ -22,13 +23,13 @@ export function IncidentsTable({ incidents, maxItems = 6 }: IncidentsTableProps)
   });
   const displayIncidents = sortedIncidents.slice(0, maxItems);
 
-  const getPriorityVariant = (priority: Incident["priority"]) => {
+  const getPriorityVariant = (priority: IncidentUI["priority"]) => {
     return priority === "CRITICAL" 
       ? "bg-red-100 text-red-700 border-red-200" 
       : "bg-gray-100 text-gray-600 border-gray-200";
   };
 
-  const getStatusVariant = (status: Incident["status"]) => {
+  const getStatusVariant = (status: IncidentUI["status"]) => {
     switch (status) {
       case "OPEN":
         return "bg-amber-100 text-amber-700 border-amber-200";
@@ -64,7 +65,7 @@ export function IncidentsTable({ incidents, maxItems = 6 }: IncidentsTableProps)
           <div className="p-2 rounded-xl bg-amber-100">
             <AlertTriangle className="h-4 w-4 text-amber-600" />
           </div>
-          <CardTitle className="text-sm font-semibold text-gray-700">Incidencias Recientes</CardTitle>
+          <CardTitle className="text-sm font-semibold text-gray-700">Incidencias</CardTitle>
         </div>
         <CardAction>
           <a href="/dashboard/incidencias" className="text-xs text-gray-400 hover:text-gray-600 flex items-center gap-0.5">
@@ -90,7 +91,6 @@ export function IncidentsTable({ incidents, maxItems = 6 }: IncidentsTableProps)
                         : "border-gray-100 hover:border-gray-200 hover:bg-gray-50/50"
                     }`}
                   >
-                    {/* Línea principal: Avatar + Descripción */}
                     <div className="flex items-start gap-2">
                       <Avatar className="h-6 w-6 shrink-0 mt-0.5">
                         <AvatarImage src={incident.createdByAvatar} alt={incident.createdBy} />
@@ -98,7 +98,6 @@ export function IncidentsTable({ incidents, maxItems = 6 }: IncidentsTableProps)
                       </Avatar>
 
                       <div className="flex-1 min-w-0">
-                        {/* Descripción - 2 líneas máximo */}
                         <p className="text-xs text-gray-700 group-hover:text-gray-900 line-clamp-2 leading-relaxed">
                           {incident.priority === "CRITICAL" && (
                             <span className="inline-flex items-center gap-1 text-red-600 font-medium mr-1">
@@ -108,7 +107,6 @@ export function IncidentsTable({ incidents, maxItems = 6 }: IncidentsTableProps)
                           {incident.description}
                         </p>
                         
-                        {/* Meta inferior */}
                         <div className="flex items-center gap-3 mt-1.5">
                           <span className="text-[10px] text-gray-400">{incident.projectName}</span>
                           <Badge variant="outline" className={`text-[8px] px-1.5 h-4 ${getStatusVariant(incident.status)}`}>
@@ -121,10 +119,8 @@ export function IncidentsTable({ incidents, maxItems = 6 }: IncidentsTableProps)
                   </motion.a>
                 </HoverCardTrigger>
 
-                {/* HoverCard con detalles completos */}
                 <HoverCardContent side="left" align="start" className="w-72 p-3">
                   <div className="space-y-2">
-                    {/* Header */}
                     <div className="flex items-start gap-2">
                       <Avatar className="h-8 w-8">
                         <AvatarImage src={incident.createdByAvatar} />
@@ -139,10 +135,8 @@ export function IncidentsTable({ incidents, maxItems = 6 }: IncidentsTableProps)
                       </Badge>
                     </div>
 
-                    {/* Descripción completa */}
                     <p className="text-xs text-gray-700 leading-relaxed">{incident.description}</p>
 
-                    {/* Meta */}
                     <div className="flex items-center gap-3 pt-1 border-t text-[10px] text-gray-500">
                       <span className="flex items-center gap-1">
                         <MapPin className="h-2.5 w-2.5" /> {incident.projectName}

@@ -8,6 +8,7 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
+import { motion } from "motion/react";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -23,7 +24,7 @@ import {
 import { Separator } from "@/components/ui/separator";
 
 import { loginSchema, type LoginFormData } from "@/lib/auth-schemas";
-import { mockLogin, mockOAuthLogin } from "@/lib/mock-auth";
+import { mockLogin, mockOAuthLogin } from "@/lib/mock";
 
 // Iconos inline para evitar dependencias adicionales
 const EyeIcon = () => (
@@ -134,175 +135,221 @@ export default function LoginForm() {
   };
 
   return (
-    <Card className="border-0 shadow-none lg:border lg:shadow-2xl lg:border-border/20 backdrop-blur-md relative overflow-hidden">
-      {/* Luz ambiental superior derecha */}
-      <div className="absolute -top-40 -right-40 w-80 h-80 bg-white/40 rounded-full blur-3xl pointer-events-none mix-blend-screen" />
-      {/* Luz ambiental inferior izquierda */}
-      <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-white/30 rounded-full blur-3xl pointer-events-none mix-blend-screen" />
-      {/* Gradiente sutil de profundidad */}
-      <div className="absolute inset-0 rounded-lg bg-linear-to-br from-white/10 via-transparent to-black/5 pointer-events-none" />
-      {/* Inset shadow para profundidad interior */}
-      <div className="absolute inset-0 rounded-lg shadow-inner shadow-black/5 pointer-events-none" />
-      <CardHeader className="space-y-1 pb-4 relative z-10">
-        <CardTitle className="text-2xl font-bold tracking-tight">
-          Iniciar sesión
-        </CardTitle>
-        <CardDescription className="text-muted-foreground">
-          Ingresa tus credenciales para acceder a tu cuenta
-        </CardDescription>
-      </CardHeader>
-
-      <CardContent className="space-y-4 relative z-10">
-        {/* Botones OAuth */}
-        <div className="grid grid-cols-2 gap-3">
-          <Button
-            variant="outline"
-            type="button"
-            disabled={oauthLoading !== null || isLoading}
-            onClick={() => handleOAuthLogin("google")}
-            className="h-11"
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5, ease: [0.25, 0.46, 0.45, 0.94] }}
+    >
+      <Card className="border-0 shadow-none lg:border lg:shadow-2xl lg:border-border/20 backdrop-blur-md relative overflow-hidden">
+        {/* Luz ambiental superior derecha */}
+        <div className="absolute -top-40 -right-40 w-80 h-80 bg-white/40 rounded-full blur-3xl pointer-events-none mix-blend-screen" />
+        {/* Luz ambiental inferior izquierda */}
+        <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-white/30 rounded-full blur-3xl pointer-events-none mix-blend-screen" />
+        {/* Gradiente sutil de profundidad */}
+        <div className="absolute inset-0 rounded-lg bg-linear-to-br from-white/10 via-transparent to-black/5 pointer-events-none" />
+        {/* Inset shadow para profundidad interior */}
+        <div className="absolute inset-0 rounded-lg shadow-inner shadow-black/5 pointer-events-none" />
+        
+        <CardHeader className="space-y-1 pb-4 relative z-10">
+          <motion.div
+            initial={{ opacity: 0, x: -10 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.4, delay: 0.1 }}
           >
-            {oauthLoading === "google" ? (
-              <LoaderIcon />
-            ) : (
-              <>
-                <GoogleIcon />
-                <span className="ml-2 hidden sm:inline">Google</span>
-              </>
-            )}
-          </Button>
-          <Button
-            variant="outline"
-            type="button"
-            disabled={oauthLoading !== null || isLoading}
-            onClick={() => handleOAuthLogin("microsoft")}
-            className="h-11"
+            <CardTitle className="text-2xl font-bold tracking-tight">
+              Iniciar sesión
+            </CardTitle>
+          </motion.div>
+          <motion.div
+            initial={{ opacity: 0, x: -10 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.4, delay: 0.15 }}
           >
-            {oauthLoading === "microsoft" ? (
-              <LoaderIcon />
-            ) : (
-              <>
-                <MicrosoftIcon />
-                <span className="ml-2 hidden sm:inline">Microsoft</span>
-              </>
-            )}
-          </Button>
-        </div>
+            <CardDescription className="text-muted-foreground">
+              Ingresa tus credenciales para acceder a tu cuenta
+            </CardDescription>
+          </motion.div>
+        </CardHeader>
 
-        {/* Separador */}
-        <div className="relative">
-          <div className="absolute inset-0 flex items-center">
-            <Separator className="w-full" />
-          </div>
-          <div className="relative flex justify-center text-xs uppercase">
-            <span className="bg-card px-2 text-muted-foreground">
-              o continúa con email
-            </span>
-          </div>
-        </div>
-
-        {/* Formulario */}
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-          {/* Campo Email */}
-          <div className="space-y-2">
-            <Label htmlFor="email">Correo electrónico</Label>
-            <Input
-              id="email"
-              type="email"
-              placeholder="tu@empresa.com"
-              autoComplete="email"
-              disabled={isLoading}
-              className={errors.email ? "border-destructive focus-visible:ring-destructive" : ""}
-              {...register("email")}
-            />
-            {errors.email && (
-              <p className="text-sm text-destructive">{errors.email.message}</p>
-            )}
-          </div>
-
-          {/* Campo Contraseña */}
-          <div className="space-y-2">
-            <div className="flex items-center justify-between">
-              <Label htmlFor="password">Contraseña</Label>
-              <a
-                href="/auth/forgot-password"
-                className="text-sm text-primary hover:underline"
-              >
-                ¿Olvidaste tu contraseña?
-              </a>
-            </div>
-            <div className="relative">
-              <Input
-                id="password"
-                type={showPassword ? "text" : "password"}
-                placeholder="••••••••"
-                autoComplete="current-password"
-                disabled={isLoading}
-                className={`pr-10 ${errors.password ? "border-destructive focus-visible:ring-destructive" : ""}`}
-                {...register("password")}
-              />
-              <button
-                type="button"
-                onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
-                tabIndex={-1}
-              >
-                {showPassword ? <EyeOffIcon /> : <EyeIcon />}
-              </button>
-            </div>
-            {errors.password && (
-              <p className="text-sm text-destructive">{errors.password.message}</p>
-            )}
-          </div>
-
-          {/* Checkbox Remember Me */}
-          <div className="flex items-center space-x-2">
-            <Checkbox id="rememberMe" {...register("rememberMe")} />
-            <Label
-              htmlFor="rememberMe"
-              className="text-sm font-normal text-muted-foreground cursor-pointer"
+        <CardContent className="space-y-4 relative z-10">
+          {/* Botones OAuth */}
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.4, delay: 0.2 }}
+            className="grid grid-cols-2 gap-3"
+          >
+            <Button
+              variant="outline"
+              type="button"
+              disabled={oauthLoading !== null || isLoading}
+              onClick={() => handleOAuthLogin("google")}
+              className="h-11"
             >
-              Mantener sesión iniciada
-            </Label>
-          </div>
-
-          {/* Botón Submit */}
-          <Button
-            type="submit"
-            className="w-full h-11"
-            disabled={isLoading || oauthLoading !== null}
-          >
-            {isLoading ? (
-              <>
+              {oauthLoading === "google" ? (
                 <LoaderIcon />
-                <span className="ml-2">Iniciando sesión...</span>
-              </>
-            ) : (
-              "Iniciar sesión"
-            )}
-          </Button>
-        </form>
+              ) : (
+                <>
+                  <GoogleIcon />
+                  <span className="ml-2 hidden sm:inline">Google</span>
+                </>
+              )}
+            </Button>
+            <Button
+              variant="outline"
+              type="button"
+              disabled={oauthLoading !== null || isLoading}
+              onClick={() => handleOAuthLogin("microsoft")}
+              className="h-11"
+            >
+              {oauthLoading === "microsoft" ? (
+                <LoaderIcon />
+              ) : (
+                <>
+                  <MicrosoftIcon />
+                  <span className="ml-2 hidden sm:inline">Microsoft</span>
+                </>
+              )}
+            </Button>
+          </motion.div>
 
-        {/* Link a Registro */}
-        <p className="text-center text-sm text-muted-foreground">
-          ¿No tienes una cuenta?{" "}
-          <a
-            href="/auth/register"
-            className="font-medium text-primary hover:underline"
+          {/* Separador */}
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.3, delay: 0.25 }}
+            className="relative"
           >
-            Crear cuenta
-          </a>
-        </p>
+            <div className="absolute inset-0 flex items-center">
+              <Separator className="w-full" />
+            </div>
+            <div className="relative flex justify-center text-xs uppercase">
+              <span className="bg-card px-2 text-muted-foreground">
+                o continúa con email
+              </span>
+            </div>
+          </motion.div>
 
-        {/* Credenciales de demo */}
-        {/* <div className="rounded-lg bg-muted/50 p-4 text-sm">
-          <p className="font-medium text-foreground mb-2">🔑 Credenciales de demo:</p>
-          <div className="space-y-1 text-muted-foreground font-mono text-xs">
-            <p>Email: <span className="text-foreground">demo@strop.app</span></p>
-            <p>Password: <span className="text-foreground">Demo123!</span></p>
-          </div>
-        </div> */}
-      </CardContent>
-    </Card>
+          {/* Formulario */}
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+            {/* Campo Email */}
+            <motion.div
+              initial={{ opacity: 0, x: -10 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.4, delay: 0.3 }}
+              className="space-y-2"
+            >
+              <Label htmlFor="email">Correo electrónico</Label>
+              <Input
+                id="email"
+                type="email"
+                placeholder="tu@empresa.com"
+                autoComplete="email"
+                disabled={isLoading}
+                className={errors.email ? "border-destructive focus-visible:ring-destructive" : ""}
+                {...register("email")}
+              />
+              {errors.email && (
+                <p className="text-sm text-destructive">{errors.email.message}</p>
+              )}
+            </motion.div>
+
+            {/* Campo Contraseña */}
+            <motion.div
+              initial={{ opacity: 0, x: -10 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.4, delay: 0.35 }}
+              className="space-y-2"
+            >
+              <div className="flex items-center justify-between">
+                <Label htmlFor="password">Contraseña</Label>
+                <a
+                  href="/auth/forgot-password"
+                  className="text-sm text-primary hover:underline"
+                >
+                  ¿Olvidaste tu contraseña?
+                </a>
+              </div>
+              <div className="relative">
+                <Input
+                  id="password"
+                  type={showPassword ? "text" : "password"}
+                  placeholder="••••••••"
+                  autoComplete="current-password"
+                  disabled={isLoading}
+                  className={`pr-10 ${errors.password ? "border-destructive focus-visible:ring-destructive" : ""}`}
+                  {...register("password")}
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                  tabIndex={-1}
+                >
+                  {showPassword ? <EyeOffIcon /> : <EyeIcon />}
+                </button>
+              </div>
+              {errors.password && (
+                <p className="text-sm text-destructive">{errors.password.message}</p>
+              )}
+            </motion.div>
+
+            {/* Checkbox Remember Me */}
+            <motion.div
+              initial={{ opacity: 0, x: -10 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.4, delay: 0.4 }}
+              className="flex items-center space-x-2"
+            >
+              <Checkbox id="rememberMe" {...register("rememberMe")} />
+              <Label
+                htmlFor="rememberMe"
+                className="text-sm font-normal text-muted-foreground cursor-pointer"
+              >
+                Mantener sesión iniciada
+              </Label>
+            </motion.div>
+
+            {/* Botón Submit */}
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.4, delay: 0.45 }}
+            >
+              <Button
+                type="submit"
+                className="w-full h-11"
+                disabled={isLoading || oauthLoading !== null}
+              >
+                {isLoading ? (
+                  <>
+                    <LoaderIcon />
+                    <span className="ml-2">Iniciando sesión...</span>
+                  </>
+                ) : (
+                  "Iniciar sesión"
+                )}
+              </Button>
+            </motion.div>
+          </form>
+
+          {/* Link a Registro */}
+          <motion.p
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.4, delay: 0.5 }}
+            className="text-center text-sm text-muted-foreground"
+          >
+            ¿No tienes una cuenta?{" "}
+            <a
+              href="/auth/register"
+              className="font-medium text-primary hover:underline"
+            >
+              Crear cuenta
+            </a>
+          </motion.p>
+        </CardContent>
+      </Card>
+    </motion.div>
   );
 }

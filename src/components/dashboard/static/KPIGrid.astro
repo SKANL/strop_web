@@ -1,0 +1,63 @@
+---
+// KPIGrid.astro - Grid de KPIs estático, sin JavaScript
+import {
+  FolderKanban,
+  AlertTriangle,
+  AlertOctagon,
+  CheckCircle,
+  Clock,
+  Users,
+} from "lucide-react";
+import KPICard from "@/components/dashboard/static/KPICard.astro";
+import type { KPIData } from "@/lib/mock";
+
+interface Props {
+  data: KPIData;
+}
+
+const { data } = Astro.props;
+---
+
+<div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
+  <KPICard
+    title="Proyectos"
+    value={data.activeProjects}
+    icon={FolderKanban}
+    variant="primary"
+    tooltip={`${data.activeProjects} activos de ${data.totalProjects} totales`}
+  />
+  <KPICard
+    title="Abiertas"
+    value={data.openIncidents}
+    icon={AlertTriangle}
+    variant="warning"
+    trend={{ value: 12, isPositive: false }}
+    tooltip={`${data.openIncidents} incidencias abiertas de ${data.totalIncidents} totales`}
+  />
+  <KPICard
+    title="Críticas"
+    value={data.criticalIncidents}
+    icon={AlertOctagon}
+    variant="destructive"
+    tooltip="Incidencias críticas que requieren atención inmediata"
+  />
+  <KPICard
+    title="Resueltas"
+    value={data.resolvedThisWeek}
+    icon={CheckCircle}
+    trend={{ value: 8, isPositive: true }}
+    tooltip="Incidencias resueltas en los últimos 7 días"
+  />
+  <KPICard
+    title="Tiempo Res."
+    value={data.avgResolutionTime}
+    icon={Clock}
+    tooltip="Tiempo promedio de resolución de incidencias"
+  />
+  <KPICard
+    title="Usuarios"
+    value={data.totalUsers}
+    icon={Users}
+    tooltip="Usuarios activos en la organización"
+  />
+</div>

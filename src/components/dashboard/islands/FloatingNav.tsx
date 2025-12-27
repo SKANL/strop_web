@@ -1,6 +1,8 @@
-// FloatingNav.tsx - Navegación flotante estilo widget (siguiendo patrón del ejemplo)
+// islands/FloatingNav.tsx - Navegación flotante con client:idle
+"use client";
+
 import { useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence } from "motion/react";
 import {
   LayoutDashboard,
   FolderKanban,
@@ -33,7 +35,6 @@ interface FloatingNavProps {
 export function FloatingNav({ currentPath = "/dashboard" }: FloatingNavProps) {
   const [isOpen, setIsOpen] = useState(false);
 
-  // Encontrar el item activo
   const activeItem = navItems.find(item => 
     currentPath === item.href || 
     (item.href !== "/dashboard" && currentPath.startsWith(item.href))
@@ -59,19 +60,16 @@ export function FloatingNav({ currentPath = "/dashboard" }: FloatingNavProps) {
       }}
     >
       <div className="flex flex-col w-full">
-        {/* Header del Widget - Click para abrir/cerrar */}
         <div
           onClick={() => setIsOpen(!isOpen)}
           className={`w-full flex items-center transition-all relative shrink-0 cursor-pointer hover:bg-white/5 border-b border-white/10 ${
             isOpen ? "h-16 px-4 justify-between" : "h-16 justify-center"
           }`}
         >
-          {/* Logo S */}
           <div className="w-10 h-10 bg-white rounded-full flex items-center justify-center text-black font-extrabold text-lg shadow-lg shrink-0 z-20 transition-transform active:scale-95">
             S
           </div>
 
-          {/* Botón cerrar (solo visible cuando está abierto) */}
           <AnimatePresence>
             {isOpen && (
               <motion.div
@@ -86,7 +84,6 @@ export function FloatingNav({ currentPath = "/dashboard" }: FloatingNavProps) {
           </AnimatePresence>
         </div>
 
-        {/* Estado COLAPSADO: Icono activo debajo de la S */}
         <AnimatePresence>
           {!isOpen && (
             <motion.div
@@ -95,8 +92,6 @@ export function FloatingNav({ currentPath = "/dashboard" }: FloatingNavProps) {
               exit={{ opacity: 0, y: -10 }}
               className="flex flex-col items-center gap-3 pb-4 w-full pt-2"
             >
-
-              {/* Icono Activo */}
               <div className="relative">
                 <ActiveIcon size={24} className="text-blue-400" strokeWidth={2} />
                 {activeItem.badge && activeItem.badge > 0 && (
@@ -109,7 +104,6 @@ export function FloatingNav({ currentPath = "/dashboard" }: FloatingNavProps) {
           )}
         </AnimatePresence>
 
-        {/* Lista de Navegación (Solo visible cuando está abierto) */}
         <AnimatePresence>
           {isOpen && (
             <motion.div
@@ -119,7 +113,7 @@ export function FloatingNav({ currentPath = "/dashboard" }: FloatingNavProps) {
               transition={{ duration: 0.2, delay: 0.05 }}
               className="flex flex-col px-2 py-2"
             >
-              {navItems.map((item, index) => {
+              {navItems.map((item) => {
                 const isActive = activeItem.id === item.id;
                 const Icon = item.icon;
 
@@ -156,10 +150,8 @@ export function FloatingNav({ currentPath = "/dashboard" }: FloatingNavProps) {
                 );
               })}
 
-              {/* Separador */}
               <div className="h-px w-full bg-white/10 my-2" />
 
-              {/* Footer */}
               <div className="px-3 py-2">
                 <span className="text-xs text-gray-500 font-medium">Strop v2.0</span>
               </div>

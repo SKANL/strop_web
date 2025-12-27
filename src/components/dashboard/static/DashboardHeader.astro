@@ -1,0 +1,29 @@
+---
+// DashboardHeader.astro - Header estático del dashboard
+import { Badge } from "@/components/ui/badge";
+
+interface Props {
+  firstName: string;
+  organizationName: string;
+  isOnline?: boolean;
+}
+
+const { firstName, organizationName, isOnline = true } = Astro.props;
+---
+
+<header class="mb-6 flex items-center gap-4">
+  <div class="flex items-center gap-2">
+    {isOnline && (
+      <span class="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
+    )}
+    <Badge
+      variant="outline"
+      className="text-xs font-medium px-2 py-0.5 bg-gray-50"
+    >
+      {organizationName}
+    </Badge>
+  </div>
+  <h1 class="text-xl md:text-2xl font-bold text-gray-900">
+    Hola, {firstName}
+  </h1>
+</header>

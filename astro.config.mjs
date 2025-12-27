@@ -12,6 +12,12 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 
 // https://astro.build/config
 export default defineConfig({
+  // Prefetch para navegación instantánea entre páginas
+  prefetch: {
+    prefetchAll: true,
+    defaultStrategy: 'hover'
+  },
+
   vite: {
     resolve: {
         alias: {

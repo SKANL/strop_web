@@ -20,7 +20,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 
-import { mockForgotPassword } from "@/lib/mock-auth";
+import { mockForgotPassword } from "@/lib/mock";
 
 const forgotPasswordSchema = z.object({
   email: z

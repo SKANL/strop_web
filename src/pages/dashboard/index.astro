@@ -1,9 +1,58 @@
 ---
-// dashboard/index.astro - Página principal del Dashboard
+// dashboard/index.astro - Página principal del Dashboard (Islands Architecture)
 import DashboardLayout from "@/layouts/DashboardLayout.astro";
-import { DashboardContent } from "@/components/dashboard/DashboardContent";
+import DashboardHeader from "@/components/dashboard/static/DashboardHeader.astro";
+import KPIGrid from "@/components/dashboard/static/KPIGrid.astro";
+import { FloatingNav } from "@/components/dashboard/islands/FloatingNav";
+import { MobileNav } from "@/components/dashboard/islands/MobileNav";
+import { RightSidebar } from "@/components/dashboard/islands/RightSidebar";
+import { DashboardTabs } from "@/components/dashboard/islands/DashboardTabs";
+import { mockKPIs, mockCurrentUserUI, mockOrganizationUI } from "@/lib/mock";
+
+const firstName = mockCurrentUserUI.name.split(" ")[0];
+const currentPath = "/dashboard";
 ---
 
 <DashboardLayout title="Dashboard | Strop" description="Panel de control ejecutivo para Strop">
-  <DashboardContent client:load currentPath="/dashboard" />
+  <div class="flex min-h-screen w-full bg-[#fafafa] overflow-hidden relative">
+    {/* Patrón de fondo */}
+    <div 
+      class="absolute inset-0 opacity-[0.03] pointer-events-none" 
+      style={{ 
+        backgroundImage: "radial-gradient(#000 1px, transparent 1px)", 
+        backgroundSize: "24px 24px" 
+      }} 
+    />
+
+    {/* Navegación Flotante (Desktop) - client:idle para hidratación diferida */}
+    <div class="hidden md:block">
+      <FloatingNav client:idle currentPath={currentPath} />
+    </div>
+
+    {/* Navegación Móvil (Sheet) - client:idle */}
+    <MobileNav client:idle currentPath={currentPath} />
+
+    {/* Panel Lateral Derecho - client:idle */}
+    <RightSidebar client:idle />
+
+    {/* Contenido Principal */}
+    <main class="flex-1 h-screen overflow-y-auto relative z-0">
+      <div class="p-4 md:p-8 pt-16 md:pt-8 pl-4 md:pl-32 pr-4 md:pr-28 max-w-7xl mx-auto min-h-screen relative z-10">
+        
+        {/* Header Estático (sin JS) */}
+        <DashboardHeader 
+          firstName={firstName} 
+          organizationName={mockOrganizationUI.name} 
+        />
+
+        {/* KPIs Grid Estático (sin JS) */}
+        <section class="mb-6">
+          <KPIGrid data={mockKPIs} />
+        </section>
+
+        {/* Tabs Interactivos - client:load (interacción principal) */}
+        <DashboardTabs client:load />
+      </div>
+    </main>
+  </div>
 </DashboardLayout>

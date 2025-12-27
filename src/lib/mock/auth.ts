@@ -1,46 +1,15 @@
 /**
- * Mock de servicios de autenticación
+ * Servicios mock de autenticación
  * Simula llamadas a API con delays realistas
+ * Usa usuarios de ./users.ts para consistencia
  */
 
-import type { LoginFormData, RegisterFormData } from "./auth-schemas";
-
-// Simular latencia de red
-const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
-
-// Usuarios mock para simular login
-const mockUsers = [
-  {
-    id: "usr_001",
-    email: "admin@constructora-xyz.com",
-    password: "Admin123!",
-    fullName: "Juan Pérez García",
-    role: "OWNER",
-    organization: {
-      id: "org_001",
-      name: "Constructora XYZ S.A. de C.V.",
-      subdomain: "constructora-xyz",
-    },
-  },
-  {
-    id: "usr_002",
-    email: "demo@strop.app",
-    password: "Demo123!",
-    fullName: "Usuario Demo",
-    role: "OWNER",
-    organization: {
-      id: "org_002",
-      name: "Demo Organization",
-      subdomain: "demo",
-    },
-  },
-];
-
-// Subdominios ya registrados (para validación)
-const registeredSubdomains = ["constructora-xyz", "demo", "strop", "admin", "app"];
+import type { LoginFormData, RegisterFormData } from "@/lib/auth-schemas";
+import { mockUsers, getUserByEmail } from "./users";
+import { mockOrganizations, isSubdomainAvailable as checkSubdomain } from "./organizations";
 
 // ============================================
-// SERVICIOS MOCK
+// TIPOS
 // ============================================
 
 export interface AuthResponse {
@@ -63,6 +32,28 @@ export interface AuthResponse {
   errors?: Record<string, string>;
 }
 
+// ============================================
+// HELPERS
+// ============================================
+
+/** Simular latencia de red */
+const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+
+/**
+ * Credenciales de demo para login
+ * En producción esto vendría de la BD con hashing
+ */
+const authCredentials: Record<string, string> = {
+  "juan.perez@constructora-demo.com": "Admin123!",
+  "carlos.mendoza@constructora-demo.com": "Super123!",
+  "maria.garcia@constructora-demo.com": "Resident123!",
+  "demo@strop.app": "Demo123!",
+};
+
+// ============================================
+// SERVICIOS MOCK
+// ============================================
+
 /**
  * Simula el proceso de login
  */
@@ -70,9 +61,8 @@ export async function mockLogin(data: LoginFormData): Promise<AuthResponse> {
   // Simular latencia de red (800-1500ms)
   await delay(800 + Math.random() * 700);
 
-  const user = mockUsers.find(
-    (u) => u.email.toLowerCase() === data.email.toLowerCase()
-  );
+  const user = getUserByEmail(data.email);
+  const org = mockOrganizations.find((o) => o.id === user?.organizationId);
 
   if (!user) {
     return {
@@ -82,11 +72,20 @@ export async function mockLogin(data: LoginFormData): Promise<AuthResponse> {
     };
   }
 
-  if (user.password !== data.password) {
+  const expectedPassword = authCredentials[data.email.toLowerCase()];
+  if (!expectedPassword || expectedPassword !== data.password) {
     return {
       success: false,
       message: "La contraseña es incorrecta",
       errors: { password: "Contraseña incorrecta" },
+    };
+  }
+
+  if (!user.isActive) {
+    return {
+      success: false,
+      message: "Tu cuenta está desactivada. Contacta al administrador.",
+      errors: { email: "Cuenta desactivada" },
     };
   }
 
@@ -100,7 +99,17 @@ export async function mockLogin(data: LoginFormData): Promise<AuthResponse> {
         fullName: user.fullName,
         role: user.role,
       },
-      organization: user.organization,
+      organization: org
+        ? {
+            id: org.id,
+            name: org.name,
+            subdomain: org.subdomain,
+          }
+        : {
+            id: "org-unknown",
+            name: "Organización",
+            subdomain: "app",
+          },
       token: `mock_token_${Date.now()}`,
     },
   };
@@ -116,7 +125,7 @@ export async function mockRegister(
   await delay(1000 + Math.random() * 1000);
 
   // Verificar si el subdominio ya existe
-  if (registeredSubdomains.includes(data.subdomain.toLowerCase())) {
+  if (!checkSubdomain(data.subdomain)) {
     return {
       success: false,
       message: "El subdominio ya está en uso",
@@ -125,7 +134,7 @@ export async function mockRegister(
   }
 
   // Verificar si el email ya existe
-  if (mockUsers.some((u) => u.email.toLowerCase() === data.email.toLowerCase())) {
+  if (getUserByEmail(data.email)) {
     return {
       success: false,
       message: "Ya existe una cuenta con este correo electrónico",
@@ -169,7 +178,7 @@ export async function checkSubdomainAvailability(
     return { available: false, message: "Mínimo 3 caracteres" };
   }
 
-  if (registeredSubdomains.includes(subdomain.toLowerCase())) {
+  if (!checkSubdomain(subdomain)) {
     return { available: false, message: "No disponible" };
   }
 
@@ -184,16 +193,10 @@ export async function mockForgotPassword(
 ): Promise<{ success: boolean; message: string }> {
   await delay(800 + Math.random() * 500);
 
-  const user = mockUsers.find(
-    (u) => u.email.toLowerCase() === email.toLowerCase()
-  );
-
   // Siempre devolvemos éxito por seguridad (no revelar si el email existe)
   return {
     success: true,
-    message: user
-      ? "Si el correo existe, recibirás instrucciones para restablecer tu contraseña"
-      : "Si el correo existe, recibirás instrucciones para restablecer tu contraseña",
+    message: "Si el correo existe, recibirás instrucciones para restablecer tu contraseña",
   };
 }
 
@@ -222,6 +225,52 @@ export async function mockOAuthLogin(
         subdomain: "oauth-demo",
       },
       token: `oauth_token_${Date.now()}`,
+    },
+  };
+}
+
+/**
+ * Simula logout (limpia sesión)
+ */
+export async function mockLogout(): Promise<{ success: boolean }> {
+  await delay(200);
+  return { success: true };
+}
+
+/**
+ * Simula verificación de token
+ */
+export async function mockVerifyToken(
+  token: string
+): Promise<AuthResponse> {
+  await delay(300);
+
+  if (!token || !token.startsWith("mock_token_")) {
+    return {
+      success: false,
+      message: "Token inválido o expirado",
+    };
+  }
+
+  // Devolver usuario actual por defecto
+  const user = mockUsers[0];
+  const org = mockOrganizations[0];
+
+  return {
+    success: true,
+    message: "Token válido",
+    data: {
+      user: {
+        id: user.id,
+        email: user.email,
+        fullName: user.fullName,
+        role: user.role,
+      },
+      organization: {
+        id: org.id,
+        name: org.name,
+        subdomain: org.subdomain,
+      },
     },
   };
 }

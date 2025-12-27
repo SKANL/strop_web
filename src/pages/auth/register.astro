@@ -10,6 +10,6 @@ import { Toaster } from "@/components/ui/sonner";
 ---
 
 <AuthLayout title="Crear cuenta">
-  <RegisterForm client:load />
-  <Toaster client:load richColors position="top-right" />
+  <RegisterForm client:idle />
+  <Toaster client:idle richColors position="top-right" />
 </AuthLayout>
