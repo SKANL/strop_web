@@ -2,12 +2,21 @@
 "use client";
 
 import { motion } from "motion/react";
-import { Construction, ArrowLeft, ChevronRight } from "lucide-react";
+import { Construction, ArrowLeft, LayoutGrid, Filter, FileOutput } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { FloatingNav } from "@/components/dashboard/islands/FloatingNav";
-import { MobileNav } from "@/components/dashboard/islands/MobileNav";
-import { RightSidebar } from "@/components/dashboard/islands/RightSidebar";
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from "@/components/ui/breadcrumb";
+import { Badge } from "@/components/ui/badge";
+import { FloatingNav } from "@/features/navigation/components/FloatingNav";
+import { MobileNav } from "@/features/navigation/components/MobileNav";
+import { RightSidebar } from "@/features/navigation/components/RightSidebar";
 
 interface PlaceholderPageProps {
   title: string;
@@ -42,18 +51,18 @@ export function PlaceholderPage({ title, description, currentPath }: Placeholder
       <main className="flex-1 h-screen overflow-y-auto relative z-0">
         <div className="p-4 md:p-8 pt-16 md:pt-8 pl-4 md:pl-32 pr-4 md:pr-28 max-w-7xl mx-auto min-h-screen relative z-10">
           
-          {/* Breadcrumb */}
-          <nav className="flex items-center gap-2 text-sm text-gray-500 mb-6">
-            <a 
-              href="/dashboard" 
-              className="hover:text-gray-900 transition-colors"
-              data-astro-prefetch
-            >
-              Dashboard
-            </a>
-            <ChevronRight className="h-4 w-4" />
-            <span className="text-gray-900 font-medium">{title}</span>
-          </nav>
+          {/* Breadcrumb usando componente shadcn */}
+          <Breadcrumb className="mb-6">
+            <BreadcrumbList>
+              <BreadcrumbItem>
+                <BreadcrumbLink href="/dashboard">Dashboard</BreadcrumbLink>
+              </BreadcrumbItem>
+              <BreadcrumbSeparator />
+              <BreadcrumbItem>
+                <BreadcrumbPage>{title}</BreadcrumbPage>
+              </BreadcrumbItem>
+            </BreadcrumbList>
+          </Breadcrumb>
 
           {/* Contenido Placeholder */}
           <motion.div
@@ -72,13 +81,13 @@ export function PlaceholderPage({ title, description, currentPath }: Placeholder
                 </CardDescription>
               </CardHeader>
               <CardContent className="text-center pt-4 pb-8">
-                <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-amber-50 text-amber-700 text-sm font-medium mb-6">
-                  <span className="relative flex h-2 w-2">
+                <Badge variant="outline" className="bg-amber-50 text-amber-700 border-amber-200 mb-6">
+                  <span className="relative flex h-2 w-2 mr-2">
                     <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75"></span>
                     <span className="relative inline-flex rounded-full h-2 w-2 bg-amber-500"></span>
                   </span>
                   En desarrollo
-                </div>
+                </Badge>
                 <p className="text-sm text-gray-500 mb-6 max-w-sm mx-auto">
                   Esta sección estará disponible próximamente. Estamos trabajando para traerte la mejor experiencia.
                 </p>
@@ -102,19 +111,23 @@ export function PlaceholderPage({ title, description, currentPath }: Placeholder
             className="mt-8 grid grid-cols-1 md:grid-cols-3 gap-4"
           >
             {[
-              { title: "Vista en tiempo real", desc: "Datos actualizados al instante" },
-              { title: "Filtros avanzados", desc: "Encuentra lo que buscas rápido" },
-              { title: "Exportar datos", desc: "Genera reportes en PDF y Excel" },
-            ].map((feature, index) => (
-              <div 
-                key={index}
-                className="p-4 rounded-xl bg-white border border-gray-100 shadow-sm"
-              >
-                <div className="w-8 h-8 rounded-lg bg-gray-100 mb-3" />
-                <h3 className="font-medium text-gray-900 mb-1">{feature.title}</h3>
-                <p className="text-sm text-gray-500">{feature.desc}</p>
-              </div>
-            ))}
+              { title: "Vista en tiempo real", desc: "Datos actualizados al instante", icon: LayoutGrid },
+              { title: "Filtros avanzados", desc: "Encuentra lo que buscas rápido", icon: Filter },
+              { title: "Exportar datos", desc: "Genera reportes en PDF y Excel", icon: FileOutput },
+            ].map((feature, index) => {
+              const Icon = feature.icon;
+              return (
+                <Card key={index} className="border-gray-100">
+                  <CardContent className="pt-4">
+                    <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center mb-3">
+                      <Icon className="h-4 w-4 text-primary" />
+                    </div>
+                    <h3 className="font-medium text-gray-900 mb-1">{feature.title}</h3>
+                    <p className="text-sm text-muted-foreground">{feature.desc}</p>
+                  </CardContent>
+                </Card>
+              );
+            })}
           </motion.div>
         </div>
       </main>

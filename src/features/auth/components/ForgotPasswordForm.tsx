@@ -8,6 +8,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { toast } from "sonner";
+import { Loader2, Mail, ArrowLeft } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -30,26 +31,6 @@ const forgotPasswordSchema = z.object({
 });
 
 type ForgotPasswordFormData = z.infer<typeof forgotPasswordSchema>;
-
-const LoaderIcon = () => (
-  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-4 w-4 animate-spin">
-    <path d="M21 12a9 9 0 1 1-6.219-8.56"/>
-  </svg>
-);
-
-const MailIcon = () => (
-  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-12 w-12 text-primary">
-    <rect width="20" height="16" x="2" y="4" rx="2"/>
-    <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/>
-  </svg>
-);
-
-const ArrowLeftIcon = () => (
-  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-4 w-4">
-    <path d="m12 19-7-7 7-7"/>
-    <path d="M19 12H5"/>
-  </svg>
-);
 
 export default function ForgotPasswordForm() {
   const [isLoading, setIsLoading] = useState(false);
@@ -100,7 +81,7 @@ export default function ForgotPasswordForm() {
           <div className="text-center space-y-4">
             <div className="flex justify-center">
               <div className="rounded-full bg-primary/10 p-4">
-                <MailIcon />
+                <Mail className="h-12 w-12 text-primary" />
               </div>
             </div>
             
@@ -132,7 +113,7 @@ export default function ForgotPasswordForm() {
                 href="/auth/login"
                 className="inline-flex items-center gap-2 text-sm font-medium text-primary hover:underline"
               >
-                <ArrowLeftIcon />
+                <ArrowLeft className="h-4 w-4" />
                 Volver a iniciar sesión
               </a>
             </div>
@@ -182,7 +163,7 @@ export default function ForgotPasswordForm() {
           <Button type="submit" className="w-full h-11" disabled={isLoading}>
             {isLoading ? (
               <>
-                <LoaderIcon />
+                <Loader2 className="h-4 w-4 animate-spin" />
                 <span className="ml-2">Enviando...</span>
               </>
             ) : (
@@ -196,7 +177,7 @@ export default function ForgotPasswordForm() {
             href="/auth/login"
             className="inline-flex items-center gap-2 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
           >
-            <ArrowLeftIcon />
+            <ArrowLeft className="h-4 w-4" />
             Volver a iniciar sesión
           </a>
         </div>

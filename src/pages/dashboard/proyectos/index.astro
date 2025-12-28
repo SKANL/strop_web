@@ -1,42 +1,10 @@
 ---
 // dashboard/proyectos/index.astro - Página de Lista de Proyectos
 import DashboardLayout from "@/layouts/DashboardLayout.astro";
-import { FloatingNav } from "@/components/dashboard/islands/FloatingNav";
-import { MobileNav } from "@/components/dashboard/islands/MobileNav";
-import { RightSidebar } from "@/components/dashboard/islands/RightSidebar";
-import { ProjectsPage } from "@/components/dashboard/projects";
+import { ProjectsPage } from "@/features/projects/components";
 import { mockProjectsWithStats } from "@/lib/mock";
-
-const currentPath = "/dashboard/proyectos";
 ---
 
 <DashboardLayout title="Proyectos | Strop" description="Gestión de proyectos y obras">
-  <div class="flex min-h-screen w-full bg-[#fafafa] overflow-hidden relative">
-    {/* Patrón de fondo */}
-    <div 
-      class="absolute inset-0 opacity-[0.03] pointer-events-none" 
-      style={{ 
-        backgroundImage: "radial-gradient(#000 1px, transparent 1px)", 
-        backgroundSize: "24px 24px" 
-      }} 
-    />
-
-    {/* Navegación Flotante (Desktop) */}
-    <div class="hidden md:block">
-      <FloatingNav client:idle currentPath={currentPath} />
-    </div>
-
-    {/* Navegación Móvil */}
-    <MobileNav client:idle currentPath={currentPath} />
-
-    {/* Panel Lateral Derecho */}
-    <RightSidebar client:idle />
-
-    {/* Contenido Principal */}
-    <main class="flex-1 h-screen overflow-y-auto relative z-0">
-      <div class="p-4 md:p-8 pt-16 md:pt-8 pl-4 md:pl-32 pr-4 md:pr-28 max-w-7xl mx-auto min-h-screen relative z-10">
-        <ProjectsPage client:load projects={mockProjectsWithStats} />
-      </div>
-    </main>
-  </div>
+  <ProjectsPage client:load projects={mockProjectsWithStats} />
 </DashboardLayout>

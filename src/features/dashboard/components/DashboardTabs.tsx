@@ -13,10 +13,10 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { ProjectsWidget } from "@/components/dashboard/islands/ProjectsWidget";
-import { IncidentsTable } from "@/components/dashboard/islands/IncidentsTable";
-import { ActivityFeed } from "@/components/dashboard/islands/ActivityFeed";
-import { StatsWidget } from "@/components/dashboard/islands/StatsWidget";
+import { ProjectsWidget } from "@/features/dashboard/components/ProjectsWidget";
+import { IncidentsTable } from "@/features/dashboard/components/IncidentsTable";
+import { ActivityFeed } from "@/features/dashboard/components/ActivityFeed";
+import { StatsWidget } from "@/features/dashboard/components/StatsWidget";
 import {
   mockProjectsUI,
   mockIncidentsUI,

@@ -1,7 +1,8 @@
 // islands/MobileNav.tsx - Navegación móvil
 "use client";
 
-import { useState } from "react";
+import { useStore } from "@nanostores/react";
+import { isMobileMenuOpen, toggleMobileMenu } from "@/store/ui";
 import { Menu, LayoutDashboard, FolderKanban, Users, AlertTriangle, ClipboardCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
@@ -29,7 +30,7 @@ interface MobileNavProps {
 }
 
 export function MobileNav({ currentPath = "/dashboard" }: MobileNavProps) {
-  const [open, setOpen] = useState(false);
+  const open = useStore(isMobileMenuOpen);
 
   const activeItem = navItems.find(item => 
     currentPath === item.href || 
@@ -37,7 +38,7 @@ export function MobileNav({ currentPath = "/dashboard" }: MobileNavProps) {
   ) || navItems[0];
 
   return (
-    <Sheet open={open} onOpenChange={setOpen}>
+    <Sheet open={open} onOpenChange={toggleMobileMenu}>
       <SheetTrigger asChild>
         <Button 
           variant="outline" 
@@ -67,7 +68,7 @@ export function MobileNav({ currentPath = "/dashboard" }: MobileNavProps) {
               <a
                 key={item.id}
                 href={item.href}
-                onClick={() => setOpen(false)}
+                onClick={() => toggleMobileMenu()}
                 className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all no-underline ${
                   isActive
                     ? "bg-blue-600/30 text-white"

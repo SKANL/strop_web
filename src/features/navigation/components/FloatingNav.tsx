@@ -1,7 +1,8 @@
 // islands/FloatingNav.tsx - Navegación flotante con client:idle (shadcn optimized)
 "use client";
 
-import { useState } from "react";
+import { useStore } from "@nanostores/react";
+import { isSidebarCollapsed, toggleSidebar } from "@/store/ui";
 import { motion, AnimatePresence } from "motion/react";
 import {
   LayoutDashboard,
@@ -42,7 +43,9 @@ interface FloatingNavProps {
 }
 
 export function FloatingNav({ currentPath = "/dashboard" }: FloatingNavProps) {
-  const [isOpen, setIsOpen] = useState(false);
+  // Global state: collapsed = true -> isOpen = false
+  const $isSidebarCollapsed = useStore(isSidebarCollapsed);
+  const isOpen = !$isSidebarCollapsed;
 
   const activeItem = navItems.find(item => 
     currentPath === item.href || 
@@ -71,7 +74,7 @@ export function FloatingNav({ currentPath = "/dashboard" }: FloatingNavProps) {
       <div className="flex flex-col w-full">
         {/* Header con logo */}
         <div
-          onClick={() => setIsOpen(!isOpen)}
+          onClick={() => toggleSidebar()}
           className={cn(
             "w-full flex items-center transition-all relative shrink-0 cursor-pointer hover:bg-white/5 border-b border-white/10",
             isOpen ? "h-16 px-4 justify-between" : "h-16 justify-center"

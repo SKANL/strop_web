@@ -10,6 +10,7 @@ import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
+import { Loader2, Check, X, Eye, EyeOff, Star } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -47,46 +48,6 @@ import {
 } from "@/lib/auth-schemas";
 import { mockRegister, checkSubdomainAvailability } from "@/lib/mock";
 
-// Iconos
-const LoaderIcon = ({ className = "h-4 w-4" }: { className?: string }) => (
-  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={`animate-spin ${className}`}>
-    <path d="M21 12a9 9 0 1 1-6.219-8.56"/>
-  </svg>
-);
-
-const CheckIcon = ({ className = "h-4 w-4" }: { className?: string }) => (
-  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
-    <polyline points="20 6 9 17 4 12"/>
-  </svg>
-);
-
-const XIcon = ({ className = "h-4 w-4" }: { className?: string }) => (
-  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
-    <line x1="18" y1="6" x2="6" y2="18"/>
-    <line x1="6" y1="6" x2="18" y2="18"/>
-  </svg>
-);
-
-const EyeIcon = () => (
-  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-4 w-4">
-    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
-    <circle cx="12" cy="12" r="3"/>
-  </svg>
-);
-
-const EyeOffIcon = () => (
-  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-4 w-4">
-    <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/>
-    <line x1="1" y1="1" x2="23" y2="23"/>
-  </svg>
-);
-
-const StarIcon = () => (
-  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="h-4 w-4 text-yellow-500">
-    <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
-  </svg>
-);
-
 // Tipos para los pasos
 type Step = 1 | 2 | 3;
 
@@ -113,7 +74,7 @@ function StepIndicator({ currentStep }: { currentStep: Step }) {
               }`}
             >
               {currentStep > step.number ? (
-                <CheckIcon className="h-5 w-5" />
+                <Check className="h-5 w-5" />
               ) : (
                 <span className="text-sm font-semibold">{step.number}</span>
               )}
@@ -225,19 +186,19 @@ function OrganizationStep({
         <div className="flex items-center gap-2 text-sm">
           {subdomainStatus.checking && (
             <>
-              <LoaderIcon className="h-3 w-3" />
+              <Loader2 className="h-3 w-3 animate-spin" />
               <span className="text-muted-foreground">Verificando...</span>
             </>
           )}
           {!subdomainStatus.checking && subdomainStatus.available === true && (
             <>
-              <CheckIcon className="h-3 w-3 text-green-500" />
+              <Check className="h-3 w-3 text-green-500" />
               <span className="text-green-600">{subdomainStatus.message}</span>
             </>
           )}
           {!subdomainStatus.checking && subdomainStatus.available === false && (
             <>
-              <XIcon className="h-3 w-3 text-destructive" />
+              <X className="h-3 w-3 text-destructive" />
               <span className="text-destructive">{subdomainStatus.message}</span>
             </>
           )}
@@ -386,7 +347,7 @@ function UserStep({
             className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
             tabIndex={-1}
           >
-            {showPassword ? <EyeOffIcon /> : <EyeIcon />}
+            {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
           </button>
         </div>
         
@@ -408,7 +369,7 @@ function UserStep({
               {passwordRequirements.map((req) => (
                 <div key={req.label} className="flex items-center gap-1.5 text-xs">
                   {req.met ? (
-                    <CheckIcon className="h-3 w-3 text-green-500" />
+                    <Check className="h-3 w-3 text-green-500" />
                   ) : (
                     <div className="h-3 w-3 rounded-full border border-muted-foreground/30" />
                   )}
@@ -443,7 +404,7 @@ function UserStep({
             className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
             tabIndex={-1}
           >
-            {showConfirmPassword ? <EyeOffIcon /> : <EyeIcon />}
+            {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
           </button>
         </div>
         {errors.confirmPassword && (
@@ -510,7 +471,7 @@ function PlanStep({
           >
             {plan.popular && (
               <div className="absolute -top-3 left-4 flex items-center gap-1 rounded-full bg-primary px-2.5 py-0.5 text-xs font-medium text-primary-foreground">
-                <StarIcon />
+                <Star className="h-4 w-4 text-yellow-500 fill-yellow-500" />
                 Popular
               </div>
             )}
@@ -520,7 +481,7 @@ function PlanStep({
                 <div className="flex items-center gap-2">
                   <h3 className="font-semibold">{plan.name}</h3>
                   {selectedPlan === plan.id && (
-                    <CheckIcon className="h-4 w-4 text-primary" />
+                    <Check className="h-4 w-4 text-primary" />
                   )}
                 </div>
                 <div className="mt-1 flex items-baseline gap-1">
@@ -530,7 +491,7 @@ function PlanStep({
                 <ul className="mt-3 space-y-1.5">
                   {plan.features.slice(0, 4).map((feature) => (
                     <li key={feature} className="flex items-center gap-2 text-sm text-muted-foreground">
-                      <CheckIcon className="h-3.5 w-3.5 text-green-500 shrink-0" />
+                      <Check className="h-3.5 w-3.5 text-green-500 shrink-0" />
                       {feature}
                     </li>
                   ))}
@@ -573,7 +534,7 @@ function PlanStep({
       {/* Info de trial */}
       <div className="rounded-lg bg-green-50 dark:bg-green-950/30 border border-green-200 dark:border-green-900 p-4 text-sm">
         <div className="flex items-center gap-2 text-green-700 dark:text-green-400">
-          <CheckIcon className="h-4 w-4" />
+          <Check className="h-4 w-4" />
           <span className="font-medium">14 días de prueba gratis</span>
         </div>
         <p className="mt-1 text-green-600 dark:text-green-500">
@@ -589,7 +550,7 @@ function PlanStep({
         <Button type="submit" disabled={isLoading} className="flex-1 h-11">
           {isLoading ? (
             <>
-              <LoaderIcon className="h-4 w-4" />
+              <Loader2 className="h-4 w-4 animate-spin" />
               <span className="ml-2">Creando cuenta...</span>
             </>
           ) : (

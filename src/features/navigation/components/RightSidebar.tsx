@@ -1,7 +1,8 @@
 // islands/RightSidebar.tsx - Panel lateral derecho
 "use client";
 
-import { useState } from "react";
+import { useStore } from "@nanostores/react";
+import { isRightSidebarOpen, toggleRightSidebar } from "@/store/ui";
 import { motion, AnimatePresence } from "motion/react";
 import {
   Bell,
@@ -27,7 +28,7 @@ import { Button } from "@/components/ui/button";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 
 export function RightSidebar() {
-  const [isExpanded, setIsExpanded] = useState(false);
+  const isExpanded = useStore(isRightSidebarOpen);
   const firstName = mockCurrentUserUI.name.split(" ")[0];
   const unreadCount = mockNotifications.filter(n => !n.read).length;
 
@@ -73,7 +74,7 @@ export function RightSidebar() {
     >
       <div className="flex flex-col w-full">
         <div
-          onClick={() => setIsExpanded(!isExpanded)}
+          onClick={() => toggleRightSidebar()}
           className={`w-full flex items-center transition-all shrink-0 cursor-pointer hover:bg-gray-50 border-b border-gray-200 ${
             isExpanded ? "h-16 px-4 justify-between" : "h-16 justify-center"
           }`}

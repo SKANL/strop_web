@@ -1,13 +1,39 @@
 ---
-// DashboardLayout.astro - Layout principal para el Dashboard con TopBar y Floating Navigation
+// DashboardLayout.astro - Structure overhaul to include Navs and Breadcrumbs
 import { ClientRouter } from 'astro:transitions';
+import { FloatingNav } from "@/features/navigation/components/FloatingNav";
+import { MobileNav } from "@/features/navigation/components/MobileNav";
+import { RightSidebar } from "@/features/navigation/components/RightSidebar";
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from "@/components/ui/breadcrumb";
+import { cn } from "@/lib/utils";
 
 interface Props {
   title?: string;
   description?: string;
+  currentPath?: string;
 }
 
-const { title = "Dashboard | Strop", description = "Panel de administración Strop" } = Astro.props;
+const { 
+  title = "Dashboard | Strop", 
+  description = "Panel de administración Strop",
+  currentPath = Astro.url.pathname
+} = Astro.props;
+
+// Generate breadcrumbs from path
+const pathSegments = currentPath.split('/').filter(Boolean);
+const breadcrumbs = pathSegments.map((segment, index) => {
+  const href = `/${pathSegments.slice(0, index + 1).join('/')}`;
+  const label = segment.charAt(0).toUpperCase() + segment.slice(1).replace(/-/g, ' ');
+  return { href, label };
+});
+
 ---
 
 <!doctype html>
@@ -19,17 +45,55 @@ const { title = "Dashboard | Strop", description = "Panel de administración Str
     <meta name="description" content={description} />
     <meta name="generator" content={Astro.generator} />
     <title>{title}</title>
-    <!-- View Transitions para navegación suave sin recarga completa -->
     <ClientRouter />
   </head>
-  <body class="min-h-screen bg-background text-foreground antialiased">
-    <!-- Contenedor Principal -->
-    <div class="relative min-h-screen">
-      <!-- Contenido de la Página -->
-      <main class="min-h-screen">
-        <slot />
-      </main>
-    </div>
+  <body class="min-h-screen bg-background text-foreground antialiased overflow-hidden">
+    <div class="flex min-h-screen w-full bg-[#fafafa] overflow-hidden relative">
+        {/* Background Pattern */}
+        <div 
+          class="absolute inset-0 opacity-[0.03] pointer-events-none" 
+          style={{ 
+            backgroundImage: "radial-gradient(#000 1px, transparent 1px)", 
+            backgroundSize: "24px 24px" 
+          }} 
+        />
+    
+        {/* Islands: Navigation & Sidebar - Persist across checking view transitions */}
+        <div class="hidden md:block">
+          <FloatingNav client:idle currentPath={currentPath} transition:persist="floating-nav" />
+        </div>
+        <MobileNav client:idle currentPath={currentPath} transition:persist="mobile-nav" />
+        <RightSidebar client:idle transition:persist="right-sidebar" />
+    
+        {/* Main Content Area */}
+        <main class="flex-1 h-screen overflow-y-auto relative z-0">
+          <div class="p-4 md:p-8 pt-16 md:pt-8 pl-4 md:pl-32 pr-4 md:pr-28 max-w-7xl mx-auto min-h-screen relative z-10 flex flex-col gap-6">
+            
+            {/* Breadcrumbs */}
+            <Breadcrumb>
+              <BreadcrumbList>
+                {breadcrumbs.map((crumb, index) => {
+                  const isLast = index === breadcrumbs.length - 1;
+                  return (
+                    <>
+                      <BreadcrumbItem key={crumb.href}>
+                         {isLast ? (
+                            <BreadcrumbPage>{crumb.label}</BreadcrumbPage>
+                         ) : (
+                            <BreadcrumbLink href={crumb.href}>{crumb.label}</BreadcrumbLink>
+                         )}
+                      </BreadcrumbItem>
+                      {!isLast && <BreadcrumbSeparator />}
+                    </>
+                  )
+                })}
+              </BreadcrumbList>
+            </Breadcrumb>
+
+            <slot />
+          </div>
+        </main>
+      </div>
   </body>
 </html>
 
