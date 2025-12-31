@@ -302,3 +302,9 @@ export function countCommentsByType(
     FOLLOWUP: comments.filter((c) => c.commentType === "FOLLOWUP").length,
   };
 }
+
+/**
+ * Alias for getCommentsWithAuthor for component consistency
+ */
+export const getCommentsByIncidentWithAuthor = getCommentsWithAuthor;
+

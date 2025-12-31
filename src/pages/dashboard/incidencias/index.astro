@@ -1,14 +1,9 @@
 ---
 // dashboard/incidencias/index.astro - Página de Incidencias
 import DashboardLayout from "@/layouts/DashboardLayout.astro";
-import { PlaceholderPage } from "@/features/dashboard/components/PlaceholderPage";
+import { IncidenciasPage } from "@/features/incidents/pages/IncidenciasPage";
 ---
 
 <DashboardLayout title="Incidencias | Strop" description="Historial y gestión de incidencias">
-  <PlaceholderPage 
-    client:load 
-    title="Incidencias" 
-    description="Consulta y filtra el historial de incidencias de todos los proyectos"
-    currentPath="/dashboard/incidencias" 
-  />
+  <IncidenciasPage client:load />
 </DashboardLayout>

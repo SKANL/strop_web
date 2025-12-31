@@ -1,0 +1,9 @@
+---
+// dashboard/configuracion/notificaciones/index.astro - Configuración de Notificaciones
+import DashboardLayout from "@/layouts/DashboardLayout.astro";
+import { NotificationSettings } from "@/features/configuracion/components";
+---
+
+<DashboardLayout title="Notificaciones | Configuración | Strop" description="Configura tus preferencias de notificación">
+  <NotificationSettings client:load />
+</DashboardLayout>

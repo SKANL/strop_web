@@ -1,0 +1,9 @@
+---
+// dashboard/configuracion/seguridad/index.astro - Configuración de Seguridad
+import DashboardLayout from "@/layouts/DashboardLayout.astro";
+import { SecuritySettings } from "@/features/configuracion/components";
+---
+
+<DashboardLayout title="Seguridad | Configuración | Strop" description="Configura la seguridad de tu cuenta">
+  <SecuritySettings client:load />
+</DashboardLayout>

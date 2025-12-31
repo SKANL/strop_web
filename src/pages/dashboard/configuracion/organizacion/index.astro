@@ -1,0 +1,9 @@
+---
+// dashboard/configuracion/organizacion/index.astro - Configuración de la Organización
+import DashboardLayout from "@/layouts/DashboardLayout.astro";
+import { OrganizationSettings } from "@/features/configuracion/components";
+---
+
+<DashboardLayout title="Organización | Configuración | Strop" description="Configura tu organización">
+  <OrganizationSettings client:load />
+</DashboardLayout>

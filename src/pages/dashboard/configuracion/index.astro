@@ -1,14 +1,9 @@
 ---
-// dashboard/configuracion/index.astro - Página de Configuración
+// dashboard/configuracion/index.astro - Hub de Configuración
 import DashboardLayout from "@/layouts/DashboardLayout.astro";
-import { PlaceholderPage } from "@/features/dashboard/components/PlaceholderPage";
+import { ConfigurationHub } from "@/features/configuracion/components";
 ---
 
 <DashboardLayout title="Configuración | Strop" description="Configuración del sistema">
-  <PlaceholderPage 
-    client:load 
-    title="Configuración" 
-    description="Configura las preferencias de tu organización y cuenta"
-    currentPath="/dashboard/configuracion" 
-  />
+  <ConfigurationHub client:load />
 </DashboardLayout>

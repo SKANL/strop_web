@@ -336,3 +336,7 @@ export function getProjectMembersWithDetailsUI(projectId: string): import("./typ
     };
   });
 }
+
+// Re-export for component usage with UI-friendly interface
+export { getProjectMembersWithDetailsUI as getProjectMembersUI };
+

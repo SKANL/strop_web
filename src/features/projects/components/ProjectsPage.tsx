@@ -10,6 +10,7 @@ import { ProjectCard } from "./ProjectCard";
 import { ProjectFilters, type SortOption, type ViewMode } from "./ProjectFilters";
 import { CreateProjectSheet } from "./CreateProjectSheet";
 import { ProjectsEmptyState } from "./ProjectsEmptyState";
+import { TooltipProvider } from "@/components/ui/tooltip";
 
 interface ProjectsPageProps {
   projects: ProjectWithStats[];
@@ -91,7 +92,8 @@ export function ProjectsPage({ projects }: ProjectsPageProps) {
   }), [projects]);
 
   return (
-    <div className="space-y-6">
+    <TooltipProvider>
+      <div className="space-y-6">
       {/* Header */}
       <motion.div
         initial={{ opacity: 0, y: -20 }}
@@ -119,58 +121,6 @@ export function ProjectsPage({ projects }: ProjectsPageProps) {
           Nuevo Proyecto
         </Button>
       </motion.div>
-
-      {/* Stats Pills */}
-      {/* <motion.div
-        initial={{ opacity: 0, y: 10 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.4, delay: 0.1 }}
-        className="flex flex-wrap gap-2"
-      >
-        <button
-          onClick={() => setStatusFilter("ALL")}
-          className={`px-4 py-2 rounded-xl text-sm font-medium transition-all ${
-            statusFilter === "ALL"
-              ? "bg-gray-900 text-white shadow-lg"
-              : "bg-gray-100 text-gray-600 hover:bg-gray-200"
-          }`}
-        >
-          Todos ({stats.total})
-        </button>
-        <button
-          onClick={() => setStatusFilter("ACTIVE")}
-          className={`px-4 py-2 rounded-xl text-sm font-medium transition-all flex items-center gap-2 ${
-            statusFilter === "ACTIVE"
-              ? "bg-emerald-500 text-white shadow-lg"
-              : "bg-emerald-50 text-emerald-700 hover:bg-emerald-100"
-          }`}
-        >
-          <span className={`w-2 h-2 rounded-full ${statusFilter === "ACTIVE" ? "bg-white" : "bg-emerald-500"}`} />
-          Activos ({stats.active})
-        </button>
-        <button
-          onClick={() => setStatusFilter("PAUSED")}
-          className={`px-4 py-2 rounded-xl text-sm font-medium transition-all flex items-center gap-2 ${
-            statusFilter === "PAUSED"
-              ? "bg-amber-500 text-white shadow-lg"
-              : "bg-amber-50 text-amber-700 hover:bg-amber-100"
-          }`}
-        >
-          <span className={`w-2 h-2 rounded-full ${statusFilter === "PAUSED" ? "bg-white" : "bg-amber-500"}`} />
-          Pausados ({stats.paused})
-        </button>
-        <button
-          onClick={() => setStatusFilter("COMPLETED")}
-          className={`px-4 py-2 rounded-xl text-sm font-medium transition-all flex items-center gap-2 ${
-            statusFilter === "COMPLETED"
-              ? "bg-blue-500 text-white shadow-lg"
-              : "bg-blue-50 text-blue-700 hover:bg-blue-100"
-          }`}
-        >
-          <span className={`w-2 h-2 rounded-full ${statusFilter === "COMPLETED" ? "bg-white" : "bg-blue-500"}`} />
-          Completados ({stats.completed})
-        </button>
-      </motion.div> */}
 
       {/* Filtros */}
       <ProjectFilters
@@ -256,6 +206,7 @@ export function ProjectsPage({ projects }: ProjectsPageProps) {
           console.log("Project saved");
         }}
       />
-    </div>
+      </div>
+    </TooltipProvider>
   );
 }

@@ -1,0 +1,9 @@
+---
+// dashboard/configuracion/perfil/index.astro - Configuración del Perfil Personal
+import DashboardLayout from "@/layouts/DashboardLayout.astro";
+import { ProfileSettings } from "@/features/configuracion/components";
+---
+
+<DashboardLayout title="Perfil | Configuración | Strop" description="Configura tu perfil personal">
+  <ProfileSettings client:load />
+</DashboardLayout>

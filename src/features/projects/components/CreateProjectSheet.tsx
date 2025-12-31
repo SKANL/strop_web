@@ -11,10 +11,10 @@ import {
   MapPin, 
   Building2, 
   User,
-  Loader2,
   CheckCircle2,
   AlertCircle
 } from "lucide-react";
+import { Spinner } from "@/components/ui/spinner";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
 import type { ProjectWithStats, User as UserType } from "@/lib/mock/types";
@@ -469,7 +469,7 @@ export function CreateProjectSheet({
                         exit={{ opacity: 0 }}
                         className="flex items-center gap-2"
                       >
-                        <Loader2 className="h-4 w-4 animate-spin" />
+                        <Spinner className="h-4 w-4" />
                         Guardando...
                       </motion.div>
                     ) : submitStatus === "success" ? (

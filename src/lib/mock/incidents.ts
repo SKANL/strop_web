@@ -197,6 +197,20 @@ export const mockIncidents: Incident[] = [
 // ============================================
 
 /**
+ * Simple hash function to generate deterministic pseudo-random values from a string
+ * This ensures the same value is generated on SSR and client
+ */
+function simpleHash(str: string): number {
+  let hash = 0;
+  for (let i = 0; i < str.length; i++) {
+    const char = str.charCodeAt(i);
+    hash = ((hash << 5) - hash) + char;
+    hash = hash & hash; // Convert to 32bit integer
+  }
+  return Math.abs(hash);
+}
+
+/**
  * Genera incidencias con datos denormalizados
  */
 export function getIncidentsWithDetails(): IncidentWithDetails[] {
@@ -204,6 +218,11 @@ export function getIncidentsWithDetails(): IncidentWithDetails[] {
     const createdByUser = getUserById(incident.createdBy);
     const assignedToUser = incident.assignedTo ? getUserById(incident.assignedTo) : undefined;
     const project = getProjectById(incident.projectId);
+    
+    // Use deterministic values based on incident ID to avoid hydration mismatch
+    const hash = simpleHash(incident.id);
+    const photosCount = (hash % 5) + 1; // 1-5 fotos
+    const commentsCount = (hash >> 4) % 10; // 0-9 comentarios
 
     return {
       ...incident,
@@ -212,8 +231,8 @@ export function getIncidentsWithDetails(): IncidentWithDetails[] {
       createdByAvatar: createdByUser?.profilePictureUrl,
       assignedToName: assignedToUser?.fullName,
       assignedToAvatar: assignedToUser?.profilePictureUrl,
-      photosCount: Math.floor(Math.random() * 5) + 1, // Mock: 1-5 fotos
-      commentsCount: Math.floor(Math.random() * 10), // Mock: 0-9 comentarios
+      photosCount,
+      commentsCount,
     };
   });
 }

@@ -10,7 +10,8 @@ import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
-import { Loader2, Check, X, Eye, EyeOff, Star } from "lucide-react";
+import { Check, X, Eye, EyeOff, Star } from "lucide-react";
+import { Spinner } from "@/components/ui/spinner";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -186,7 +187,7 @@ function OrganizationStep({
         <div className="flex items-center gap-2 text-sm">
           {subdomainStatus.checking && (
             <>
-              <Loader2 className="h-3 w-3 animate-spin" />
+              <Spinner className="h-3 w-3" />
               <span className="text-muted-foreground">Verificando...</span>
             </>
           )}
@@ -550,7 +551,7 @@ function PlanStep({
         <Button type="submit" disabled={isLoading} className="flex-1 h-11">
           {isLoading ? (
             <>
-              <Loader2 className="h-4 w-4 animate-spin" />
+              <Spinner className="h-4 w-4" />
               <span className="ml-2">Creando cuenta...</span>
             </>
           ) : (
