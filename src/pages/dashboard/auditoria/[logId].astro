@@ -1,0 +1,70 @@
+---
+/**
+ * Página de detalle individual de log de auditoría
+ * Permite compartir URL específica de un log
+ */
+
+import { getAuditLogsByOrganization } from "@/lib/mock/audit-logs";
+import { mockCurrentUser } from "@/lib/mock/users";
+
+// Generar páginas estáticas para todos los logs
+export async function getStaticPaths() {
+  const orgId = mockCurrentUser.organizationId;
+  const allLogs = getAuditLogsByOrganization(orgId);
+  
+  return allLogs.map((log) => ({
+    params: { logId: log.id },
+  }));
+}
+
+import DashboardLayout from "@/layouts/DashboardLayout.astro";
+import { AuditActionBadge } from "@/features/auditoria/components/AuditActionBadge";
+import { AuditLogDetailTabs } from "@/features/auditoria/components/AuditLogDetailTabs";
+import { getAuditLogById } from "@/lib/mock/audit-logs";
+import { getUserById } from "@/lib/mock/users";
+import { roleLabels } from "@/lib/mock/types";
+import { formatDateTime } from "@/features/auditoria/utils/formatters";
+
+// Obtener ID del log desde la URL
+const { logId } = Astro.params;
+
+// Cargar log desde el servidor
+const log = logId ? getAuditLogById(logId) : null;
+
+// Si no existe el log, redirigir a la página principal
+if (!log) {
+  return Astro.redirect("/dashboard/auditoria");
+}
+
+const user = log.userId ? getUserById(log.userId) : null;
+---
+
+<DashboardLayout title={`Log ${log.id} | Auditoría | Strop`} description="Detalle de log de auditoría">
+  <div class="container mx-auto py-6 space-y-6">
+    <!-- Header -->
+    <div class="flex items-center justify-between">
+      <div>
+        <h1 class="text-3xl font-bold flex items-center gap-2">
+          <AuditActionBadge action={log.action} />
+          <span>Detalle de Auditoría</span>
+        </h1>
+        <p class="text-muted-foreground">
+          {formatDateTime(log.createdAt)} · Log ID: {log.id}
+        </p>
+      </div>
+      <a href="/dashboard/auditoria" class="text-sm text-muted-foreground hover:text-foreground">
+        ← Volver a Auditoría
+      </a>
+    </div>
+
+    <!-- Contenido con Tabs (React Island) -->
+    <AuditLogDetailTabs
+      client:load
+      log={log}
+      userName={user?.fullName || "Sistema"}
+      userEmail={user?.email}
+      userRole={user?.role ? roleLabels[user.role] : undefined}
+      userAvatar={user?.profilePictureUrl}
+    />
+  </div>
+</DashboardLayout>

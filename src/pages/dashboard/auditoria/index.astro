@@ -1,14 +1,101 @@
 ---
-// dashboard/auditoria/index.astro - Página de Auditoría
+/**
+ * Página principal del módulo de Auditoría
+ * SSR de datos iniciales + React Islands para interactividad
+ */
+
 import DashboardLayout from "@/layouts/DashboardLayout.astro";
-import { PlaceholderPage } from "@/features/dashboard/components/PlaceholderPage";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { AuditLogTable } from "@/features/auditoria/components/AuditLogTable";
+import { AuditLogDetail } from "@/features/auditoria/components/AuditLogDetail";
+import { getAuditLogsByOrganization, getActivitySummary, getFailedLoginAttempts } from "@/lib/mock/audit-logs";
+import { mockCurrentUser } from "@/lib/mock/users";
+
+// SSR: Cargar datos en servidor
+const orgId = mockCurrentUser.organizationId;
+const initialLogs = getAuditLogsByOrganization(orgId);
+const summary = getActivitySummary(orgId);
+const securityAlerts = getFailedLoginAttempts(orgId, 24);
 ---
 
 <DashboardLayout title="Auditoría | Strop" description="Logs y registro de actividades">
-  <PlaceholderPage 
-    client:load 
-    title="Auditoría" 
-    description="Consulta los logs de todas las acciones críticas del sistema"
-    currentPath="/dashboard/auditoria" 
-  />
+  <div class="container mx-auto py-6 space-y-6">
+    <!-- Header -->
+    <div class="flex items-center justify-between">
+      <div>
+        <h1 class="text-3xl font-bold">Auditoría del Sistema</h1>
+        <p class="text-muted-foreground">
+          Registro completo de acciones críticas
+        </p>
+      </div>
+    </div>
+
+    <!-- KPIs -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-base">Acciones Hoy</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div class="text-3xl font-bold">{summary.todayActions}</div>
+          <p class="text-sm text-muted-foreground">
+            {summary.weekActions} esta semana
+          </p>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-base">Total de Acciones</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div class="text-3xl font-bold">{summary.totalActions}</div>
+          <p class="text-sm text-muted-foreground">
+            Todas las acciones registradas
+          </p>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-base">Alertas de Seguridad</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div class={`text-3xl font-bold ${securityAlerts.length > 0 ? 'text-destructive' : ''}`}>
+            {securityAlerts.length}
+          </div>
+          <p class="text-sm text-muted-foreground">
+            Intentos fallidos (24h)
+          </p>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-base">Usuarios Activos</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div class="text-3xl font-bold">{summary.topUsers.length}</div>
+          <p class="text-sm text-muted-foreground">
+            Usuarios con actividad
+          </p>
+        </CardContent>
+      </Card>
+    </div>
+
+    <!-- Tabla Principal -->
+    <Card>
+      <CardHeader>
+        <div class="flex justify-between items-center">
+          <CardTitle>Registro de Actividad</CardTitle>
+        </div>
+      </CardHeader>
+      <CardContent>
+        <AuditLogTable client:load initialLogs={initialLogs} />
+      </CardContent>
+    </Card>
+
+    <!-- Modal de Detalle (React Island) -->
+    <AuditLogDetail client:load />
+  </div>
 </DashboardLayout>
