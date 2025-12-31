@@ -465,3 +465,28 @@ export interface ProjectMemberWithDetails {
   assignedByName?: string;
   assignedByAvatar?: string;
 }
+
+/**
+ * Material/Insumo de construcción (Explosión de Insumos)
+ * @see REQUIREMENTS_V2.md - RF-A03
+ */
+export interface Material {
+  id: string;
+  organizationId: string;
+  projectId: string;
+  name: string;                // Nombre del material (ej: "Cemento Portland")
+  unit: string;                // Unidad de medida (ej: "m3", "ton", "pza")
+  plannedQuantity: number;     // Cantidad planeada (línea base)
+  requestedQuantity: number;   // Cantidad solicitada acumulada
+  createdAt: string;
+  updatedAt: string;
+}
+
+/**
+ * Material con datos calculados (para UI)
+ */
+export interface MaterialWithStats extends Material {
+  availableQuantity: number;   // plannedQuantity - requestedQuantity
+  deviationPercentage: number; // (requestedQuantity - plannedQuantity) / plannedQuantity * 100
+  hasDeviation: boolean;       // requestedQuantity > plannedQuantity
+}

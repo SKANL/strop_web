@@ -16,7 +16,6 @@ import {
 } from "lucide-react";
 import {
   mockCurrentUserUI,
-  mockNotifications,
   mockOrganizationUI,
   roleLabels,
 } from "@/lib/mock";
@@ -25,36 +24,55 @@ import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
 import { Button } from "@/components/ui/button";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Check, CheckCheck } from "lucide-react";
+import { 
+  $notifications, 
+  $unreadCount, 
+  markAsRead, 
+  markAllAsRead,
+  type NotificationType 
+} from "@/lib/stores/notifications";
+import { formatDistanceToNow } from "date-fns";
+import { es } from "date-fns/locale";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 export function RightSidebar() {
   const isExpanded = useStore(isRightSidebarOpen);
+  const notifications = useStore($notifications);
+  const unreadCount = useStore($unreadCount);
   const firstName = mockCurrentUserUI.name.split(" ")[0];
-  const unreadCount = mockNotifications.filter(n => !n.read).length;
 
-  const getNotificationIcon = (type: string) => {
+  const getNotificationIcon = (type: NotificationType) => {
     switch (type) {
-      case "warning":
-      case "critical":
-        return AlertTriangle;
-      default:
-        return Info;
+      case 'MENTION': return User;
+      case 'ASSIGNMENT': return Info; // Or a clipboard icon
+      case 'PROJECT_UPDATE': return Building2;
+      case 'SYSTEM': return Info;
+      default: return Info;
     }
   };
 
-  const getNotificationColor = (type: string) => {
+  const getNotificationColor = (type: NotificationType) => {
     switch (type) {
-      case "critical":
-        return "bg-red-100 text-red-600";
-      case "warning":
-        return "bg-amber-100 text-amber-600";
-      default:
-        return "bg-blue-100 text-blue-600";
+      case 'MENTION': return "bg-purple-100 text-purple-600";
+      case 'ASSIGNMENT': return "bg-blue-100 text-blue-600";
+      case 'PROJECT_UPDATE': return "bg-emerald-100 text-emerald-600";
+      default: return "bg-gray-100 text-gray-600";
     }
   };
 
   const getInitials = (name: string) => {
     return name.split(" ").map(n => n[0]).join("").substring(0, 2).toUpperCase();
+  };
+
+  // Helper date format
+  const formatTime = (isoString: string) => {
+    try {
+      return formatDistanceToNow(new Date(isoString), { addSuffix: true, locale: es });
+    } catch (e) {
+      return "hace un momento";
+    }
   };
 
   return (
@@ -174,55 +192,163 @@ export function RightSidebar() {
                 </div>
 
                 <div className="mb-4">
-                  <div className="flex items-center justify-between mb-3">
-                    <div className="flex items-center gap-2">
-                      <Bell className="h-4 w-4 text-gray-400" />
-                      <span className="text-xs font-bold text-gray-600 uppercase tracking-wider">
-                        Notificaciones
-                      </span>
+                  <Tabs defaultValue="all" className="w-full">
+                    <div className="flex items-center justify-between mb-3 px-1">
+                      <div className="flex items-center gap-2">
+                         <Bell className="h-4 w-4 text-gray-400" />
+                         <span className="text-xs font-bold text-gray-600 uppercase tracking-wider">Notificaciones</span>
+                      </div>
+                      {unreadCount > 0 && (
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <Button 
+                              variant="ghost" 
+                              size="icon" 
+                              className="h-6 w-6 hover:bg-blue-50 hover:text-blue-600"
+                              onClick={() => markAllAsRead()}
+                            >
+                              <CheckCheck className="h-3.5 w-3.5" />
+                            </Button>
+                          </TooltipTrigger>
+                          <TooltipContent>Marcar todas como leídas</TooltipContent>
+                        </Tooltip>
+                      )}
                     </div>
-                    {unreadCount > 0 && (
-                      <Badge className="text-[10px] font-bold bg-blue-100 text-blue-700 hover:bg-blue-100 border-0">
-                        {unreadCount} nuevas
-                      </Badge>
-                    )}
-                  </div>
 
-                  <ScrollArea className="h-44">
-                    <div className="space-y-1.5 pr-2">
-                      {mockNotifications.slice(0, 4).map((notification) => {
-                        const Icon = getNotificationIcon(notification.type);
-                        return (
-                          <div
-                            key={notification.id}
-                            className={`p-2 rounded-lg border ${
-                              notification.read
-                                ? "bg-gray-50 border-gray-100"
-                                : "bg-blue-50/50 border-blue-100"
-                            }`}
-                          >
-                            <div className="flex items-start gap-2">
-                              <div
-                                className={`p-1.5 rounded shrink-0 ${getNotificationColor(
-                                  notification.type
-                                )}`}
-                              >
-                                <Icon className="h-3 w-3" />
-                              </div>
-                              <div className="flex-1 min-w-0">
-                                <p className="text-[10px] font-medium text-gray-900 line-clamp-2">
-                                  {notification.title}
-                                </p>
-                                <p className="text-[9px] text-gray-500 mt-0.5">
-                                  {notification.time}
-                                </p>
-                              </div>
+                    <TabsList className="w-full h-9 p-1 bg-gray-100/50 mb-2">
+                      <TabsTrigger value="all" className="flex-1 text-xs h-7">Todas</TabsTrigger>
+                      <TabsTrigger value="unread" className="flex-1 text-xs h-7">
+                        No leídas
+                        {unreadCount > 0 && (
+                           <span className="ml-1.5 flex h-4 w-4 items-center justify-center rounded-full bg-blue-100 text-[9px] font-bold text-blue-600">
+                             {unreadCount}
+                           </span>
+                        )}
+                      </TabsTrigger>
+                    </TabsList>
+
+                    <TabsContent value="all" className="mt-0">
+                      <ScrollArea className="h-48 pr-3">
+                        <div className="space-y-2">
+                          {notifications.length > 0 ? (
+                            notifications.map((notification) => {
+                              const Icon = getNotificationIcon(notification.type);
+                              return (
+                                <div
+                                  key={notification.id}
+                                  className={`group p-2.5 rounded-lg border transition-all hover:bg-gray-50/80 ${
+                                    notification.isRead
+                                      ? "bg-white border-gray-100 opacity-60 hover:opacity-100"
+                                      : "bg-blue-50/30 border-blue-100"
+                                  }`}
+                                >
+                                  <div className="flex items-start gap-3">
+                                    <div
+                                      className={`p-1.5 rounded-md shrink-0 ${getNotificationColor(
+                                        notification.type
+                                      )}`}
+                                    >
+                                      <Icon className="h-3.5 w-3.5" />
+                                    </div>
+                                    <div className="flex-1 min-w-0">
+                                      <div className="flex items-start justify-between gap-2 mb-0.5">
+                                        <p className={`text-[11px] leading-tight ${!notification.isRead ? "font-semibold text-gray-900" : "font-medium text-gray-700"}`}>
+                                          {notification.title}
+                                        </p>
+                                        {!notification.isRead && (
+                                          <Button 
+                                            variant="ghost" 
+                                            size="icon" 
+                                            className="h-4 w-4 -mt-1 -mr-1 text-gray-400 opacity-0 group-hover:opacity-100 hover:text-blue-600 transition-opacity"
+                                            onClick={(e) => {
+                                              e.stopPropagation();
+                                              markAsRead(notification.id);
+                                            }}
+                                          >
+                                            <Check className="h-3 w-3" />
+                                          </Button>
+                                        )}
+                                      </div>
+                                      <p className="text-[10px] text-gray-500 line-clamp-2 leading-relaxed">
+                                        {notification.message}
+                                      </p>
+                                      <p className="text-[9px] text-gray-400 mt-1.5">
+                                        {formatTime(notification.timestamp)}
+                                      </p>
+                                    </div>
+                                  </div>
+                                </div>
+                              );
+                            })
+                          ) : (
+                            <div className="flex flex-col items-center justify-center h-40 text-gray-400">
+                              <Bell className="h-8 w-8 mb-2 opacity-20" />
+                              <p className="text-xs">Sin notificaciones</p>
                             </div>
-                          </div>
-                        );
-                      })}
-                    </div>
-                  </ScrollArea>
+                          )}
+                        </div>
+                      </ScrollArea>
+                    </TabsContent>
+
+                    <TabsContent value="unread" className="mt-0">
+                      <ScrollArea className="h-48 pr-3">
+                        <div className="space-y-2">
+                          {notifications.some(n => !n.isRead) ? (
+                            notifications
+                              .filter(n => !n.isRead)
+                              .map((notification) => {
+                                const Icon = getNotificationIcon(notification.type);
+                                return (
+                                  <div
+                                  key={notification.id}
+                                  className="group p-2.5 rounded-lg border bg-blue-50/30 border-blue-100 transition-all hover:bg-gray-50/80"
+                                >
+                                  <div className="flex items-start gap-3">
+                                    <div
+                                      className={`p-1.5 rounded-md shrink-0 ${getNotificationColor(
+                                        notification.type
+                                      )}`}
+                                    >
+                                      <Icon className="h-3.5 w-3.5" />
+                                    </div>
+                                    <div className="flex-1 min-w-0">
+                                      <div className="flex items-start justify-between gap-2 mb-0.5">
+                                        <p className="text-[11px] leading-tight font-semibold text-gray-900">
+                                          {notification.title}
+                                        </p>
+                                        <Button 
+                                            variant="ghost" 
+                                            size="icon" 
+                                            className="h-4 w-4 -mt-1 -mr-1 text-gray-400 opacity-0 group-hover:opacity-100 hover:text-blue-600 transition-opacity"
+                                            onClick={(e) => {
+                                              e.stopPropagation();
+                                              markAsRead(notification.id);
+                                            }}
+                                          >
+                                            <Check className="h-3 w-3" />
+                                        </Button>
+                                      </div>
+                                      <p className="text-[10px] text-gray-500 line-clamp-2 leading-relaxed">
+                                        {notification.message}
+                                      </p>
+                                      <p className="text-[9px] text-gray-400 mt-1.5">
+                                        {formatTime(notification.timestamp)}
+                                      </p>
+                                    </div>
+                                  </div>
+                                </div>
+                                );
+                              })
+                          ) : (
+                            <div className="flex flex-col items-center justify-center h-40 text-gray-400">
+                              <CheckCheck className="h-8 w-8 mb-2 opacity-20" />
+                              <p className="text-xs">Todo leído</p>
+                            </div>
+                          )}
+                        </div>
+                      </ScrollArea>
+                    </TabsContent>
+                  </Tabs>
                 </div>
 
                 <Separator className="my-2" />

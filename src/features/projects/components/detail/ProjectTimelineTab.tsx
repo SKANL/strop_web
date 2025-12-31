@@ -1,20 +1,28 @@
-// components/dashboard/projects/detail/ProjectTimelineTab.tsx - Tab de ruta crítica con vista Gantt (Recharts)
-"use client";
-
-import { useMemo } from "react";
+import { useState, useMemo } from "react";
+import { toast } from "sonner";
 import { 
   FileSpreadsheet,
   TrendingUp,
   Calendar,
   CheckCircle2,
   Clock,
-  AlertCircle
+  AlertCircle,
+  Upload
 } from "lucide-react";
 import { Bar, BarChart, XAxis, YAxis, CartesianGrid, Cell, LabelList } from "recharts";
 import type { CriticalPathItem, CriticalPathStatus } from "@/lib/mock/types";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import {
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "@/components/ui/sheet";
+import { FileUpload } from "@/components/ui/file-upload";
 import {
   ChartContainer,
   ChartTooltip,
@@ -57,6 +65,36 @@ const statusColors: Record<CriticalPathStatus, { completed: string; remaining: s
 };
 
 export function ProjectTimelineTab({ items }: ProjectTimelineTabProps) {
+  const [isImportOpen, setIsImportOpen] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(0);
+
+  const handleFileSelect = async (file: File) => {
+    setIsUploading(true);
+    setUploadProgress(0);
+
+    // Simular carga
+    const interval = setInterval(() => {
+      setUploadProgress(prev => {
+        if (prev >= 100) {
+          clearInterval(interval);
+          return 100;
+        }
+        return prev + 10;
+      });
+    }, 200);
+
+    // Simular fin de proceso
+    setTimeout(() => {
+      clearInterval(interval);
+      setIsUploading(false);
+      setIsImportOpen(false);
+      toast.success("Programa de obra importado", {
+        description: `Se han procesado 45 actividades del archivo ${file.name}`
+      });
+    }, 2500);
+  };
+
   // Estadísticas
   const stats = useMemo(() => {
     const total = items.length;
@@ -202,13 +240,34 @@ export function ProjectTimelineTab({ items }: ProjectTimelineTabProps) {
                 </div>
               </div>
 
-              <Button 
-                variant="outline" 
-                className="rounded-xl gap-2 border-slate-200 hover:bg-slate-50"
-              >
-                <FileSpreadsheet className="h-4 w-4 text-emerald-600" />
-                Importar .xlsx
-              </Button>
+              <Sheet open={isImportOpen} onOpenChange={setIsImportOpen}>
+                <SheetTrigger asChild>
+                  <Button 
+                    variant="outline" 
+                    className="rounded-xl gap-2 border-slate-200 hover:bg-slate-50"
+                  >
+                    <FileSpreadsheet className="h-4 w-4 text-emerald-600" />
+                    Importar .xlsx
+                  </Button>
+                </SheetTrigger>
+                <SheetContent className="sm:max-w-md">
+                  <SheetHeader>
+                    <SheetTitle>Importar Ruta Crítica</SheetTitle>
+                    <SheetDescription>
+                      Sube tu archivo Excel o CSV con el programa de obra.
+                      Asegúrate de incluir columnas: Actividad, Fecha Inicio, Fecha Fin.
+                    </SheetDescription>
+                  </SheetHeader>
+                  <div className="mt-8">
+                    <FileUpload 
+                      accept=".xlsx,.csv"
+                      onFileSelect={handleFileSelect}
+                      isUploading={isUploading}
+                      uploadProgress={uploadProgress}
+                    />
+                  </div>
+                </SheetContent>
+              </Sheet>
             </div>
           </div>
         </CardHeader>

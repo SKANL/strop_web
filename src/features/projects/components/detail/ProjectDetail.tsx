@@ -1,7 +1,7 @@
 // components/dashboard/projects/detail/ProjectDetail.tsx - Componente principal de detalle
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { 
   ArrowLeft, 
@@ -56,6 +56,9 @@ import { ProjectOverview } from "./ProjectOverview";
 import { ProjectMembersTab } from "./ProjectMembersTab";
 import { ProjectTimelineTab } from "./ProjectTimelineTab";
 import { ProjectIncidentsTab } from "./ProjectIncidentsTab";
+import { ProjectMaterialsTab } from "./ProjectMaterialsTab";
+import { mockMaterials } from "@/lib/mock/materials";
+import { Package } from "lucide-react";
 
 interface ProjectDetailProps {
   project: ProjectWithStats;
@@ -90,6 +93,16 @@ export function ProjectDetail({
 }: ProjectDetailProps) {
   const [activeTab, setActiveTab] = useState("overview");
   const config = statusConfig[project.status];
+
+  // Calcular stats de materiales (simulación client-side)
+  const materialsWithStats: import('@/lib/mock/types').MaterialWithStats[] = useMemo(() => {
+    return mockMaterials.map(m => ({
+      ...m,
+      availableQuantity: m.plannedQuantity - m.requestedQuantity,
+      deviationPercentage: ((m.requestedQuantity - m.plannedQuantity) / m.plannedQuantity) * 100,
+      hasDeviation: m.requestedQuantity > m.plannedQuantity
+    }));
+  }, []);
 
   const formatDate = (dateStr: string) => {
     return new Date(dateStr).toLocaleDateString("es-MX", {
@@ -302,6 +315,13 @@ export function ProjectDetail({
                 Ruta Crítica
               </TabsTrigger>
               <TabsTrigger 
+                value="materials" 
+                className="h-full rounded-xl text-sm font-medium text-gray-600 data-[state=active]:bg-gray-900 data-[state=active]:text-white data-[state=active]:shadow-lg transition-all duration-200 flex items-center justify-center gap-2"
+              >
+                <Package className="h-4 w-4" />
+                Insumos
+              </TabsTrigger>
+              <TabsTrigger 
                 value="incidents" 
                 className="h-full rounded-xl text-sm font-medium text-gray-600 data-[state=active]:bg-blue-600 data-[state=active]:text-white data-[state=active]:shadow-lg transition-all duration-200 flex items-center justify-center gap-2"
               >
@@ -333,6 +353,10 @@ export function ProjectDetail({
                 
                 <TabsContent value="timeline" className="mt-0">
                   <ProjectTimelineTab items={criticalPath} />
+                </TabsContent>
+
+                <TabsContent value="materials" className="mt-0">
+                  <ProjectMaterialsTab materials={materialsWithStats} />
                 </TabsContent>
                 
                 <TabsContent value="incidents" className="mt-0">
