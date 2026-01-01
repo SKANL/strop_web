@@ -11,6 +11,7 @@ import {
   Users,
   AlertTriangle,
   ClipboardCheck,
+  BookOpen,
   X,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -37,6 +38,7 @@ const navItems: NavItem[] = [
   { id: "proyectos", label: "Proyectos", icon: FolderKanban, href: "/dashboard/proyectos" },
   { id: "usuarios", label: "Usuarios", icon: Users, href: "/dashboard/usuarios" },
   { id: "incidencias", label: "Incidencias", icon: AlertTriangle, href: "/dashboard/incidencias", badge: 3 },
+  { id: "bitacora", label: "Bitácora", icon: BookOpen, href: "/dashboard/bitacora" },
   { id: "auditoria", label: "Auditoría", icon: ClipboardCheck, href: "/dashboard/auditoria" },
 ];
 
