@@ -30,19 +30,18 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
-import { FileUpload } from "@/components/ui/file-upload";
+import { ExcelImportFlow } from "../import/ExcelImportFlow";
 
 import type { MaterialWithStats } from "@/lib/mock/types";
 
 interface ProjectMaterialsTabProps {
   materials: MaterialWithStats[];
+  projectId?: string;
 }
 
-export function ProjectMaterialsTab({ materials }: ProjectMaterialsTabProps) {
+export function ProjectMaterialsTab({ materials, projectId = "mock-project-id" }: ProjectMaterialsTabProps) {
   const [searchTerm, setSearchTerm] = useState("");
   const [isImportOpen, setIsImportOpen] = useState(false);
-  const [isUploading, setIsUploading] = useState(false);
-  const [uploadProgress, setUploadProgress] = useState(0);
 
   const filteredMaterials = useMemo(() => {
     return materials.filter(m => 
@@ -59,30 +58,14 @@ export function ProjectMaterialsTab({ materials }: ProjectMaterialsTabProps) {
     return { total, withDeviation, totalPlanned, totalRequested };
   }, [materials]);
 
-  const handleFileSelect = async (file: File) => {
-    setIsUploading(true);
-    setUploadProgress(0);
-
-    // Simular carga
-    const interval = setInterval(() => {
-      setUploadProgress(prev => {
-        if (prev >= 100) {
-          clearInterval(interval);
-          return 100;
-        }
-        return prev + 10;
-      });
-    }, 200);
-
-    // Simular fin de proceso
-    setTimeout(() => {
-      clearInterval(interval);
-      setIsUploading(false);
-      setIsImportOpen(false);
-      toast.success("Explosión de insumos importada", {
-        description: `Se han actualizado ${materials.length + 5} materiales desde ${file.name}`
-      });
-    }, 2500);
+  // Handle successful import
+  const handleImportSuccess = (data: Record<string, unknown>[]) => {
+    console.log("Imported materials:", data);
+    // TODO: In real implementation, this would update the materials via a store or refetch
+    setIsImportOpen(false);
+    toast.success("Materiales importados", {
+      description: `Se importaron ${data.length} materiales exitosamente`,
+    });
   };
 
   return (
@@ -163,23 +146,23 @@ export function ProjectMaterialsTab({ materials }: ProjectMaterialsTabProps) {
                   <span className="hidden sm:inline">Importar</span>
                 </Button>
               </SheetTrigger>
-              <SheetContent className="sm:max-w-md">
-                <SheetHeader>
-                  <SheetTitle>Importar Explosión de Insumos</SheetTitle>
-                  <SheetDescription>
-                    Sube tu archivo para actualizar el inventario planeado.
-                    Formatos soportados: .xlsx, .csv
-                  </SheetDescription>
-                </SheetHeader>
-                <div className="mt-8">
-                  <FileUpload 
-                    accept=".xlsx,.csv"
-                    onFileSelect={handleFileSelect}
-                    isUploading={isUploading}
-                    uploadProgress={uploadProgress}
-                  />
-                </div>
-              </SheetContent>
+              <SheetContent className="sm:max-w-2xl w-full" side="right">
+                  <SheetHeader className="mb-4">
+                    <SheetTitle>Importar Explosión de Insumos</SheetTitle>
+                    <SheetDescription>
+                      Importa tu catálogo de materiales desde Excel (.xlsx) o CSV.
+                      El sistema detectará automáticamente las columnas compatible.
+                    </SheetDescription>
+                  </SheetHeader>
+                  <div className="h-[calc(100vh-180px)]">
+                    <ExcelImportFlow
+                      type="materials"
+                      projectId={projectId}
+                      onSuccess={handleImportSuccess}
+                      onCancel={() => setIsImportOpen(false)}
+                    />
+                  </div>
+                </SheetContent>
             </Sheet>
           </div>
         </CardHeader>

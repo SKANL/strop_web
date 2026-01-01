@@ -7,7 +7,7 @@
 
 import { useState } from "react";
 import { useStore } from "@nanostores/react";
-import { motion } from "framer-motion";
+import { motion } from "motion/react";
 import {
   Table,
   TableHeader,
@@ -103,7 +103,8 @@ export function AuditLogTable({ initialLogs }: AuditLogTableProps) {
                 animate={{ opacity: 1 }}
                 transition={{ delay: index * 0.02 }}
                 whileHover={{
-                  backgroundColor: "hsl(var(--accent))",
+                  // Use concrete color instead of CSS variable for Motion animation
+                  backgroundColor: "rgba(0, 0, 0, 0.04)",
                 }}
                 onClick={() => handleRowClick(log.id)}
                 className="cursor-pointer"

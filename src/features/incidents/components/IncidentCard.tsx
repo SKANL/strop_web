@@ -80,7 +80,7 @@ export function IncidentCard({ incident, onClick }: IncidentCardProps) {
       className="cursor-pointer"
       onClick={onClick}
     >
-      <Card className="hover:border-primary/50 transition-colors">
+      <Card className="border-border/50">
         <CardContent className="p-4">
           {/* Header: Tipo + Badges */}
           <div className="flex items-start justify-between gap-2 mb-3">

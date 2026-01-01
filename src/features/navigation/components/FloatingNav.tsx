@@ -1,6 +1,7 @@
 // islands/FloatingNav.tsx - Navegación flotante con client:idle (shadcn optimized)
 "use client";
 
+import { useState, useEffect } from "react";
 import { useStore } from "@nanostores/react";
 import { isSidebarCollapsed, toggleSidebar } from "@/store/ui";
 import { motion, AnimatePresence } from "motion/react";
@@ -44,9 +45,17 @@ interface FloatingNavProps {
 }
 
 export function FloatingNav({ currentPath = "/dashboard" }: FloatingNavProps) {
+  // Client-side hydration flag to prevent mismatch
+  const [mounted, setMounted] = useState(false);
+  
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+  
   // Global state: collapsed = true -> isOpen = false
   const $isSidebarCollapsed = useStore(isSidebarCollapsed);
-  const isOpen = !$isSidebarCollapsed;
+  // Always render collapsed on SSR to match client initial state
+  const isOpen = mounted ? !$isSidebarCollapsed : false;
 
   const activeItem = navItems.find(item => 
     currentPath === item.href || 

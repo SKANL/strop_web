@@ -7,7 +7,6 @@ import {
   CheckCircle2,
   Clock,
   AlertCircle,
-  Upload
 } from "lucide-react";
 import { Bar, BarChart, XAxis, YAxis, CartesianGrid, Cell, LabelList } from "recharts";
 import type { CriticalPathItem, CriticalPathStatus } from "@/lib/mock/types";
@@ -22,18 +21,17 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
-import { FileUpload } from "@/components/ui/file-upload";
 import {
   ChartContainer,
   ChartTooltip,
   ChartTooltipContent,
-  ChartLegend,
-  ChartLegendContent,
   type ChartConfig,
 } from "@/components/ui/chart";
+import { ExcelImportFlow } from "../import/ExcelImportFlow";
 
 interface ProjectTimelineTabProps {
   items: CriticalPathItem[];
+  projectId?: string;
 }
 
 // Configuración del chart para shadcn
@@ -64,35 +62,17 @@ const statusColors: Record<CriticalPathStatus, { completed: string; remaining: s
   },
 };
 
-export function ProjectTimelineTab({ items }: ProjectTimelineTabProps) {
+export function ProjectTimelineTab({ items, projectId = "mock-project-id" }: ProjectTimelineTabProps) {
   const [isImportOpen, setIsImportOpen] = useState(false);
-  const [isUploading, setIsUploading] = useState(false);
-  const [uploadProgress, setUploadProgress] = useState(0);
 
-  const handleFileSelect = async (file: File) => {
-    setIsUploading(true);
-    setUploadProgress(0);
-
-    // Simular carga
-    const interval = setInterval(() => {
-      setUploadProgress(prev => {
-        if (prev >= 100) {
-          clearInterval(interval);
-          return 100;
-        }
-        return prev + 10;
-      });
-    }, 200);
-
-    // Simular fin de proceso
-    setTimeout(() => {
-      clearInterval(interval);
-      setIsUploading(false);
-      setIsImportOpen(false);
-      toast.success("Programa de obra importado", {
-        description: `Se han procesado 45 actividades del archivo ${file.name}`
-      });
-    }, 2500);
+  // Handle successful import
+  const handleImportSuccess = (data: Record<string, unknown>[]) => {
+    console.log("Imported data:", data);
+    // TODO: In real implementation, this would update the items via a store or refetch
+    setIsImportOpen(false);
+    toast.success("Ruta Crítica importada", {
+      description: `Se importaron ${data.length} actividades exitosamente`,
+    });
   };
 
   // Estadísticas
@@ -250,20 +230,20 @@ export function ProjectTimelineTab({ items }: ProjectTimelineTabProps) {
                     Importar .xlsx
                   </Button>
                 </SheetTrigger>
-                <SheetContent className="sm:max-w-md">
-                  <SheetHeader>
+                <SheetContent className="sm:max-w-2xl w-full" side="right">
+                  <SheetHeader className="mb-4">
                     <SheetTitle>Importar Ruta Crítica</SheetTitle>
                     <SheetDescription>
-                      Sube tu archivo Excel o CSV con el programa de obra.
-                      Asegúrate de incluir columnas: Actividad, Fecha Inicio, Fecha Fin.
+                      Importa tu programa de obra desde Excel (.xlsx) o CSV.
+                      El sistema detectará automáticamente las columnas compatibles.
                     </SheetDescription>
                   </SheetHeader>
-                  <div className="mt-8">
-                    <FileUpload 
-                      accept=".xlsx,.csv"
-                      onFileSelect={handleFileSelect}
-                      isUploading={isUploading}
-                      uploadProgress={uploadProgress}
+                  <div className="h-[calc(100vh-180px)]">
+                    <ExcelImportFlow
+                      type="critical_path"
+                      projectId={projectId}
+                      onSuccess={handleImportSuccess}
+                      onCancel={() => setIsImportOpen(false)}
                     />
                   </div>
                 </SheetContent>

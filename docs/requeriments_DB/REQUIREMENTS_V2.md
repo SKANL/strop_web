@@ -18,17 +18,19 @@
 
 **Funcionalidades del QUÉ (según SRS):**
 
-| ID | Función | QUÉ hace (no cómo) |
-|:---|:--------|:-------------------|
-| RF-A01 | Crear Proyectos | Dar de alta nuevas obras con nombre, ubicación, fechas |
-| RF-A02 | Asignar Usuarios | Vincular personal a proyectos con roles (S, R, C) |
-| RF-A03 | Cargar Ruta Crítica | Importar programa de obra (.xlsx/.csv) como línea base inalterable |
-| RF-C03 | Dashboard Ejecutivo | Ver KPIs consolidados de todos los proyectos en tiempo real |
-| RF-B06 | Búsqueda/Filtrado | Consultar historial de incidencias con múltiples filtros |
-| RF-C04 | Bitácora Digital | Ver historial inmutable y cronológico de cada incidencia |
-| - | Gestión de Usuarios | Crear, editar, activar/desactivar usuarios del sistema |
-| - | Ver Auditoría | Consultar logs de todas las acciones críticas |
-| - | Alertas Críticas | Recibir notificaciones de incidencias CRITICAL y desviaciones de material |
+| ID       | Función                   | QUÉ hace (no cómo)                                                                                                                                                                                               |
+| :------- | :------------------------ | :--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| RF-A01   | Crear Proyectos           | Dar de alta nuevas obras con nombre, ubicación, fechas                                                                                                                                                           |
+| RF-A02   | Asignar Usuarios          | Vincular personal a proyectos con roles (S, R, C)                                                                                                                                                                |
+| RF-A03   | Cargar Ruta Crítica       | Importar programa de obra (.xlsx/.csv) con mapeo inteligente de columnas. Soporta formatos Opus, Neodata, Project. Permite guardar plantillas de mapeo para reutilizar. Línea base inalterable post-importación. |
+| RF-A03.1 | Plantillas de Importación | Guardar configuraciones de mapeo columna-Excel → campo-BD para reutilizar en futuras importaciones del mismo formato.                                                                                            |
+| RF-C03   | Dashboard Ejecutivo       | Ver KPIs consolidados de todos los proyectos en tiempo real                                                                                                                                                      |
+| RF-B02   | Alertas Urgentes          | Mostrar tab de notificaciones CRÍTICAS y desviaciones de material separado de notificaciones normales                                                                                                            |
+| RF-B05.1 | Indicador de Desviación   | Mostrar badge visual "Desviación" en materiales donde cantidad_solicitada > cantidad_planeada. Notificar automáticamente a D/A y Superintendente.                                                                |
+| RF-B06   | Búsqueda/Filtrado         | Consultar historial de incidencias con múltiples filtros                                                                                                                                                         |
+| RF-C04   | Bitácora Digital          | Ver historial inmutable y cronológico de cada incidencia                                                                                                                                                         |
+| -        | Gestión de Usuarios       | Crear, editar, activar/desactivar usuarios del sistema                                                                                                                                                           |
+| -        | Ver Auditoría             | Consultar logs de todas las acciones críticas                                                                                                                                                                    |
 
 **Características técnicas:**
 
@@ -47,16 +49,16 @@
 
 **Funcionalidades del QUÉ (según SRS):**
 
-| ID | Función | QUÉ hace (no cómo) |
-|:---|:--------|:-------------------|
-| RF-B01.1 | Crear Incidencia | Registrar evento con tipo predefinido y descripción |
-| RF-B01.2 | Capturar Fotos | Adjuntar 1-5 fotos con GPS y timestamp sellados |
-| RF-B02 | Escalamiento | Notificar automáticamente al superior jerárquico |
-| RF-B03 | Asignar Responsable | Delegar incidencia a subordinado (solo R, S) |
-| RF-B04 | Cerrar Incidencia | Marcar como resuelta con nota de cierre |
-| RF-B05 | Solicitar Material | Crear solicitud con validación contra explosión de insumos |
-| RF-B06 | Ver Incidencias | Consultar incidencias del proyecto asignado |
-| RNF-C02 | Modo Offline | Trabajar sin conexión, sincronizar al recuperar señal |
+| ID       | Función             | QUÉ hace (no cómo)                                         |
+| :------- | :------------------ | :--------------------------------------------------------- |
+| RF-B01.1 | Crear Incidencia    | Registrar evento con tipo predefinido y descripción        |
+| RF-B01.2 | Capturar Fotos      | Adjuntar 1-5 fotos con GPS y timestamp sellados            |
+| RF-B02   | Escalamiento        | Notificar automáticamente al superior jerárquico           |
+| RF-B03   | Asignar Responsable | Delegar incidencia a subordinado (solo R, S)               |
+| RF-B04   | Cerrar Incidencia   | Marcar como resuelta con nota de cierre                    |
+| RF-B05   | Solicitar Material  | Crear solicitud con validación contra explosión de insumos |
+| RF-B06   | Ver Incidencias     | Consultar incidencias del proyecto asignado                |
+| RNF-C02  | Modo Offline        | Trabajar sin conexión, sincronizar al recuperar señal      |
 
 **Características técnicas:**
 
@@ -209,63 +211,63 @@ CREATE TABLE organizations (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   -- Por qué: ID único para cada cliente/empresa constructora (tenant isolation)
   -- QUÉ: Separador de datos entre clientes en el SaaS
-  
+
   name VARCHAR(255) UNIQUE NOT NULL,
   -- Por qué: Nombre de la empresa constructora (mostrar en UI, reportes)
   -- Ejemplo: "Constructora ABC", "Grupo Constructor XYZ"
-  
+
   subdomain VARCHAR(100) UNIQUE,
   -- Por qué: URL única por tenant (https://constructora-abc.strop.app)
   -- Para routing multi-tenant eficiente sin exponer IDs
-  
+
   slug VARCHAR(100) UNIQUE NOT NULL,
   -- Por qué: Identificador legible para URLs y APIs (ej: "constructora-abc")
-  
+
   logo_url VARCHAR(500),
   -- Por qué: Branding del tenant - logo de la empresa para mostrar en UI
   -- Almacenado en Supabase Storage, referenciado por URL
-  
+
   billing_email VARCHAR(255),
   -- Por qué: Email para facturas/cobros (puede ser diferente al Owner)
   -- Ejemplo: contabilidad@constructora.com vs owner@constructora.com
-  
+
   created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
   -- Por qué: Auditoría - cuándo se registró el cliente (con timezone para clientes globales)
-  
+
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
   -- Por qué: Auditoría - cuándo se actualizó datos de la empresa
-  
+
   -- Límites de cuota (para modelo de precios SaaS)
   storage_quota_mb INT DEFAULT 5000,
   -- Por qué: Límite de almacenamiento de fotos/documentos por tenant
   -- Ejemplo: plan básico 5GB, plan pro 50GB (previene costos descontrolados)
   -- NOTA: El uso actual se obtiene vía Supabase Storage API (no duplicar dato)
-  
+
   max_users INT DEFAULT 50,
   -- Por qué: Límite máximo de usuarios por tier de suscripción
-  
+
   max_projects INT DEFAULT 100,
   -- Por qué: Límite máximo de proyectos simultáneos
-  
+
   plan ENUM('STARTER', 'PROFESSIONAL', 'ENTERPRISE') DEFAULT 'STARTER',
   -- Por qué: Tier de suscripción (define features, cuota, límites)
-  
+
   trial_ends_at TIMESTAMP WITH TIME ZONE,
   -- Por qué: Fecha de expiración del periodo de prueba gratis
   -- NULL = no está en trial (ya pagó o trial expirado)
-  
+
   is_active BOOLEAN DEFAULT TRUE,
   -- Por qué: Deshabilitar organización (suspension por falta de pago)
-  
+
   deleted_at TIMESTAMP WITH TIME ZONE,
   -- Por qué: Soft delete - retención de datos históricos post-cancelación (compliance)
-  
+
   CONSTRAINT check_storage_quota CHECK (storage_quota_mb > 0),
   -- Por qué: Validación - cuota debe ser positiva
-  
+
   CONSTRAINT check_max_users CHECK (max_users > 0),
   -- Por qué: Validación - al menos 1 usuario
-  
+
   CONSTRAINT check_billing_email_format CHECK (billing_email IS NULL OR billing_email ~ '^[A-Za-z0-9._%+\-]+@[A-Za-z0-9.\-]+\.[A-Z|a-z]{2,}$')
   -- Por qué: Validación - si hay billing_email, debe ser formato válido
 );
@@ -283,12 +285,14 @@ CREATE INDEX idx_organizations_trial ON organizations(trial_ends_at) WHERE trial
 
 **POR QUÉ:** En un SaaS multi-tenant, los datos deben estar segregados por cliente. Cada fila es una "compañía" independiente
 
-**QUÉ HACE:** 
+**QUÉ HACE:**
+
 - Define límites de cuota (almacenamiento, usuarios, proyectos)
 - Segmenta todos los datos de usuarios, proyectos e incidencias por tenant
 - Habilita model SaaS con múltiples clientes compartiendo infraestructura
 
 **CÓMO lo hace:**
+
 - Cada tabla tendrá `organization_id` que referencia a esta tabla
 - RLS policies filtran automáticamente por `organization_id` del usuario logueado
 - URLs incluyen subdomain para routing automático (no expone IDs)
@@ -303,61 +307,61 @@ CREATE TABLE users (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   -- Por qué: Identificador único global, no es secuencial (seguridad)
   -- NOTA: Este ID debe coincidir con auth.users.id de Supabase Auth
-  
+
   organization_id UUID NOT NULL REFERENCES organizations(id) ON DELETE CASCADE,
   -- Por qué: CRÍTICO para SaaS - vincula usuario a empresa (multi-tenant isolation)
   -- Permite que Juan sea Owner en empresa A y Cabo en empresa B
-  
+
   email VARCHAR(255) NOT NULL,
   -- Por qué: Email para identificación (credenciales manejadas por Supabase Auth)
   -- NOTA: La autenticación real está en auth.users, esto es solo referencia
-  
+
   full_name VARCHAR(255) NOT NULL,
   -- Por qué: Nombre completo para mostrar en UI y auditoría (identidad visual)
-  
+
   role ENUM('OWNER', 'SUPERINTENDENT', 'RESIDENT', 'CABO') NOT NULL,
   -- Por qué: Define nivel de acceso y permisos DENTRO de su organización (RBAC local)
-  
+
   is_active BOOLEAN DEFAULT TRUE,
   -- Por qué: Deshabilitar usuario sin eliminar historial (soft delete lógico)
   -- Ejemplo: empleado sale del equipo pero historial permanece
-  
+
   phone VARCHAR(20),
   -- Por qué: Contacto para notificaciones críticas (Post-MVP: SMS, llamadas)
-  
+
   profile_picture_url VARCHAR(500),
   -- Por qué: Avatar/foto de perfil para identificación visual en la app
-  
+
   timezone VARCHAR(50) DEFAULT 'America/Mexico_City',
   -- Por qué: Zona horaria del usuario para mostrar fechas localizadas
   -- Formato IANA (ej: 'America/New_York', 'Europe/Madrid')
-  
+
   language VARCHAR(10) DEFAULT 'es',
   -- Por qué: Preferencia de idioma para i18n (es=español, en=inglés)
   -- MVP: Solo español. Post-MVP: Multi-idioma
-  
+
   invited_by UUID REFERENCES users(id),
   -- Por qué: Auditoría - quién invitó a este usuario al sistema
   -- NULL para el primer Owner de la organización
-  
+
   created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
   -- Por qué: Auditoría - cuándo se registró el usuario (timezone para múltiples zonas)
-  
+
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
   -- Por qué: Auditoría - cuándo se modificó el perfil (email, nombre, teléfono)
-  
+
   deleted_at TIMESTAMP WITH TIME ZONE,
   -- Por qué: Soft delete - marcar desactivado sin perder historial de auditoría
-  
+
   last_login TIMESTAMP WITH TIME ZONE,
   -- Por qué: Monitoreo de actividad - saber si usuario sigue activo
-  
+
   CONSTRAINT check_email_format CHECK (email ~ '^[A-Za-z0-9._%+\-]+@[A-Za-z0-9.\-]+\.[A-Z|a-z]{2,}$'),
   -- Por qué: Validación básica de email (regex estándar)
-  
+
   CONSTRAINT check_language CHECK (language IN ('es', 'en')),
   -- Por qué: Solo idiomas soportados (español e inglés)
-  
+
   UNIQUE(organization_id, email)
   -- Por qué: Email único DENTRO de cada organización (permite duplicados en otros tenants)
 );
@@ -375,13 +379,15 @@ CREATE INDEX idx_users_invited_by ON users(invited_by) WHERE invited_by IS NOT N
 
 **POR QUÉ:** Cada usuario tiene perfil, permisos y auditoría de acciones. En SaaS, un mismo email puede existir en múltiples organizaciones
 
-**QUÉ HACE:** 
+**QUÉ HACE:**
+
 - Define perfil de usuario (nombre, teléfono, foto, preferencias)
 - Asigna roles que determinan permisos dentro de su organización
 - Registra auditoría de actividad (cuándo se creó, cuándo fue visto por última vez)
 - Permite deshabilitar usuarios sin perder historial
 
 **CÓMO lo hace:**
+
 - `organization_id` segmenta usuarios por empresa (Juan puede ser OWNER en A y CABO en B)
 - `UNIQUE(organization_id, email)` permite mismo email en diferentes tenants
 - Índices rápidos para login (email lookup por org) y búsquedas por rol
@@ -394,47 +400,47 @@ CREATE INDEX idx_users_invited_by ON users(invited_by) WHERE invited_by IS NOT N
 CREATE TABLE projects (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   -- Por qué: Identificador único para cada obra
-  
+
   organization_id UUID NOT NULL REFERENCES organizations(id) ON DELETE CASCADE,
   -- Por qué: CRÍTICO para SaaS - vincula proyecto a empresa (separa datos entre tenants)
-  
+
   name VARCHAR(100) NOT NULL,
   -- Por qué: Nombre de la obra (único DENTRO de cada organización, no globalmente)
   -- Permite que empresa A y empresa B tengan proyecto "Edificio A"
-  
+
   location VARCHAR(255) NOT NULL,
   -- Por qué: Dirección/ubicación geográfica de la obra (para mapas, detalles geográficos)
-  
+
   description TEXT,
   -- Por qué: Detalles adicionales de la obra (cliente, contratista, presupuesto, etc.)
-  
+
   start_date DATE NOT NULL,
   -- Por qué: Fecha de inicio planificada (para calcular retrasos vs planeado)
-  
+
   end_date DATE NOT NULL,
   -- Por qué: Fecha de fin planificada (validar: end_date > start_date)
-  
+
   status ENUM('ACTIVE', 'PAUSED', 'COMPLETED') DEFAULT 'ACTIVE',
   -- Por qué: Estado del proyecto (ACTIVE=en progreso, PAUSED=parada, COMPLETED=terminada)
-  
+
   created_by UUID NOT NULL REFERENCES users(id),
   -- Por qué: Auditoría - quién creó el proyecto (trazabilidad de responsables)
-  
+
   owner_id UUID REFERENCES users(id),
   -- Por qué: Usuario responsable del proyecto (Superintendente o Owner)
-  
+
   created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
   -- Por qué: Auditoría - cuándo se creó el proyecto (timezone para múltiples zonas)
-  
+
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
   -- Por qué: Auditoría - cuándo se modificó (nombre, descripción, estado, fechas)
-  
+
   deleted_at TIMESTAMP WITH TIME ZONE,
   -- Por qué: Soft delete - proyectos completados se marcan sin eliminar (compliance)
-  
+
   CONSTRAINT check_dates CHECK (end_date > start_date),
   -- Por qué: Validación - fecha fin DEBE ser posterior a inicio
-  
+
   UNIQUE(organization_id, name)
   -- Por qué: Nombres únicos DENTRO de cada organización (permite duplicados en otros tenants)
 );
@@ -451,12 +457,14 @@ CREATE INDEX idx_projects_org_owner ON projects(organization_id, owner_id);
 
 **POR QUÉ:** Una obra constructora realiza múltiples proyectos simultáneamente. Cada proyecto es una instancia independiente de construcción
 
-**QUÉ HACE:** 
+**QUÉ HACE:**
+
 - Define meta-datos de la obra (ubicación, fechas, estado)
 - Vincula todos los incidentes, usuarios y ruta crítica a su proyecto
 - Permite rastrear progreso y financiero de la obra
 
 **CÓMO lo hace:**
+
 - `organization_id` separa proyectos de diferentes clientes
 - `UNIQUE(organization_id, name)` permite nombres duplicados en diferentes tenants
 - Índices rápidos para queries por organización + estado/fecha
@@ -472,32 +480,32 @@ CREATE INDEX idx_projects_org_owner ON projects(organization_id, owner_id);
 CREATE TABLE project_members (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   -- Por qué: Relación muchos-a-muchos entre proyectos y usuarios
-  
+
   organization_id UUID NOT NULL REFERENCES organizations(id) ON DELETE CASCADE,
   -- Por qué: CRÍTICO para SaaS - vincula asignación a empresa (evita consultas cross-org)
-  
+
   project_id UUID NOT NULL REFERENCES projects(id) ON DELETE CASCADE,
   -- Por qué: ID del proyecto al que se asigna el usuario
-  
+
   user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
   -- Por qué: ID del usuario asignado al proyecto
-  
+
   assigned_role ENUM('SUPERINTENDENT', 'RESIDENT', 'CABO') NOT NULL,
   -- Por qué: Rol específico del usuario DENTRO de este proyecto (puede ser diferente en otros)
   -- Nota: OWNER no va aquí porque OWNER tiene acceso a TODOS los proyectos de su org
-  
+
   assigned_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
   -- Por qué: Auditoría - cuándo se asignó (timezone para múltiples zonas)
-  
+
   assigned_by UUID NOT NULL REFERENCES users(id),
   -- Por qué: Auditoría - quién hizo la asignación (trazabilidad de responsables)
-  
+
   removed_at TIMESTAMP WITH TIME ZONE,
   -- Por qué: Soft delete - marcarlo como removido del proyecto sin eliminar historial
-  
+
   UNIQUE(project_id, user_id),
   -- Por qué: Un usuario no puede estar 2 veces en el mismo proyecto
-  
+
   CONSTRAINT check_org_consistency CHECK (
     -- Validación: user.organization_id DEBE coincidir con project.organization_id
     -- Esto previene asignaciones cross-tenant
@@ -517,12 +525,14 @@ CREATE INDEX idx_project_members_org_project ON project_members(organization_id,
 
 **POR QUÉ:** Un usuario puede tener diferentes roles en diferentes proyectos (Ej: Juan es Superintendente en Proyecto A pero Residente en Proyecto B)
 
-**QUÉ HACE:** 
+**QUÉ HACE:**
+
 - Define quién trabaja en qué proyecto y con qué rol
 - Permite auditoría de quién fue asignado a proyecto y cuándo
 - Soft delete permite rastrear historial sin perder trazabilidad
 
 **CÓMO lo hace:**
+
 - `organization_id` separa asignaciones de diferentes empresas
 - Índices rápidos para: "¿A qué proyectos está asignado Juan?" y "¿Quién trabaja en Proyecto A?"
 - CHECK constraint valida que usuario y proyecto sean del mismo tenant (seguridad)
@@ -533,67 +543,67 @@ CREATE INDEX idx_project_members_org_project ON project_members(organization_id,
 CREATE TABLE incidents (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   -- Por qué: Identificador único para cada incidencia (bitácora digital)
-  
+
   organization_id UUID NOT NULL REFERENCES organizations(id) ON DELETE CASCADE,
   -- Por qué: CRÍTICO para SaaS - vincula incidencia a empresa (multi-tenant isolation)
-  
+
   project_id UUID NOT NULL REFERENCES projects(id) ON DELETE CASCADE,
   -- Por qué: Qué proyecto/obra pertenece esta incidencia (segmentación de datos)
-  
+
   created_by UUID NOT NULL REFERENCES users(id),
   -- Por qué: Quién reportó la incidencia (responsabilidad, auditoría, trazabilidad)
-  
+
   type VARCHAR(100) NOT NULL,
   -- Por qué: Tipo de incidencia (Órdenes, Solicitudes, Certificaciones, Notificaciones, Material)
   -- VARCHAR permite futuras extensiones sin migration (flexible vs ENUM rígido)
-  
+
   description TEXT NOT NULL,
   -- Por qué: Detalles de la incidencia (10-1000 caracteres, RF-B01.1)
-  
+
   priority ENUM('NORMAL', 'CRITICAL') DEFAULT 'NORMAL',
   -- Por qué: Nivel de urgencia (CRITICAL = notificación inmediata al Owner, RF-B02)
-  
+
   status ENUM('OPEN', 'ASSIGNED', 'CLOSED') DEFAULT 'OPEN',
   -- Por qué: Workflow (OPEN→ASSIGNED→CLOSED, lineal, sin retroceso, RF-B04)
-  
+
   assigned_to UUID REFERENCES users(id),
   -- Por qué: Quién es responsable de resolver (NULL = abierta, alguien debe asignarla)
-  
+
   created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
   -- Por qué: Auditoría - marca de tiempo inalterable de creación (servidor, timezone)
-  
+
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
   -- Por qué: Auditoría - cuándo se hicieron cambios (NO para campos inmutables post-cierre)
-  
+
   closed_at TIMESTAMP WITH TIME ZONE,
   -- Por qué: Marca de tiempo cuando se cerró (NULL si aún está abierta)
-  
+
   closed_by UUID REFERENCES users(id),
   -- Por qué: Auditoría - quién cerró la incidencia (trazabilidad de responsables)
-  
+
   location_name VARCHAR(255),
   -- Por qué: Descripción del lugar dentro de la obra ("Piso 3, Zona A, Escalera Sur")
-  
+
   gps_lat DECIMAL(10, 8) NOT NULL,
   -- Por qué: Latitud del GPS al crear (obligatoria, RF-B01.2, previene fraude)
-  
+
   gps_lng DECIMAL(11, 8) NOT NULL,
   -- Por qué: Longitud del GPS al crear (obligatoria, RF-B01.2, previene fraude)
-  
+
   closed_notes TEXT,
   -- Por qué: Nota de cierre obligatoria (RF-B04), explica cómo se resolvió
-  
+
   is_immutable BOOLEAN DEFAULT FALSE,
   -- Por qué: Flag cuando status=CLOSED (trigger bloquea UPDATE, RNF-B02 inalterabilidad)
-  
+
   deleted_at TIMESTAMP WITH TIME ZONE,
   -- Por qué: Soft delete - solo Owner/Admin pueden eliminar (estado OPEN/ASSIGNED)
-  
+
   CONSTRAINT check_description_length CHECK (char_length(description) >= 10 AND char_length(description) <= 1000),
   -- Por qué: Validación - descripción tiene longitud mínima y máxima (SRS)
-  
+
   CONSTRAINT check_closed_notes_required CHECK (
-    (status != 'CLOSED' AND closed_notes IS NULL) OR 
+    (status != 'CLOSED' AND closed_notes IS NULL) OR
     (status = 'CLOSED' AND closed_notes IS NOT NULL AND char_length(closed_notes) > 0)
   )
   -- Por qué: Validación - si cerrada DEBE tener nota (RF-B04)
@@ -618,13 +628,15 @@ CREATE INDEX idx_incidents_org_assigned ON incidents(organization_id, assigned_t
 
 **POR QUÉ:** Necesidad de registro digital inalterable de todos los eventos en obra para compliance, auditoría y resolución de disputas
 
-**QUÉ HACE:** 
+**QUÉ HACE:**
+
 - Captura evento en momento específico con contexto (GPS, fotos, descripción)
 - Registra workflow desde creación hasta cierre (OPEN→ASSIGNED→CLOSED)
 - Garantiza inalterabilidad post-cierre para cumplimiento normativo (RNF-B02)
 - Permite auditoría completa (quién creó, quién cerró, cuándo)
 
 **CÓMO lo hace:**
+
 - `organization_id` separa incidencias de diferentes clientes
 - Índices rápidos por estado/proyecto/fecha (queries de dashboards)
 - Particionamiento por fecha permite escalar a millones sin ralentizar (PARTITION BY RANGE)
@@ -637,37 +649,37 @@ CREATE INDEX idx_incidents_org_assigned ON incidents(organization_id, assigned_t
 CREATE TABLE photos (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   -- Por qué: Identificador único para cada foto (múltiples fotos por incidencia)
-  
+
   organization_id UUID NOT NULL REFERENCES organizations(id) ON DELETE CASCADE,
   -- Por qué: CRÍTICO para SaaS - vincula foto a empresa (multi-tenant isolation)
-  
+
   incident_id UUID NOT NULL REFERENCES incidents(id) ON DELETE CASCADE,
   -- Por qué: Vincula foto a incidencia (relación 1:N, máximo 5 por incidencia)
-  
+
   storage_path VARCHAR(500) NOT NULL,
   -- Por qué: URL en Supabase Storage donde se almacena encriptado (AES-256)
   -- Ejemplo: /organizations/org_id/incidents/incident_id/uuid_timestamp.jpg.encrypted
-  
+
   uploaded_by UUID NOT NULL REFERENCES users(id),
   -- Por qué: Auditoría - quién subió la foto (trazabilidad, responsabilidad)
-  
+
   uploaded_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
   -- Por qué: Marca de tiempo inalterable de cuándo se subió (servidor, timezone)
-  
+
   original_filename VARCHAR(255),
   -- Por qué: Nombre original antes de encriptación (para logging e identificación)
-  
+
   file_size INT,
   -- Por qué: Tamaño en bytes (monitoreo de cuota de Storage, para alertas de límite)
-  
+
   metadata JSONB,
   -- Por qué: Metadatos capturados: {gps_lat, gps_lng, timestamp_device, watermark_verified}
   -- JSONB permite indexing y búsquedas de coordenadas (previene fraude de fotos antiguas)
-  
+
   deleted_at TIMESTAMP WITH TIME ZONE,
   -- Por qué: Soft delete - marcar eliminada pero mantener en auditoria (RNF-B02)
   -- Nota: No se puede eliminar si incidencia está cerrada (trigger)
-  
+
   CONSTRAINT check_file_size CHECK (file_size > 0 AND file_size <= 5242880)
   -- Por qué: Validación - máximo 5MB por foto (5242880 bytes, previene abuso de cuota)
 );
@@ -683,13 +695,15 @@ CREATE INDEX idx_photos_org_uploaded ON photos(organization_id, uploaded_at DESC
 
 **POR QUÉ:** Fotos son prueba visual incontestable de estado de obra. Requieren encriptación y auditoría de almacenamiento
 
-**QUÉ HACE:** 
+**QUÉ HACE:**
+
 - Vincula fotos a incidencias específicas
 - Registra metadatos de captura (GPS, timestamp, watermark)
 - Monitorea uso de almacenamiento por tenant (para cobrar según cuota)
 - Permite auditar quién subió qué foto y cuándo
 
 **CÓMO lo hace:**
+
 - `organization_id` separa fotos de diferentes clientes en Storage
 - Índices rápidos para "¿Todas las fotos de incidencia X?" y "¿Cuánto almacenamiento usó org Y?"
 - Metadata JSONB permite búsquedas por GPS (geoloctalización de evidencia)
@@ -707,35 +721,35 @@ CREATE INDEX idx_photos_org_uploaded ON photos(organization_id, uploaded_at DESC
 CREATE TABLE comments (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   -- Por qué: Identificador único para cada comentario (bitácora de seguimiento)
-  
+
   organization_id UUID NOT NULL REFERENCES organizations(id) ON DELETE CASCADE,
   -- Por qué: CRÍTICO para SaaS - vincula comentario a empresa (multi-tenant isolation)
-  
+
   incident_id UUID NOT NULL REFERENCES incidents(id) ON DELETE CASCADE,
   -- Por qué: Vincula comentario a incidencia (múltiples notas por incidencia)
-  
+
   author_id UUID NOT NULL REFERENCES users(id),
   -- Por qué: Quién escribió el comentario (responsabilidad, auditoría, trazabilidad)
-  
+
   text TEXT NOT NULL,
   -- Por qué: Contenido del comentario (5-500 caracteres, RF-B07)
-  
+
   comment_type ENUM('ASSIGNMENT', 'CLOSURE', 'FOLLOWUP') DEFAULT 'FOLLOWUP',
   -- Por qué: Clasificación (ASSIGNMENT=instrucción, CLOSURE=nota cierre, FOLLOWUP=seguimiento)
   -- FOLLOWUP permite agregar notas a incidencias CLOSED (RNF-B02 inalterabilidad)
-  
+
   created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
   -- Por qué: Auditoría - marca cronológica inalterable (servidor, timezone)
-  
+
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
   -- Por qué: Auditoría - si fue editado por admin (flag is_edited para compliance)
-  
+
   is_edited BOOLEAN DEFAULT FALSE,
   -- Por qué: Flag para detectar comentarios editados (para cumplimiento normativo)
-  
+
   deleted_at TIMESTAMP WITH TIME ZONE,
   -- Por qué: Soft delete - mantener en auditoría aunque se borre (preserva evidencia)
-  
+
   CONSTRAINT check_text_length CHECK (char_length(text) >= 5 AND char_length(text) <= 500)
   -- Por qué: Validación - comentarios muy cortos o muy largos no son útiles para auditoría
 );
@@ -751,13 +765,15 @@ CREATE INDEX idx_comments_org_author ON comments(organization_id, author_id) WHE
 
 **POR QUÉ:** Evidencia textual de decisiones, acuerdos e instrucciones. Permite auditar quién dijo qué y cuándo
 
-**QUÉ HACE:** 
+**QUÉ HACE:**
+
 - Registra comunicación entre usuarios sobre incidencias
 - Permite seguimiento de instrucciones (ASSIGNMENT) y resoluciones (CLOSURE)
 - Permite agregar notas de seguimiento incluso post-cierre (FOLLOWUP)
 - Detecta ediciones administrativas para compliance
 
 **CÓMO lo hace:**
+
 - `organization_id` separa comentarios de diferentes clientes
 - Índices rápidos para "¿Todas las notas de incidencia X?" y "¿Qué comentó usuario Y?"
 - Soft delete preserva evidencia incluso si se elimina accidentalmente
@@ -773,49 +789,49 @@ CREATE INDEX idx_comments_org_author ON comments(organization_id, author_id) WHE
 CREATE TABLE critical_path_items (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   -- Por qué: Identificador único para cada actividad crítica
-  
+
   organization_id UUID NOT NULL REFERENCES organizations(id) ON DELETE CASCADE,
   -- Por qué: CRÍTICO para SaaS - vincula actividad a empresa (multi-tenant isolation)
-  
+
   project_id UUID NOT NULL REFERENCES projects(id) ON DELETE CASCADE,
   -- Por qué: Ruta crítica pertenece a un proyecto (línea base RF-A03)
-  
+
   activity_name VARCHAR(255) NOT NULL,
   -- Por qué: Nombre de la actividad (ej: "Excavación", "Cimentación", "Encofrado")
-  
+
   planned_start DATE NOT NULL,
   -- Por qué: Fecha de inicio planeada (importada de .xlsx, baseline inmutable)
-  
+
   planned_end DATE NOT NULL,
   -- Por qué: Fecha de fin planeada (importada de .xlsx, permite calcular retrasos)
-  
+
   actual_start DATE,
   -- Por qué: Fecha real de inicio (cuándo empezó realmente vs. planeado)
-  
+
   actual_end DATE,
   -- Por qué: Fecha real de fin (para medir desviaciones de cronograma, KPI)
-  
+
   status ENUM('PENDING', 'IN_PROGRESS', 'COMPLETED') DEFAULT 'PENDING',
   -- Por qué: Estado (PENDING=no inicia, IN_PROGRESS=en ejecución, COMPLETED=terminada)
-  
+
   progress_percentage INTEGER DEFAULT 0,
   -- Por qué: Porcentaje avance (0-100, reportado por Residente, RF-B06, KPI del dashboard)
-  
+
   created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
   -- Por qué: Cuándo se importó la ruta crítica (timezone para múltiples zonas)
-  
+
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
   -- Por qué: Cuándo se actualizó el progreso (auditoría de cambios)
-  
+
   updated_by UUID REFERENCES users(id),
   -- Por qué: Auditoría - quién reportó el progreso (trazabilidad)
-  
+
   deleted_at TIMESTAMP WITH TIME ZONE,
   -- Por qué: Soft delete - marcar eliminada sin romper auditoría (compliance)
-  
+
   CONSTRAINT check_dates CHECK (planned_end >= planned_start),
   -- Por qué: Validación - fecha fin DEBE ser >= a inicio (lógica de cronograma)
-  
+
   CONSTRAINT check_progress CHECK (progress_percentage >= 0 AND progress_percentage <= 100)
   -- Por qué: Validación - porcentaje debe estar entre 0 y 100 (lógica de avance)
 );
@@ -831,13 +847,15 @@ CREATE INDEX idx_critical_path_org_status ON critical_path_items(organization_id
 
 **POR QUÉ:** Línea base de obra permite detectar retrasos, desviaciones y calcular KPIs del proyecto (avance físico vs planeado)
 
-**QUÉ HACE:** 
+**QUÉ HACE:**
+
 - Importa cronograma desde archivo Excel (.xlsx) como línea base inalterable
 - Permite reportar progreso real (% avance, fechas actuales) vs planeado
 - Calcula desviaciones para alertas de retrasos
 - Audita quién y cuándo reportó avances
 
 **CÓMO lo hace:**
+
 - `organization_id` separa cronogramas de diferentes clientes
 - Índices rápidos para "¿Todas las actividades de proyecto X?" y "¿Cuáles están retrasadas?"
 - Soft delete permite ver historial sin eliminar datos
@@ -855,41 +873,41 @@ CREATE INDEX idx_critical_path_org_status ON critical_path_items(organization_id
 CREATE TABLE audit_logs (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   -- Por qué: Identificador único para cada evento auditado
-  
+
   organization_id UUID NOT NULL REFERENCES organizations(id) ON DELETE CASCADE,
   -- Por qué: CRÍTICO para SaaS - vincula log a empresa (multi-tenant isolation)
   -- Permite separar auditoría por cliente para reportes y compliance
-  
+
   user_id UUID NOT NULL REFERENCES users(id),
   -- Por qué: Quién realizó la acción (responsabilidad, trazabilidad)
-  
+
   action VARCHAR(100) NOT NULL,
   -- Por qué: Tipo de acción (CREATE_INCIDENT, ASSIGN_INCIDENT, CLOSE_INCIDENT, UPDATE_PROJECT, etc.)
-  
+
   target_id UUID NOT NULL,
   -- Por qué: ID del recurso afectado (incident_id, project_id, user_id, etc.)
-  
+
   target_type VARCHAR(50),
   -- Por qué: Tipo de recurso (INCIDENT, PROJECT, USER, COMMENT, etc.)
-  
+
   changes_summary TEXT,
   -- Por qué: Descripción legible de qué cambió (ej: "Asignado a Juan Pérez")
-  
+
   old_values JSONB,
   -- Por qué: Valores anteriores antes de la acción {field: old_value, ...} (análisis forense)
-  
+
   new_values JSONB,
   -- Por qué: Valores nuevos después de la acción {field: new_value, ...} (análisis forense)
-  
+
   ip_address VARCHAR(45),
   -- Por qué: IP de origen (trazabilidad, detectar acceso no autorizado, fraud detection)
-  
+
   user_agent VARCHAR(500),
   -- Por qué: Browser/Cliente (ej: "Mozilla/5.0... Chrome/120", identifica tipo de cliente)
-  
+
   timestamp TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
   -- Por qué: Marca cronológica inalterable (registrada en servidor, timezone)
-  
+
   is_immutable BOOLEAN DEFAULT TRUE
   -- Por qué: Esta tabla es de SOLO LECTURA (nunca UPDATE/DELETE, RNF-B03)
   -- Nota: No hay deleted_at aquí porque los logs NUNCA se borran
@@ -915,13 +933,15 @@ CREATE INDEX idx_audit_org_target ON audit_logs(organization_id, target_id);
 
 **POR QUÉ:** Compliance legal, auditoría forense, y protección contra manipulación de evidencia. Imposible de modificar post-creación
 
-**QUÉ HACE:** 
+**QUÉ HACE:**
+
 - Registra TODA acción que afecte datos críticos (crear, asignar, cerrar incidencias, cambiar usuarios)
 - Captura valores antes/después para análisis forense (quién cambió qué y cómo)
 - Registra contexto técnico (IP, navegador) para detectar acceso fraudulento
 - Particiona por fecha para escalar a millones sin ralentizar
 
 **CÓMO lo hace:**
+
 - `organization_id` separa auditoría de diferentes clientes (reportes por tenant)
 - Tabla particionada permite archivar logs antiguos sin eliminar
 - Índices rápidos para \"\u00bfQué hizo usuario X en período Y?\" y \"¿Quién modificó recurso Z?\"
@@ -1003,17 +1023,17 @@ incident-photos/
     └── {project_id}/
         └── {incident_id}/
             └── {uuid}_{timestamp}.{ext}
-            
+
 profile-pictures/
 └── {user_id}/
     └── avatar.{ext}
-    
+
 organization-assets/
 └── {organization_id}/
     ├── logo.{ext}
     └── documents/
         └── {filename}.{ext}
-        
+
 critical-path-imports/
 └── {organization_id}/
     └── {project_id}/
@@ -1109,12 +1129,14 @@ CREATE POLICY "critical_path_insert" ON storage.objects
 
 **POR QUÉ:** Separar archivos por tenant, controlar acceso, prevenir abuso de cuota
 
-**QUÉ HACE:** 
+**QUÉ HACE:**
+
 - Define 4 buckets con propósitos específicos (fotos, avatares, logos, imports)
 - Establece límites de tamaño y tipos MIME permitidos
 - Implementa RLS policies para control de acceso granular
 
 **CÓMO lo hace:**
+
 - Buckets privados por defecto (excepto avatares)
 - Estructura de carpetas incluye organization_id para aislamiento
 - Policies extraen org_id del path y validan pertenencia del usuario
@@ -1189,13 +1211,13 @@ BEGIN
        OLD.created_at IS DISTINCT FROM NEW.created_at THEN
       RAISE EXCEPTION 'No se puede modificar una incidencia cerrada. Campos inmutables: type, description, priority, gps, created_by, created_at';
     END IF;
-    
+
     -- Bloquear reapertura (CLOSED → otro estado)
     IF NEW.status != 'CLOSED' THEN
       RAISE EXCEPTION 'No se puede reabrir una incidencia cerrada. Cree una nueva incidencia vinculada.';
     END IF;
   END IF;
-  
+
   RETURN NEW;
 END;
 $$ LANGUAGE plpgsql;
@@ -1237,11 +1259,11 @@ BEGIN
   SELECT COUNT(*) INTO photo_count
   FROM photos
   WHERE incident_id = NEW.incident_id AND deleted_at IS NULL;
-  
+
   IF photo_count >= 5 THEN
     RAISE EXCEPTION 'Máximo 5 fotos por incidencia. Ya hay % fotos.', photo_count;
   END IF;
-  
+
   RETURN NEW;
 END;
 $$ LANGUAGE plpgsql;
@@ -1269,9 +1291,9 @@ BEGIN
   ELSIF TG_OP = 'DELETE' THEN
     action_type = 'DELETE_' || UPPER(TG_TABLE_NAME);
   END IF;
-  
+
   target_type = UPPER(TG_TABLE_NAME);
-  
+
   -- Insertar en audit_logs
   IF TG_OP = 'DELETE' THEN
     INSERT INTO audit_logs (organization_id, user_id, action, target_id, target_type, old_values, timestamp)
@@ -1340,7 +1362,8 @@ CREATE TRIGGER protect_audit_logs_delete
 
 **POR QUÉ:** Garantizar consistencia sin depender de la aplicación (defense in depth)
 
-**QUÉ HACE:** 
+**QUÉ HACE:**
+
 - Actualiza `updated_at` automáticamente en cada modificación
 - Bloquea modificaciones a incidencias cerradas (RNF-B02)
 - Limita a 5 fotos por incidencia
@@ -1348,6 +1371,7 @@ CREATE TRIGGER protect_audit_logs_delete
 - Protege audit_logs de modificación/eliminación
 
 **CÓMO lo hace:**
+
 - Funciones PL/pgSQL ejecutadas en eventos BEFORE/AFTER
 - SECURITY DEFINER para audit logs (ejecuta con permisos elevados)
 - Validaciones con RAISE EXCEPTION para bloquear operaciones inválidas
@@ -1387,7 +1411,7 @@ ALTER PUBLICATION supabase_realtime ADD TABLE critical_path_items;
 // Ejemplo de suscripción desde Web Admin (Astro + React)
 // Archivo: src/lib/realtime/subscriptions.ts
 
-import { supabase } from '@/lib/supabase/client';
+import { supabase } from "@/lib/supabase/client";
 
 // Suscripción a incidencias de un proyecto específico
 export function subscribeToProjectIncidents(
@@ -1399,22 +1423,22 @@ export function subscribeToProjectIncidents(
   return supabase
     .channel(`incidents:project:${projectId}`)
     .on(
-      'postgres_changes',
+      "postgres_changes",
       {
-        event: 'INSERT',
-        schema: 'public',
-        table: 'incidents',
-        filter: `project_id=eq.${projectId}`
+        event: "INSERT",
+        schema: "public",
+        table: "incidents",
+        filter: `project_id=eq.${projectId}`,
       },
       (payload) => onInsert(payload.new as Incident)
     )
     .on(
-      'postgres_changes',
+      "postgres_changes",
       {
-        event: 'UPDATE',
-        schema: 'public',
-        table: 'incidents',
-        filter: `project_id=eq.${projectId}`
+        event: "UPDATE",
+        schema: "public",
+        table: "incidents",
+        filter: `project_id=eq.${projectId}`,
       },
       (payload) => onUpdate(payload.new as Incident)
     )
@@ -1429,12 +1453,12 @@ export function subscribeToCriticalIncidents(
   return supabase
     .channel(`incidents:critical:${organizationId}`)
     .on(
-      'postgres_changes',
+      "postgres_changes",
       {
-        event: 'INSERT',
-        schema: 'public',
-        table: 'incidents',
-        filter: `organization_id=eq.${organizationId},priority=eq.CRITICAL`
+        event: "INSERT",
+        schema: "public",
+        table: "incidents",
+        filter: `organization_id=eq.${organizationId},priority=eq.CRITICAL`,
       },
       (payload) => onCritical(payload.new as Incident)
     )
@@ -1449,12 +1473,12 @@ export function subscribeToCriticalPathProgress(
   return supabase
     .channel(`critical_path:${projectId}`)
     .on(
-      'postgres_changes',
+      "postgres_changes",
       {
-        event: 'UPDATE',
-        schema: 'public',
-        table: 'critical_path_items',
-        filter: `project_id=eq.${projectId}`
+        event: "UPDATE",
+        schema: "public",
+        table: "critical_path_items",
+        filter: `project_id=eq.${projectId}`,
       },
       (payload) => onProgress(payload.new as CriticalPathItem)
     )
@@ -1464,22 +1488,27 @@ export function subscribeToCriticalPathProgress(
 
 ### Casos de Uso de Realtime
 
-| Pantalla | Suscripción | Evento | Acción en UI |
-|:---------|:------------|:-------|:-------------|
-| **Dashboard Ejecutivo** | `incidents` por org | INSERT | Incrementar contador, mostrar alerta si CRITICAL |
-| **Dashboard Ejecutivo** | `incidents` por org | UPDATE (status) | Actualizar KPIs (abiertos, cerrados) |
-| **Lista de Incidencias** | `incidents` por proyecto | INSERT/UPDATE | Actualizar lista automáticamente |
-| **Detalle Incidencia** | `comments` por incident_id | INSERT | Mostrar nuevo comentario sin refresh |
-| **Ruta Crítica** | `critical_path_items` | UPDATE | Actualizar barra de progreso |
-| **Alertas Owner** | `incidents` con priority=CRITICAL | INSERT | Toast notification + sonido |
+| Pantalla                 | Suscripción                       | Evento          | Acción en UI                                     |
+| :----------------------- | :-------------------------------- | :-------------- | :----------------------------------------------- |
+| **Dashboard Ejecutivo**  | `incidents` por org               | INSERT          | Incrementar contador, mostrar alerta si CRITICAL |
+| **Dashboard Ejecutivo**  | `incidents` por org               | UPDATE (status) | Actualizar KPIs (abiertos, cerrados)             |
+| **Lista de Incidencias** | `incidents` por proyecto          | INSERT/UPDATE   | Actualizar lista automáticamente                 |
+| **Detalle Incidencia**   | `comments` por incident_id        | INSERT          | Mostrar nuevo comentario sin refresh             |
+| **Ruta Crítica**         | `critical_path_items`             | UPDATE          | Actualizar barra de progreso                     |
+| **Alertas Owner**        | `incidents` con priority=CRITICAL | INSERT          | Toast notification + sonido                      |
 
 ### Consideraciones de Performance
 
 ```typescript
 // IMPORTANTE: Desuscribirse al desmontar componentes
 useEffect(() => {
-  const subscription = subscribeToProjectIncidents(projectId, orgId, onInsert, onUpdate);
-  
+  const subscription = subscribeToProjectIncidents(
+    projectId,
+    orgId,
+    onInsert,
+    onUpdate
+  );
+
   return () => {
     subscription.unsubscribe();
   };
@@ -1496,12 +1525,14 @@ useEffect(() => {
 
 **POR QUÉ:** UX mejorada - dashboard refleja cambios sin refresh manual
 
-**QUÉ HACE:** 
+**QUÉ HACE:**
+
 - Habilita publicación en tablas críticas (incidents, comments, projects, critical_path)
 - Define patrones de suscripción por proyecto/organización
 - Maneja alertas de incidencias CRITICAL en tiempo real
 
 **CÓMO lo hace:**
+
 - PostgreSQL publications + Supabase Realtime channels
 - Filtrado por project_id/organization_id (no cargar todos los datos)
 - RLS policies aplican automáticamente (solo ves cambios autorizados)
@@ -1513,60 +1544,60 @@ useEffect(() => {
 
 ### ✅ MULTI-TENANT ISOLATION
 
-| Cambio | Antes | Después | Impacto |
-|:-------|:------|:--------|:--------|
-| **Tabla ORGANIZATIONS** | ❌ NO EXISTE | ✅ Nueva | Raíz de multi-tenant, segmenta clientes |
-| **organization_id** | ❌ AUSENTE | ✅ EN TODAS | Separa datos entre empresas |
-| **RLS Policies** | ⚠️ Incompletas | ✅ Multi-tenant | Validar org_id en cada query |
-| **Email único** | ❌ GLOBAL | ✅ POR TENANT | Juan@email.com en múltiples orgs |
-| **Nombres únicos** | ❌ GLOBAL | ✅ POR TENANT | 2 orgs pueden tener Proyecto A |
+| Cambio                  | Antes          | Después         | Impacto                                 |
+| :---------------------- | :------------- | :-------------- | :-------------------------------------- |
+| **Tabla ORGANIZATIONS** | ❌ NO EXISTE   | ✅ Nueva        | Raíz de multi-tenant, segmenta clientes |
+| **organization_id**     | ❌ AUSENTE     | ✅ EN TODAS     | Separa datos entre empresas             |
+| **RLS Policies**        | ⚠️ Incompletas | ✅ Multi-tenant | Validar org_id en cada query            |
+| **Email único**         | ❌ GLOBAL      | ✅ POR TENANT   | Juan@email.com en múltiples orgs        |
+| **Nombres únicos**      | ❌ GLOBAL      | ✅ POR TENANT   | 2 orgs pueden tener Proyecto A          |
 
 ### ✅ TIMEZONE SUPPORT (Usuarios globales)
 
-| Cambio | Antes | Después |
-|:-------|:------|:--------|
-| `created_at` | `TIMESTAMP` | `TIMESTAMP WITH TIME ZONE` |
-| `updated_at` | `TIMESTAMP` | `TIMESTAMP WITH TIME ZONE` |
-| `deleted_at` | `TIMESTAMP` | `TIMESTAMP WITH TIME ZONE` |
-| Beneficio | Sin zona horaria | Soporta usuarios en múltiples países |
+| Cambio       | Antes            | Después                              |
+| :----------- | :--------------- | :----------------------------------- |
+| `created_at` | `TIMESTAMP`      | `TIMESTAMP WITH TIME ZONE`           |
+| `updated_at` | `TIMESTAMP`      | `TIMESTAMP WITH TIME ZONE`           |
+| `deleted_at` | `TIMESTAMP`      | `TIMESTAMP WITH TIME ZONE`           |
+| Beneficio    | Sin zona horaria | Soporta usuarios en múltiples países |
 
 ### ✅ ÍNDICES DE PERFORMANCE
 
-| Tabla | Índices Agregados | Propósito |
-|:------|:------------------|:----------|
-| **users** | `(org_id, email)` | Login rápido |
-| **projects** | `(org_id, status, created_at)` | Dashboards rápidos |
-| **incidents** | `(org_id, status, created_at DESC)` | Queries de reportes |
-| **comments** | `(org_id, incident_id)` | Cargar notas de incidencia |
-| **photos** | `(org_id, incident_id)` | Cargar fotos de incidencia |
-| **critical_path** | `(org_id, project_id, status)` | Ruta crítica del dashboard |
-| **audit_logs** | `(org_id, timestamp DESC, action)` | Compliance queries rápidas |
+| Tabla             | Índices Agregados                   | Propósito                  |
+| :---------------- | :---------------------------------- | :------------------------- |
+| **users**         | `(org_id, email)`                   | Login rápido               |
+| **projects**      | `(org_id, status, created_at)`      | Dashboards rápidos         |
+| **incidents**     | `(org_id, status, created_at DESC)` | Queries de reportes        |
+| **comments**      | `(org_id, incident_id)`             | Cargar notas de incidencia |
+| **photos**        | `(org_id, incident_id)`             | Cargar fotos de incidencia |
+| **critical_path** | `(org_id, project_id, status)`      | Ruta crítica del dashboard |
+| **audit_logs**    | `(org_id, timestamp DESC, action)`  | Compliance queries rápidas |
 
 ### ✅ ESCALABILIDAD PREPARADA (Sin over-engineering)
 
-| Aspecto | Implementado Ahora | Preparado para Futuro |
-|:--------|:-------------------|:----------------------|
-| **Particionamiento** | ❌ No (YAGNI) | ✅ Comentarios con instrucciones cuando >1M registros |
-| **Archivado** | ❌ No | ✅ Documentado cómo hacerlo con Supabase Storage |
-| **Cuotas Storage** | ✅ Límite definido | ✅ Uso calculado via Supabase Storage API |
+| Aspecto              | Implementado Ahora | Preparado para Futuro                                 |
+| :------------------- | :----------------- | :---------------------------------------------------- |
+| **Particionamiento** | ❌ No (YAGNI)      | ✅ Comentarios con instrucciones cuando >1M registros |
+| **Archivado**        | ❌ No              | ✅ Documentado cómo hacerlo con Supabase Storage      |
+| **Cuotas Storage**   | ✅ Límite definido | ✅ Uso calculado via Supabase Storage API             |
 
 ### ✅ SUPABASE INFRASTRUCTURE
 
-| Componente | Estado | Descripción |
-|:-----------|:-------|:------------|
-| **Storage Buckets** | ✅ Definido | 4 buckets (incident-photos, profile-pictures, organization-assets, critical-path-imports) |
-| **Storage Policies** | ✅ RLS | Acceso controlado por organization_id y rol |
-| **Triggers** | ✅ Definidos | updated_at automático, inmutabilidad, max 5 fotos, audit log |
-| **Realtime** | ✅ Configurado | Suscripciones a incidents, comments, projects, critical_path |
+| Componente           | Estado         | Descripción                                                                               |
+| :------------------- | :------------- | :---------------------------------------------------------------------------------------- |
+| **Storage Buckets**  | ✅ Definido    | 4 buckets (incident-photos, profile-pictures, organization-assets, critical-path-imports) |
+| **Storage Policies** | ✅ RLS         | Acceso controlado por organization_id y rol                                               |
+| **Triggers**         | ✅ Definidos   | updated_at automático, inmutabilidad, max 5 fotos, audit log                              |
+| **Realtime**         | ✅ Configurado | Suscripciones a incidents, comments, projects, critical_path                              |
 
 ### ✅ LÍMITES DE CUOTA POR TENANT
 
-| Límite | Propósito | Ejemplos de Tiers |
-|:-------|:----------|:------------------|
-| `storage_quota_mb` | Cobrar por almacenamiento | Starter: 5GB, Pro: 50GB, Enterprise: 500GB |
-| `max_users` | Cobrar por cantidad de usuarios | Starter: 50, Pro: 200, Enterprise: Ilimitado |
-| `max_projects` | Cobrar por cantidad de obras | Starter: 5, Pro: 50, Enterprise: Ilimitado |
-| `plan` | Nivel de suscripción | STARTER, PROFESSIONAL, ENTERPRISE |
+| Límite             | Propósito                       | Ejemplos de Tiers                            |
+| :----------------- | :------------------------------ | :------------------------------------------- |
+| `storage_quota_mb` | Cobrar por almacenamiento       | Starter: 5GB, Pro: 50GB, Enterprise: 500GB   |
+| `max_users`        | Cobrar por cantidad de usuarios | Starter: 50, Pro: 200, Enterprise: Ilimitado |
+| `max_projects`     | Cobrar por cantidad de obras    | Starter: 5, Pro: 50, Enterprise: Ilimitado   |
+| `plan`             | Nivel de suscripción            | STARTER, PROFESSIONAL, ENTERPRISE            |
 
 ### ✅ AUDITORÍA FORENSE POR TENANT
 
@@ -1637,15 +1668,15 @@ useEffect(() => {
 
 **INALTERABILIDAD POST-CIERRE:**
 
-| Acción | Permitido | Razón |
-|--------|-----------|-------|
-| Editar descripción original | ❌ | Rompe auditoría |
-| Editar tipo/prioridad | ❌ | Rompe auditoría |
-| Editar assigned_to | ❌ | Rompe auditoría |
-| Agregar comentario (FOLLOWUP) | ✅ | Permitido para notas de seguimiento |
-| Agregar foto (en comentario) | ✅ | Permitido como parte de seguimiento |
-| Cambiar estado CLOSED → OPEN | ❌ | Crear nueva incidencia vinculada en su lugar |
-| Ver detalles | ✅ | Solo lectura |
+| Acción                        | Permitido | Razón                                        |
+| ----------------------------- | --------- | -------------------------------------------- |
+| Editar descripción original   | ❌        | Rompe auditoría                              |
+| Editar tipo/prioridad         | ❌        | Rompe auditoría                              |
+| Editar assigned_to            | ❌        | Rompe auditoría                              |
+| Agregar comentario (FOLLOWUP) | ✅        | Permitido para notas de seguimiento          |
+| Agregar foto (en comentario)  | ✅        | Permitido como parte de seguimiento          |
+| Cambiar estado CLOSED → OPEN  | ❌        | Crear nueva incidencia vinculada en su lugar |
+| Ver detalles                  | ✅        | Solo lectura                                 |
 
 **Implementación:**
 
@@ -1840,6 +1871,7 @@ OPEN → ASSIGNED → CLOSED
 **4 Roles jerárquicos:**
 
 1. **OWNER/ADMIN (D/A)** - Dueño del sistema
+
    - Acceso total
    - Crea proyectos
    - Define plantillas
@@ -1848,6 +1880,7 @@ OPEN → ASSIGNED → CLOSED
    - Notificado de incidents CRITICAL
 
 2. **SUPERINTENDENT (S)** - Jefe de obra
+
    - Gestiona múltiples proyectos
    - Revisa incidencias
    - Reporta avance físico
@@ -1855,6 +1888,7 @@ OPEN → ASSIGNED → CLOSED
    - Ve incidencias de sus obras
 
 3. **RESIDENT (R)** - Residente de obra
+
    - Registra incidencias
    - Reporta avance
    - Notifica necesidades
@@ -1869,27 +1903,27 @@ OPEN → ASSIGNED → CLOSED
 
 ### 5.3 - Matriz de Permisos (RBAC Completa)
 
-| ACCIÓN | OWNER | SUPER | RESIDENT | CABO | Plataforma |
-|:---|:---:|:---:|:---:|:---:|:---:|
-| Crear incidencia | ✅ | ✅ | ✅ | ✅ | Móvil/Admin |
-| Editar incidencia* | ✅ | ✅ | ✅ | ❌ | Móvil/Admin |
-| Asignar responsable | ✅ | ✅ | ✅ | ❌ | Móvil/Admin |
-| Cerrar incidencia | ✅ | ✅ | ✅ | ❌ | Móvil/Admin |
-| Ver todas (global) | ✅ | ✅** | ❌ | ❌ | Admin |
-| Ver solo su obra | - | ✅** | ✅ | ✅ | Móvil/Admin |
-| Reportar avance | ✅ | ✅ | ✅ | ❌ | Móvil/Admin |
-| Cargar Ruta Crítica | ✅ | ❌ | ❌ | ❌ | Admin |
-| Ver Ruta Crítica (RO) | ✅ | ✅ | ✅ | ✅ | Móvil/Admin |
-| Agregar comentario | ✅ | ✅ | ✅ | ✅ | Móvil/Admin |
-| Subir fotos | ✅ | ✅ | ✅ | ✅ | Móvil |
-| Crear usuario | ✅ | ❌ | ❌ | ❌ | Admin |
-| Ver auditoría | ✅ | ✅ | ❌ | ❌ | Admin |
-| Editar usuario | ✅ | ❌ | ❌ | ❌ | Admin |
-| Activar/desactivar usuario | ✅ | ❌ | ❌ | ❌ | Admin |
+| ACCIÓN                     | OWNER | SUPER  | RESIDENT | CABO | Plataforma  |
+| :------------------------- | :---: | :----: | :------: | :--: | :---------: |
+| Crear incidencia           |  ✅   |   ✅   |    ✅    |  ✅  | Móvil/Admin |
+| Editar incidencia\*        |  ✅   |   ✅   |    ✅    |  ❌  | Móvil/Admin |
+| Asignar responsable        |  ✅   |   ✅   |    ✅    |  ❌  | Móvil/Admin |
+| Cerrar incidencia          |  ✅   |   ✅   |    ✅    |  ❌  | Móvil/Admin |
+| Ver todas (global)         |  ✅   | ✅\*\* |    ❌    |  ❌  |    Admin    |
+| Ver solo su obra           |   -   | ✅\*\* |    ✅    |  ✅  | Móvil/Admin |
+| Reportar avance            |  ✅   |   ✅   |    ✅    |  ❌  | Móvil/Admin |
+| Cargar Ruta Crítica        |  ✅   |   ❌   |    ❌    |  ❌  |    Admin    |
+| Ver Ruta Crítica (RO)      |  ✅   |   ✅   |    ✅    |  ✅  | Móvil/Admin |
+| Agregar comentario         |  ✅   |   ✅   |    ✅    |  ✅  | Móvil/Admin |
+| Subir fotos                |  ✅   |   ✅   |    ✅    |  ✅  |    Móvil    |
+| Crear usuario              |  ✅   |   ❌   |    ❌    |  ❌  |    Admin    |
+| Ver auditoría              |  ✅   |   ✅   |    ❌    |  ❌  |    Admin    |
+| Editar usuario             |  ✅   |   ❌   |    ❌    |  ❌  |    Admin    |
+| Activar/desactivar usuario |  ✅   |   ❌   |    ❌    |  ❌  |    Admin    |
 
-*Editar = agregar comentarios/fotos en status OPEN/ASSIGNED, cambiar assigned_to
+\*Editar = agregar comentarios/fotos en status OPEN/ASSIGNED, cambiar assigned_to
 
-**SUPER ve incidencias de proyectos asignados a él o sus subordinados
+\*\*SUPER ve incidencias de proyectos asignados a él o sus subordinados
 
 ### 5.4 - Row Level Security (RLS) Policies
 
@@ -2123,13 +2157,15 @@ src/
 
 1. **RF-A01:** Crear proyectos
 2. **RF-A02:** Asignar usuarios a proyectos
-3. **RF-A03:** Cargar Ruta Crítica (.xlsx/.csv)
-4. **RF-C03:** Dashboard ejecutivo con KPIs
-5. **RF-B06:** Búsqueda/filtrado de incidencias
-6. **RF-C04:** Ver bitácora digital (solo lectura)
-7. Gestión de usuarios (CRUD)
-8. Ver auditoría del sistema
-9. Recibir alertas de incidencias CRITICAL
+3. **RF-A03:** Cargar Ruta Crítica (.xlsx/.csv) con mapeo inteligente de columnas
+4. **RF-A03.1:** Plantillas de importación (guardar configuraciones de mapeo)
+5. **RF-C03:** Dashboard ejecutivo con KPIs
+6. **RF-B02:** Tab de alertas urgentes (CRITICAL + DEVIATION separados)
+7. **RF-B05.1:** Indicador de desviación en materiales
+8. **RF-B06:** Búsqueda/filtrado de incidencias
+9. **RF-C04:** Ver bitácora digital (solo lectura)
+10. Gestión de usuarios (CRUD)
+11. Ver auditoría del sistema
 
 **API Routes para App Móvil:**
 
@@ -2140,13 +2176,15 @@ src/
 
 ### 🔧 SIGUIENTE PASO
 
-**Para Web Admin (este proyecto):**
+**Para Web Admin (pendiente - Post-MVP):**
 
-1. Crear migrations de Supabase (SQL)
+1. Crear migrations de Supabase (SQL), incluyendo tabla `import_templates`
 2. Generar Zod schemas compartidos
 3. Crear tipos TypeScript
 4. Implementar Astro Actions (Dashboard, Proyectos, Usuarios)
 5. Crear API Routes (para que App Móvil consuma)
+6. Vista dedicada de Bitácora Digital (`/dashboard/bitacora`)
+7. Exportación PDF de bitácora
 
 **Proyecto futuro (App Móvil - Flutter):**
 
@@ -2155,3 +2193,85 @@ src/
 - Push Notifications: FCM (Android) / APNs (iOS)
 - GPS, Cámara, Permisos: Nativos de plataforma
 - Optimización: Compresión de imágenes antes de sincronización
+
+---
+
+## 📎 APÉNDICE A: Nuevas Tablas de Base de Datos
+
+> **Propósito:** Especificación de tablas adicionales identificadas durante la implementación.
+
+### A.1 - Tabla IMPORT_TEMPLATES (Plantillas de importación de Excel)
+
+**Propósito:** Guardar configuraciones de mapeo para reutilizar en futuras importaciones.
+
+**Por qué:** Neodata, Opus, Project tienen formatos diferentes; el usuario no quiere mapear cada vez.
+
+```sql
+CREATE TABLE import_templates (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+
+  organization_id UUID NOT NULL REFERENCES organizations(id) ON DELETE CASCADE,
+  -- Por qué: CRÍTICO para SaaS - plantilla pertenece a empresa específica
+
+  created_by UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  -- Por qué: Auditoría - quién creó la plantilla
+
+  name VARCHAR(255) NOT NULL,
+  -- Por qué: Nombre descriptivo (ej: "Formato Opus 2024", "Neodata Estándar")
+
+  description TEXT,
+  -- Por qué: Notas adicionales sobre cuándo usar esta plantilla
+
+  mapping JSONB NOT NULL,
+  -- Por qué: Configuración de mapeo columna_excel -> campo_db
+  -- Ejemplo: {"db_activity_name": "Concepto", "db_planned_start": "Fecha Inicio", ...}
+
+  source_type VARCHAR(50),
+  -- Por qué: Identificar origen (opus, neodata, project, custom)
+  -- Facilita sugerencias automáticas en futuras importaciones
+
+  target_entity VARCHAR(50) NOT NULL DEFAULT 'critical_path_items',
+  -- Por qué: A qué tabla se importan los datos (critical_path_items, materials, etc.)
+
+  created_at TIMESTAMPTZ DEFAULT now(),
+  updated_at TIMESTAMPTZ DEFAULT now(),
+  deleted_at TIMESTAMPTZ,
+
+  UNIQUE(organization_id, name)
+  -- Por qué: Nombres únicos por organización
+);
+
+-- Índices
+CREATE INDEX idx_import_templates_org ON import_templates(organization_id) WHERE deleted_at IS NULL;
+CREATE INDEX idx_import_templates_source ON import_templates(organization_id, source_type) WHERE deleted_at IS NULL;
+
+-- RLS: Solo miembros de la organización pueden gestionar plantillas
+ALTER TABLE import_templates ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "import_templates_select" ON import_templates
+  FOR SELECT USING (
+    organization_id IN (SELECT organization_id FROM users WHERE id = auth.uid())
+  );
+
+CREATE POLICY "import_templates_insert" ON import_templates
+  FOR INSERT WITH CHECK (
+    organization_id IN (SELECT organization_id FROM users WHERE id = auth.uid())
+  );
+
+CREATE POLICY "import_templates_update" ON import_templates
+  FOR UPDATE USING (
+    organization_id IN (SELECT organization_id FROM users WHERE id = auth.uid())
+  );
+
+CREATE POLICY "import_templates_delete" ON import_templates
+  FOR DELETE USING (
+    created_by = auth.uid() OR
+    auth.uid() IN (SELECT id FROM users WHERE role = 'OWNER' AND organization_id = import_templates.organization_id)
+  );
+```
+
+### A.2 - Nota sobre Storage Buckets para Excel
+
+> **NOTA:** Los archivos Excel se procesan en el cliente (navegador) con la librería `xlsx`.
+> El bucket `critical-path-imports` es opcional para archivado de originales, no necesario para el flujo principal.
+> **Decisión de diseño:** El parsing ocurre en frontend para reducir latencia y costos de servidor.

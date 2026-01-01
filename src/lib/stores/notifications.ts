@@ -1,6 +1,12 @@
 import { atom, computed } from 'nanostores';
 
-export type NotificationType = 'MENTION' | 'PROJECT_UPDATE' | 'SYSTEM' | 'ASSIGNMENT';
+export type NotificationType = 
+  | 'MENTION' 
+  | 'PROJECT_UPDATE' 
+  | 'SYSTEM' 
+  | 'ASSIGNMENT' 
+  | 'CRITICAL' 
+  | 'DEVIATION';
 
 export interface Notification {
   id: string;
@@ -59,13 +65,34 @@ const INITIAL_NOTIFICATIONS: Notification[] = [
     message: 'Bienvenido al sistema de administración de Strop',
     timestamp: new Date(Date.now() - 1000 * 60 * 60 * 48).toISOString(), // 2 days ago
     isRead: true
+  },
+  // Example critical/deviation notifications for demo
+  {
+    id: '5',
+    type: 'CRITICAL',
+    title: '⚠️ Retraso Crítico',
+    message: 'La actividad "Cimentación" en proyecto "Torre Norte" tiene retraso de 5 días',
+    timestamp: new Date(Date.now() - 1000 * 60 * 30).toISOString(), // 30 min ago
+    isRead: false,
+    link: '/projects/p1/timeline',
+    projectId: 'p1'
+  },
+  {
+    id: '6',
+    type: 'DEVIATION',
+    title: '📊 Desviación de Material',
+    message: 'Cemento Portland: Solicitado 1,200 sacos vs Planeado 1,000 sacos (+20%)',
+    timestamp: new Date(Date.now() - 1000 * 60 * 45).toISOString(), // 45 min ago
+    isRead: false,
+    link: '/projects/p1/materials',
+    projectId: 'p1'
   }
 ];
 
 // Atoms
 export const $notifications = atom<Notification[]>(INITIAL_NOTIFICATIONS);
 
-// Computed
+// Computed - All unread
 export const $unreadCount = computed($notifications, notifications => 
   notifications.filter(n => !n.isRead).length
 );
@@ -73,6 +100,15 @@ export const $unreadCount = computed($notifications, notifications =>
 export const $unreadNotifications = computed($notifications, notifications => 
   notifications.filter(n => !n.isRead)
 );
+
+// Computed - Urgent (CRITICAL or DEVIATION type)
+export const $urgentNotifications = computed($notifications, notifications =>
+  notifications.filter(n => 
+    (n.type === 'CRITICAL' || n.type === 'DEVIATION') && !n.isRead
+  )
+);
+
+export const $urgentCount = computed($urgentNotifications, urgent => urgent.length);
 
 // Actions
 export function markAsRead(id: string) {
@@ -105,3 +141,45 @@ export function removeNotification(id: string) {
     $notifications.get().filter(n => n.id !== id)
   );
 }
+
+/**
+ * Add a material deviation alert notification
+ * Called when requestedQuantity > plannedQuantity for any material
+ */
+export function addDeviationAlert(material: {
+  name: string;
+  requestedQuantity: number;
+  plannedQuantity: number;
+  unit: string;
+}, projectId: string, projectName?: string) {
+  const deviationPercent = Math.round(
+    ((material.requestedQuantity - material.plannedQuantity) / material.plannedQuantity) * 100
+  );
+
+  addNotification({
+    type: 'DEVIATION',
+    title: '📊 Desviación de Material Detectada',
+    message: `${material.name}: Solicitado ${material.requestedQuantity.toLocaleString()} ${material.unit} vs Planeado ${material.plannedQuantity.toLocaleString()} ${material.unit} (+${deviationPercent}%)${projectName ? ` en ${projectName}` : ''}`,
+    link: `/projects/${projectId}/materials`,
+    projectId,
+  });
+}
+
+/**
+ * Add a critical incident/delay alert notification
+ */
+export function addCriticalAlert(
+  title: string,
+  message: string,
+  projectId: string,
+  link?: string
+) {
+  addNotification({
+    type: 'CRITICAL',
+    title: `⚠️ ${title}`,
+    message,
+    link: link ?? `/projects/${projectId}`,
+    projectId,
+  });
+}
+

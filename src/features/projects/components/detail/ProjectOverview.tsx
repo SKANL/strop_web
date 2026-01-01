@@ -1,6 +1,7 @@
 // components/dashboard/projects/detail/ProjectOverview.tsx - Tab de resumen del proyecto
 "use client";
 
+import { useState, useEffect } from "react";
 import { motion } from "motion/react";
 import { 
   TrendingUp, 
@@ -33,11 +34,14 @@ const roleLabels = {
 export function ProjectOverview({ project, members, incidents }: ProjectOverviewProps) {
   const formatCurrency = (amount?: number) => {
     if (!amount) return "—";
+    // Use consistent formatting to prevent SSR/client hydration mismatch
+    // Always use 0 fraction digits for compact notation
     return new Intl.NumberFormat("es-MX", {
       style: "currency",
       currency: "MXN",
       notation: "compact",
-      maximumFractionDigits: 1,
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0,
     }).format(amount);
   };
 
@@ -47,10 +51,14 @@ export function ProjectOverview({ project, members, incidents }: ProjectOverview
 
   const recentIncidents = incidents.slice(0, 5);
 
-  // Calcular días restantes
-  const today = new Date();
-  const endDate = new Date(project.endDate);
-  const daysRemaining = Math.ceil((endDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
+  // Calcular días restantes - client-side only to prevent hydration mismatch
+  const [daysRemaining, setDaysRemaining] = useState<number | null>(null);
+  
+  useEffect(() => {
+    const today = new Date();
+    const endDate = new Date(project.endDate);
+    setDaysRemaining(Math.ceil((endDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24)));
+  }, [project.endDate]);
 
   // KPIs con diseño mejorado
   const kpis = [
@@ -156,7 +164,9 @@ export function ProjectOverview({ project, members, incidents }: ProjectOverview
                   <div className="text-right">
                     <div className="flex items-center gap-1 text-sm text-gray-500">
                       <Clock className="h-4 w-4" />
-                      {daysRemaining > 0 ? (
+                      {daysRemaining === null ? (
+                        <span>Calculando...</span>
+                      ) : daysRemaining > 0 ? (
                         <span>{daysRemaining} días restantes</span>
                       ) : (
                         <span className="text-red-500">Vencido</span>

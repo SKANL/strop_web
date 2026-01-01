@@ -84,11 +84,14 @@ export function ProjectCard({
 
   const formatCurrency = (amount?: number) => {
     if (!amount) return "—";
+    // Use consistent formatting to prevent SSR/client hydration mismatch
+    // Always use 0 fraction digits for compact notation
     return new Intl.NumberFormat("es-MX", {
       style: "currency",
       currency: "MXN",
       notation: "compact",
-      maximumFractionDigits: 1,
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0,
     }).format(amount);
   };
 

@@ -13,6 +13,8 @@ import {
   Info,
   Settings,
   X,
+  AlertCircle,
+  TrendingUp,
 } from "lucide-react";
 import {
   mockCurrentUserUI,
@@ -28,7 +30,9 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Check, CheckCheck } from "lucide-react";
 import { 
   $notifications, 
-  $unreadCount, 
+  $unreadCount,
+  $urgentNotifications,
+  $urgentCount,
   markAsRead, 
   markAllAsRead,
   type NotificationType 
@@ -41,13 +45,17 @@ export function RightSidebar() {
   const isExpanded = useStore(isRightSidebarOpen);
   const notifications = useStore($notifications);
   const unreadCount = useStore($unreadCount);
+  const urgentNotifications = useStore($urgentNotifications);
+  const urgentCount = useStore($urgentCount);
   const firstName = mockCurrentUserUI.name.split(" ")[0];
 
   const getNotificationIcon = (type: NotificationType) => {
     switch (type) {
       case 'MENTION': return User;
-      case 'ASSIGNMENT': return Info; // Or a clipboard icon
+      case 'ASSIGNMENT': return Info;
       case 'PROJECT_UPDATE': return Building2;
+      case 'CRITICAL': return AlertCircle;
+      case 'DEVIATION': return TrendingUp;
       case 'SYSTEM': return Info;
       default: return Info;
     }
@@ -58,6 +66,8 @@ export function RightSidebar() {
       case 'MENTION': return "bg-purple-100 text-purple-600";
       case 'ASSIGNMENT': return "bg-blue-100 text-blue-600";
       case 'PROJECT_UPDATE': return "bg-emerald-100 text-emerald-600";
+      case 'CRITICAL': return "bg-red-100 text-red-600";
+      case 'DEVIATION': return "bg-amber-100 text-amber-600";
       default: return "bg-gray-100 text-gray-600";
     }
   };
@@ -217,6 +227,14 @@ export function RightSidebar() {
 
                     <TabsList className="w-full h-9 p-1 bg-gray-100/50 mb-2">
                       <TabsTrigger value="all" className="flex-1 text-xs h-7">Todas</TabsTrigger>
+                      <TabsTrigger value="urgent" className="flex-1 text-xs h-7">
+                        Urgentes
+                        {urgentCount > 0 && (
+                           <span className="ml-1.5 flex h-4 w-4 items-center justify-center rounded-full bg-red-100 text-[9px] font-bold text-red-600 animate-pulse">
+                             {urgentCount}
+                           </span>
+                        )}
+                      </TabsTrigger>
                       <TabsTrigger value="unread" className="flex-1 text-xs h-7">
                         No leídas
                         {unreadCount > 0 && (
@@ -284,6 +302,71 @@ export function RightSidebar() {
                             <div className="flex flex-col items-center justify-center h-40 text-gray-400">
                               <Bell className="h-8 w-8 mb-2 opacity-20" />
                               <p className="text-xs">Sin notificaciones</p>
+                            </div>
+                          )}
+                        </div>
+                      </ScrollArea>
+                    </TabsContent>
+
+                    {/* Urgent Notifications Tab */}
+                    <TabsContent value="urgent" className="mt-0">
+                      <ScrollArea className="h-48 pr-3">
+                        <div className="space-y-2">
+                          {urgentNotifications.length > 0 ? (
+                            urgentNotifications.map((notification) => {
+                              const Icon = getNotificationIcon(notification.type);
+                              const isDeviation = notification.type === 'DEVIATION';
+                              const isCritical = notification.type === 'CRITICAL';
+                              return (
+                                <div
+                                  key={notification.id}
+                                  className={`group p-2.5 rounded-lg border transition-all hover:bg-gray-50/80 ${
+                                    isCritical 
+                                      ? "bg-red-50/50 border-red-200" 
+                                      : "bg-amber-50/50 border-amber-200"
+                                  }`}
+                                >
+                                  <div className="flex items-start gap-3">
+                                    <div
+                                      className={`p-1.5 rounded-md shrink-0 ${getNotificationColor(
+                                        notification.type
+                                      )}`}
+                                    >
+                                      <Icon className="h-3.5 w-3.5" />
+                                    </div>
+                                    <div className="flex-1 min-w-0">
+                                      <div className="flex items-start justify-between gap-2 mb-0.5">
+                                        <p className="text-[11px] leading-tight font-semibold text-gray-900">
+                                          {notification.title}
+                                        </p>
+                                        <Button 
+                                          variant="ghost" 
+                                          size="icon" 
+                                          className="h-4 w-4 -mt-1 -mr-1 text-gray-400 opacity-0 group-hover:opacity-100 hover:text-blue-600 transition-opacity"
+                                          onClick={(e) => {
+                                            e.stopPropagation();
+                                            markAsRead(notification.id);
+                                          }}
+                                        >
+                                          <Check className="h-3 w-3" />
+                                        </Button>
+                                      </div>
+                                      <p className="text-[10px] text-gray-500 line-clamp-2 leading-relaxed">
+                                        {notification.message}
+                                      </p>
+                                      <p className="text-[9px] text-gray-400 mt-1.5">
+                                        {formatTime(notification.timestamp)}
+                                      </p>
+                                    </div>
+                                  </div>
+                                </div>
+                              );
+                            })
+                          ) : (
+                            <div className="flex flex-col items-center justify-center h-40 text-gray-400">
+                              <AlertTriangle className="h-8 w-8 mb-2 opacity-20" />
+                              <p className="text-xs">Sin alertas urgentes</p>
+                              <p className="text-[10px] text-gray-300 mt-1">¡Todo en orden!</p>
                             </div>
                           )}
                         </div>

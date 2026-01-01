@@ -179,8 +179,8 @@ export function IncidentDetail({ incident, open, onClose }: IncidentDetailProps)
                   </TabsTrigger>
                 </TabsList>
 
-                <AnimatePresence mode="wait">
-                  <TabsContent value="info" className="mt-4 space-y-4">
+                {/* Tab Contents - no AnimatePresence needed, Tabs handles visibility */}
+                <TabsContent value="info" className="mt-4 space-y-4">
                     {/* Description */}
                     <motion.div variants={itemVariants}>
                       <h4 className="text-sm font-medium mb-2">Descripción</h4>
@@ -308,7 +308,6 @@ export function IncidentDetail({ incident, open, onClose }: IncidentDetailProps)
                   <TabsContent value="timeline" className="mt-4">
                     <IncidentTimeline incident={incident} comments={comments} />
                   </TabsContent>
-                </AnimatePresence>
               </Tabs>
             </motion.div>
           </ScrollArea>
