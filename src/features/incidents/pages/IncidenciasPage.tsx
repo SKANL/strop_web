@@ -43,8 +43,8 @@ export function IncidenciasPage() {
             transition={{ delay: 0.1 }}
             className="flex items-center gap-3 p-4 rounded-xl bg-card border"
           >
-            <div className="flex size-10 items-center justify-center rounded-lg bg-yellow-500/10">
-              <Clock className="size-5 text-yellow-600" />
+            <div className="flex size-10 items-center justify-center rounded-lg bg-warning/10">
+              <Clock className="size-5 text-warning" />
             </div>
             <div>
               <p className="text-2xl font-semibold">{counts.open}</p>
@@ -58,8 +58,8 @@ export function IncidenciasPage() {
             transition={{ delay: 0.15 }}
             className="flex items-center gap-3 p-4 rounded-xl bg-card border"
           >
-            <div className="flex size-10 items-center justify-center rounded-lg bg-blue-500/10">
-              <UserCheck className="size-5 text-blue-600" />
+            <div className="flex size-10 items-center justify-center rounded-lg bg-info/10">
+              <UserCheck className="size-5 text-info" />
             </div>
             <div>
               <p className="text-2xl font-semibold">{counts.assigned}</p>
@@ -73,8 +73,8 @@ export function IncidenciasPage() {
             transition={{ delay: 0.2 }}
             className="flex items-center gap-3 p-4 rounded-xl bg-card border"
           >
-            <div className="flex size-10 items-center justify-center rounded-lg bg-green-500/10">
-              <CheckCircle2 className="size-5 text-green-600" />
+            <div className="flex size-10 items-center justify-center rounded-lg bg-success/10">
+              <CheckCircle2 className="size-5 text-success" />
             </div>
             <div>
               <p className="text-2xl font-semibold">{counts.closed}</p>
@@ -88,13 +88,13 @@ export function IncidenciasPage() {
             transition={{ delay: 0.25 }}
             className="flex items-center gap-3 p-4 rounded-xl bg-card border"
           >
-            <div className="flex size-10 items-center justify-center rounded-lg bg-red-500/10">
-              <AlertTriangle className="size-5 text-red-600" />
+            <div className="flex size-10 items-center justify-center rounded-lg bg-destructive/10">
+              <AlertTriangle className="size-5 text-destructive" />
             </div>
             <div className="flex items-center gap-2">
               <p className="text-2xl font-semibold">{counts.critical}</p>
               {counts.critical > 0 && (
-                <Badge variant="destructive" className="text-[10px]">
+                <Badge variant="destructive" size="sm">
                   ¡Atención!
                 </Badge>
               )}

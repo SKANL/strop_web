@@ -111,7 +111,7 @@ export function IncidentAssignDialog({
                       <div className="flex items-center gap-2">
                         <Avatar className="size-6">
                           <AvatarImage src={member.userAvatar} />
-                          <AvatarFallback className="text-[10px]">
+                          <AvatarFallback className="text-xs">
                             {getInitials(member.userName)}
                           </AvatarFallback>
                         </Avatar>

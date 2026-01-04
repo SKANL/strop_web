@@ -26,7 +26,7 @@ export function UserStatusIndicator({
   };
 
   const labelSizeClasses = {
-    sm: "text-[10px]",
+    sm: "text-xs",
     default: "text-xs",
     lg: "text-sm",
   };
@@ -40,8 +40,8 @@ export function UserStatusIndicator({
           "rounded-full",
           sizeClasses[size],
           isActive
-            ? "bg-emerald-500 shadow-sm shadow-emerald-500/50"
-            : "bg-gray-400"
+            ? "bg-success shadow-sm shadow-success/50"
+            : "bg-muted-foreground"
         )}
       />
       {showLabel && (
@@ -49,7 +49,7 @@ export function UserStatusIndicator({
           className={cn(
             "font-medium",
             labelSizeClasses[size],
-            isActive ? "text-emerald-700" : "text-gray-500"
+            isActive ? "text-success" : "text-muted-foreground"
           )}
         >
           {isActive ? "Activo" : "Inactivo"}
@@ -74,15 +74,15 @@ export function UserStatusBadge({
       className={cn(
         "inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-xs font-medium",
         isActive
-          ? "bg-emerald-100 text-emerald-700"
-          : "bg-gray-100 text-gray-600",
+          ? "bg-success/10 text-success"
+          : "bg-muted text-muted-foreground",
         className
       )}
     >
       <span
         className={cn(
           "w-1.5 h-1.5 rounded-full",
-          isActive ? "bg-emerald-500" : "bg-gray-400"
+          isActive ? "bg-success" : "bg-muted-foreground"
         )}
       />
       {isActive ? "Activo" : "Inactivo"}

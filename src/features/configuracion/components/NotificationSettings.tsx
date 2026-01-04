@@ -100,10 +100,10 @@ export function NotificationSettings() {
 
       <form onSubmit={handleSubmit} className="space-y-6">
         {/* Alertas Críticas */}
-        <Card className="bg-white/80 backdrop-blur-sm border-gray-100">
+        <Card className="bg-card/80 backdrop-blur-sm border-border">
           <CardHeader>
             <div className="flex items-center gap-2">
-              <AlertTriangle className="h-5 w-5 text-amber-500" />
+              <AlertTriangle className="h-5 w-5 text-warning" />
               <CardTitle>Alertas Críticas</CardTitle>
             </div>
             <CardDescription>
@@ -133,7 +133,7 @@ export function NotificationSettings() {
         </Card>
 
         {/* Actividad de Proyectos */}
-        <Card className="bg-white/80 backdrop-blur-sm border-gray-100">
+        <Card className="bg-card/80 backdrop-blur-sm border-border">
           <CardHeader>
             <div className="flex items-center gap-2">
               <Bell className="h-5 w-5 text-primary" />
@@ -166,7 +166,7 @@ export function NotificationSettings() {
         </Card>
 
         {/* Resúmenes y Email */}
-        <Card className="bg-white/80 backdrop-blur-sm border-gray-100">
+        <Card className="bg-card/80 backdrop-blur-sm border-border">
           <CardHeader>
             <div className="flex items-center gap-2">
               <Mail className="h-5 w-5 text-primary" />

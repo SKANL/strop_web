@@ -131,7 +131,9 @@ export function UserInviteDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-lg max-h-[90vh] overflow-y-auto">
+
+      <DialogContent className="sm:max-w-lg max-h-[90vh] p-0 flex flex-col gap-0">
+        <div className="flex-1 overflow-y-auto custom-scrollbar p-6">
         <DialogHeader>
           <motion.div
             initial={{ opacity: 0, y: -10 }}
@@ -139,8 +141,8 @@ export function UserInviteDialog({
             transition={{ duration: 0.3 }}
           >
             <div className="flex items-center gap-3 mb-2">
-              <div className="p-2 rounded-xl bg-blue-100">
-                <UserPlus className="h-5 w-5 text-blue-600" />
+              <div className="p-2 rounded-xl bg-primary/10">
+                <UserPlus className="h-5 w-5 text-primary" />
               </div>
               <div>
                 <DialogTitle className="text-lg">
@@ -162,7 +164,7 @@ export function UserInviteDialog({
               animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.3, delay: 0.1 }}
             >
-              <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-4">
+              <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-4">
                 Información Personal
               </h3>
 
@@ -175,10 +177,11 @@ export function UserInviteDialog({
                       <FormLabel>Email *</FormLabel>
                       <FormControl>
                         <div className="relative">
-                          <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+                          <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                           <Input
                             placeholder="usuario@empresa.com"
-                            className="h-11 pl-10 rounded-xl"
+                            inputSize="lg"
+                            className="pl-10"
                             {...field}
                           />
                         </div>
@@ -196,10 +199,11 @@ export function UserInviteDialog({
                       <FormLabel>Nombre completo *</FormLabel>
                       <FormControl>
                         <div className="relative">
-                          <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+                          <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                           <Input
                             placeholder="Nombre Apellido Apellido"
-                            className="h-11 pl-10 rounded-xl"
+                            inputSize="lg"
+                            className="pl-10"
                             {...field}
                           />
                         </div>
@@ -217,10 +221,11 @@ export function UserInviteDialog({
                       <FormLabel>Teléfono (opcional)</FormLabel>
                       <FormControl>
                         <div className="relative">
-                          <Phone className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+                          <Phone className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                           <Input
                             placeholder="+52 55 1234 5678"
-                            className="h-11 pl-10 rounded-xl"
+                            inputSize="lg"
+                            className="pl-10"
                             {...field}
                           />
                         </div>
@@ -240,7 +245,7 @@ export function UserInviteDialog({
               animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.3, delay: 0.2 }}
             >
-              <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-4">
+              <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-4">
                 Rol
               </h3>
 
@@ -267,17 +272,17 @@ export function UserInviteDialog({
                                 className={cn(
                                   "flex items-center gap-3 p-3 rounded-xl border cursor-pointer transition-all",
                                   field.value === role
-                                    ? "border-blue-500 bg-blue-50/50 shadow-sm"
-                                    : "border-gray-200 hover:border-gray-300 hover:bg-gray-50/50"
+                                    ? "border-primary bg-primary/5 shadow-sm"
+                                    : "border-border hover:border-border/80 hover:bg-muted/50"
                                 )}
                               >
                                 <RadioGroupItem value={role} id={role} />
                                 <span className="text-xl">{roleIcons[role]}</span>
                                 <div className="flex-1">
-                                  <p className="font-medium text-gray-900">
+                                  <p className="font-medium text-foreground">
                                     {roleLabels[role]}
                                   </p>
-                                  <p className="text-xs text-gray-500">
+                                  <p className="text-xs text-muted-foreground">
                                     {roleDescriptions[role]}
                                   </p>
                                 </div>
@@ -301,7 +306,7 @@ export function UserInviteDialog({
               animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.3, delay: 0.3 }}
             >
-              <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-4">
+              <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-4">
                 Proyectos Asignados
               </h3>
 
@@ -325,8 +330,8 @@ export function UserInviteDialog({
                             className={cn(
                               "flex items-center gap-3 p-3 rounded-xl border cursor-pointer transition-all",
                               field.value?.includes(project.id)
-                                ? "border-emerald-500 bg-emerald-50/50"
-                                : "border-gray-200 hover:border-gray-300 hover:bg-gray-50/50"
+                                ? "border-success bg-success/5"
+                                : "border-border hover:border-border/80 hover:bg-muted/50"
                             )}
                           >
                             <Checkbox
@@ -343,10 +348,10 @@ export function UserInviteDialog({
                               }}
                             />
                             <div className="flex-1">
-                              <p className="font-medium text-gray-900">
+                              <p className="font-medium text-foreground">
                                 {project.name}
                               </p>
-                              <p className="text-xs text-gray-500">
+                              <p className="text-xs text-muted-foreground">
                                 {project.location}
                               </p>
                             </div>
@@ -354,8 +359,8 @@ export function UserInviteDialog({
                               className={cn(
                                 "w-2 h-2 rounded-full",
                                 project.status === "ACTIVE"
-                                  ? "bg-emerald-500"
-                                  : "bg-amber-500"
+                                  ? "bg-success"
+                                  : "bg-warning"
                               )}
                             />
                           </Label>
@@ -374,14 +379,16 @@ export function UserInviteDialog({
                   type="button"
                   variant="outline"
                   onClick={() => onOpenChange(false)}
-                  className="flex-1 h-11 rounded-xl"
+                  size="lg"
+                  className="flex-1"
                   disabled={isSubmitting}
                 >
                   Cancelar
                 </Button>
                 <Button
                   type="submit"
-                  className="flex-1 h-11 rounded-xl bg-blue-600 hover:bg-blue-700"
+                  size="lg"
+                  className="flex-1 bg-primary hover:bg-primary/90"
                   disabled={isSubmitting || submitStatus === "success"}
                 >
                   <AnimatePresence mode="wait">
@@ -423,6 +430,7 @@ export function UserInviteDialog({
             </DialogFooter>
           </form>
         </Form>
+        </div>
       </DialogContent>
     </Dialog>
   );

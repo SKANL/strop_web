@@ -38,7 +38,7 @@ export function SettingsCard({
         className={cn(
           "group cursor-pointer transition-all duration-200",
           "hover:shadow-md hover:border-primary/20",
-          "bg-white/80 backdrop-blur-sm",
+          "bg-card/80 backdrop-blur-sm",
           className
         )}
       >
@@ -51,7 +51,7 @@ export function SettingsCard({
 
             {/* Contenido */}
             <div className="flex-1 min-w-0">
-              <h3 className="font-semibold text-gray-900 group-hover:text-primary transition-colors">
+              <h3 className="font-semibold text-foreground group-hover:text-primary transition-colors">
                 {title}
               </h3>
               <p className="text-sm text-muted-foreground mt-0.5 line-clamp-2">

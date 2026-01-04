@@ -102,12 +102,12 @@ export function ProjectsPage({ projects }: ProjectsPageProps) {
         className="flex flex-col sm:flex-row sm:items-center justify-between gap-4"
       >
         <div className="flex items-center gap-3">
-          <div className="p-3 rounded-2xl bg-linear-to-br from-blue-500 to-blue-600 shadow-lg shadow-blue-500/25">
-            <FolderKanban className="h-6 w-6 text-white" />
+          <div className="p-3 rounded-2xl bg-primary shadow-lg shadow-primary/25">
+            <FolderKanban className="h-6 w-6 text-primary-foreground" />
           </div>
           <div>
-            <h1 className="text-2xl font-bold text-gray-900">Proyectos</h1>
-            <p className="text-sm text-gray-500">
+            <h1 className="text-2xl font-bold text-foreground">Proyectos</h1>
+            <p className="text-sm text-muted-foreground">
               Gestiona tus obras de construcción
             </p>
           </div>
@@ -115,7 +115,8 @@ export function ProjectsPage({ projects }: ProjectsPageProps) {
 
         <Button 
           onClick={handleCreate}
-          className="h-11 px-6 rounded-xl bg-blue-600 hover:bg-blue-700 shadow-lg shadow-blue-500/25 transition-all hover:shadow-xl hover:shadow-blue-500/30"
+          size="lg"
+          className="shadow-lg shadow-primary/25 transition-all hover:shadow-xl hover:shadow-primary/30"
         >
           <Plus className="h-4 w-4 mr-2" />
           Nuevo Proyecto

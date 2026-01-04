@@ -97,10 +97,19 @@ export function FileUpload({
               onDragLeave={() => setIsDragging(false)}
               onDrop={handleDrop}
               className={cn(
-                "border-2 border-dashed transition-all cursor-pointer hover:bg-muted/50 flex flex-col items-center justify-center py-10 px-6 text-center gap-4",
+                "border-2 border-dashed transition-all cursor-pointer hover:bg-muted/50 flex flex-col items-center justify-center py-10 px-6 text-center gap-4 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 outline-none",
                 isDragging ? "border-primary bg-primary/5" : "border-muted-foreground/25"
               )}
               onClick={() => inputRef.current?.click()}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" || e.key === " ") {
+                  e.preventDefault();
+                  inputRef.current?.click();
+                }
+              }}
+              tabIndex={0}
+              role="button"
+              aria-label="Subir archivo"
             >
               <input
                 ref={inputRef}
@@ -134,7 +143,7 @@ export function FileUpload({
             <Card className="p-4 flex items-center justify-between border-primary/20 bg-primary/5">
               <div className="flex items-center gap-4 overflow-hidden">
                 <div className="p-2 bg-background rounded-md border shadow-sm shrink-0">
-                  <FileSpreadsheet className="h-6 w-6 text-emerald-600" />
+                  <FileSpreadsheet className="h-6 w-6 text-success" />
                 </div>
                 <div className="min-w-0">
                   <p className="text-sm font-medium truncate max-w-[200px] sm:max-w-md">

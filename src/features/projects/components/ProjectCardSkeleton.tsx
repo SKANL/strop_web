@@ -6,7 +6,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 
 export function ProjectCardSkeleton() {
   return (
-    <Card className="rounded-2xl border-gray-200/60 overflow-hidden">
+    <Card className="rounded-2xl border-border overflow-hidden">
       <CardHeader className="pb-3">
         <div className="flex items-start justify-between">
           <div className="flex items-center gap-3">
@@ -40,7 +40,7 @@ export function ProjectCardSkeleton() {
         </div>
 
         {/* Stats row */}
-        <div className="flex items-center justify-between pt-2 border-t border-gray-100">
+        <div className="flex items-center justify-between pt-2 border-t border-border">
           <div className="flex gap-4">
             <Skeleton className="h-4 w-16" />
             <Skeleton className="h-4 w-16" />

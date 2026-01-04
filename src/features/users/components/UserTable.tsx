@@ -55,11 +55,11 @@ export function UserTable({
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: 0.3 }}
-      className="rounded-xl border bg-white shadow-sm overflow-hidden"
+      className="rounded-xl border bg-card shadow-sm overflow-hidden"
     >
       <Table>
         <TableHeader>
-          <TableRow className="bg-gray-50/50">
+          <TableRow className="bg-muted/50">
             <TableHead className="w-[300px]">
               <Button variant="ghost" size="sm" className="h-8 -ml-3 font-semibold">
                 Usuario
@@ -92,7 +92,7 @@ export function UserTable({
               animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.3, delay: index * 0.03 }}
               className={cn(
-                "group cursor-pointer transition-colors hover:bg-gray-50/80",
+                "group cursor-pointer transition-colors hover:bg-muted",
                 !user.isActive && "opacity-60"
               )}
               onClick={() => onView?.(user)}
@@ -110,18 +110,18 @@ export function UserTable({
                         .toUpperCase()}
                     </AvatarFallback>
                   </Avatar>
-                  <span className="font-medium text-gray-900">{user.fullName}</span>
+                  <span className="font-medium text-foreground">{user.fullName}</span>
                 </div>
               </TableCell>
               <TableCell>
                 <UserRoleBadge role={user.role} size="sm" />
               </TableCell>
-              <TableCell className="text-gray-600">{user.email}</TableCell>
-              <TableCell className="text-gray-600">{user.phone || "—"}</TableCell>
+              <TableCell className="text-muted-foreground">{user.email}</TableCell>
+              <TableCell className="text-muted-foreground">{user.phone || "—"}</TableCell>
               <TableCell>
                 <UserStatusBadge isActive={user.isActive} />
               </TableCell>
-              <TableCell className="text-gray-500 text-sm" suppressHydrationWarning>
+              <TableCell className="text-muted-foreground text-sm" suppressHydrationWarning>
                 {user.lastLogin
                   ? `Hace ${formatDistanceToNow(new Date(user.lastLogin), { locale: es })}`
                   : "Nunca"}
@@ -149,7 +149,7 @@ export function UserTable({
                     <DropdownMenuSeparator />
                     <DropdownMenuItem
                       onClick={() => onToggleStatus?.(user)}
-                      className={user.isActive ? "text-red-600" : "text-emerald-600"}
+                      className={user.isActive ? "text-destructive" : "text-success"}
                     >
                       {user.isActive ? (
                         <>

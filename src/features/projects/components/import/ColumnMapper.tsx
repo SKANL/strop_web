@@ -62,9 +62,9 @@ function formatPreviewValue(value: unknown): string {
 
 // Get confidence color based on match quality
 function getConfidenceColor(confidence: number): string {
-  if (confidence >= 80) return "text-emerald-600 dark:text-emerald-400";
-  if (confidence >= 50) return "text-amber-600 dark:text-amber-400";
-  return "text-slate-400 dark:text-slate-500";
+  if (confidence >= 80) return "text-success";
+  if (confidence >= 50) return "text-warning";
+  return "text-muted-foreground";
 }
 
 export function ColumnMapper({
@@ -142,7 +142,7 @@ export function ColumnMapper({
       {/* Header Stats */}
       <div className="flex flex-wrap items-center gap-3 mb-4">
         <Badge variant="secondary" className="gap-1.5 px-2.5 py-1">
-          <Sparkles className="h-3 w-3 text-amber-500" />
+          <Sparkles className="h-3 w-3 text-warning" />
           {autoMatchedCount} auto-detectados
         </Badge>
         <Badge
@@ -150,7 +150,7 @@ export function ColumnMapper({
           className={cn(
             "gap-1.5 px-2.5 py-1",
             validation.isValid
-              ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400"
+              ? "bg-success/20 text-success"
               : ""
           )}
         >
@@ -209,7 +209,7 @@ export function ColumnMapper({
                   key={suggestion.sourceColumn}
                   className={cn(
                     "transition-colors",
-                    currentTargetKey && "bg-emerald-50/50 dark:bg-emerald-950/20"
+                    currentTargetKey && "bg-success/5"
                   )}
                 >
                   {/* Source Column */}
@@ -225,7 +225,7 @@ export function ColumnMapper({
                       className={cn(
                         "h-4 w-4",
                         currentTargetKey
-                          ? "text-emerald-500"
+                          ? "text-success"
                           : "text-muted-foreground/50"
                       )}
                     />

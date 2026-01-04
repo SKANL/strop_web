@@ -21,25 +21,25 @@ export function ProjectsWidget({ projects, maxItems = 5 }: ProjectsWidgetProps) 
   const getStatusVariant = (status: ProjectUI["status"]) => {
     switch (status) {
       case "ACTIVE":
-        return "bg-green-100 text-green-700 border-green-200";
+        return "bg-success/10 text-success border-success/20";
       case "PAUSED":
-        return "bg-gray-100 text-gray-600 border-gray-200";
+        return "bg-muted text-muted-foreground border-border";
       case "COMPLETED":
-        return "bg-blue-100 text-blue-700 border-blue-200";
+        return "bg-info/10 text-info border-info/20";
     }
   };
 
   return (
-    <Card className="rounded-3xl border-gray-200/60 shadow-sm py-0 gap-0">
+    <Card className="rounded-3xl border-border/60 shadow-sm py-0 gap-0">
       <CardHeader className="p-4 pb-3 border-b-0">
         <div className="flex items-center gap-2">
-          <div className="p-2 rounded-xl bg-blue-100">
-            <FolderKanban className="h-4 w-4 text-blue-600" />
+          <div className="p-2 rounded-xl bg-primary/10">
+            <FolderKanban className="h-4 w-4 text-primary" />
           </div>
-          <CardTitle className="text-sm font-semibold text-gray-700">Proyectos</CardTitle>
+          <CardTitle className="text-sm font-semibold text-foreground">Proyectos</CardTitle>
         </div>
         <CardAction>
-          <a href="/dashboard/proyectos" className="text-xs text-gray-400 hover:text-gray-600 flex items-center gap-0.5">
+          <a href="/dashboard/proyectos" className="text-xs text-muted-foreground hover:text-foreground flex items-center gap-0.5">
             Ver todos <ChevronRight className="h-3 w-3" />
           </a>
         </CardAction>
@@ -55,21 +55,21 @@ export function ProjectsWidget({ projects, maxItems = 5 }: ProjectsWidgetProps) 
                 initial={{ opacity: 0, x: -10 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ duration: 0.2, delay: index * 0.03 }}
-                className="block p-3 rounded-xl border border-gray-100 hover:border-gray-200 hover:bg-gray-50/50 transition-all group"
+                className="block p-3 rounded-xl border border-border hover:border-border hover:bg-muted/50 transition-all group"
               >
                 <div className="flex items-center justify-between mb-2">
                   <Tooltip>
                     <TooltipTrigger asChild>
-                      <h4 className="font-medium text-sm text-gray-900 group-hover:text-blue-600 truncate max-w-48 cursor-default">
+                      <h4 className="font-medium text-sm text-foreground group-hover:text-primary truncate max-w-48 cursor-default">
                         {project.name}
                       </h4>
                     </TooltipTrigger>
                     <TooltipContent side="top">
                       <p className="text-xs">{project.name}</p>
-                      <p className="text-[10px] text-gray-400">{project.location}</p>
+                      <p className="text-xs text-muted-foreground">{project.location}</p>
                     </TooltipContent>
                   </Tooltip>
-                  <Badge variant="outline" className={`text-[9px] font-medium px-1.5 py-0 h-4 ${getStatusVariant(project.status)}`}>
+                  <Badge variant="outline" size="sm" className={`font-medium ${getStatusVariant(project.status)}`}>
                     {project.status === "ACTIVE" ? "Activo" : project.status === "PAUSED" ? "Pausado" : "Fin"}
                   </Badge>
                 </div>
@@ -77,17 +77,17 @@ export function ProjectsWidget({ projects, maxItems = 5 }: ProjectsWidgetProps) 
                 <div className="flex items-center gap-2 mb-2">
                   <Progress 
                     value={project.progress} 
-                    className="h-1 flex-1 bg-gray-100 [&>div]:bg-blue-500"
+                    className="h-1 flex-1 bg-muted [&>div]:bg-primary"
                   />
-                  <span className="text-[10px] font-semibold text-gray-700 w-8 text-right">{project.progress}%</span>
+                  <span className="text-xs font-semibold text-foreground w-8 text-right">{project.progress}%</span>
                 </div>
 
-                <div className="flex items-center gap-3 text-[10px] text-gray-400">
+                <div className="flex items-center gap-3 text-xs text-muted-foreground">
                   <span className="flex items-center gap-0.5"><Users className="h-2.5 w-2.5" /> {project.membersCount}</span>
                   <span className="flex items-center gap-0.5"><AlertTriangle className="h-2.5 w-2.5" /> {project.openIncidents}</span>
                   {project.criticalIncidents > 0 && (
-                    <span className="flex items-center gap-0.5 text-red-500">
-                      <span className="h-1 w-1 rounded-full bg-red-500 animate-pulse" />
+                    <span className="flex items-center gap-0.5 text-destructive">
+                      <span className="h-1 w-1 rounded-full bg-destructive animate-pulse" />
                       {project.criticalIncidents}
                     </span>
                   )}

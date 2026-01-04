@@ -97,7 +97,7 @@ export function IncidentCloseDialog({
         >
           <AlertDialogHeader>
             <AlertDialogTitle className="flex items-center gap-2">
-              <CheckCircle2 className="size-5 text-green-600" />
+              <CheckCircle2 className="size-5 text-success" />
               Cerrar Incidencia
             </AlertDialogTitle>
             <AlertDialogDescription>
@@ -109,14 +109,14 @@ export function IncidentCloseDialog({
             {/* Warning Banner */}
             <motion.div
               animate={warningPulse}
-              className="flex items-start gap-3 p-3 bg-amber-500/10 border border-amber-500/30 rounded-lg"
+              className="flex items-start gap-3 p-3 bg-warning/10 border border-warning/30 rounded-lg"
             >
-              <AlertTriangle className="size-5 text-amber-600 shrink-0 mt-0.5" />
+              <AlertTriangle className="size-5 text-warning shrink-0 mt-0.5" />
               <div className="text-sm">
-                <p className="font-medium text-amber-700 dark:text-amber-400">
+                <p className="font-medium text-warning">
                   Acción irreversible
                 </p>
-                <p className="text-amber-600/80 dark:text-amber-400/80 text-xs mt-1">
+                <p className="text-warning/80 text-xs mt-1">
                   Una vez cerrada, no podrás editar esta incidencia. Solo se podrán agregar comentarios de seguimiento.
                 </p>
               </div>
@@ -177,7 +177,7 @@ export function IncidentCloseDialog({
             <AlertDialogAction
               onClick={handleClose}
               disabled={!isValid}
-              className="bg-green-600 hover:bg-green-700"
+              className="bg-success hover:bg-success/90"
             >
               Cerrar Incidencia
             </AlertDialogAction>

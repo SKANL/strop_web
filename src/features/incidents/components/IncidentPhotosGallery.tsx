@@ -172,7 +172,7 @@ export function IncidentPhotosGallery({ photos }: IncidentPhotosGalleryProps) {
             </Badge>
           )}
           {currentPhoto.metadata.watermarkVerified && (
-            <Badge variant="secondary" className="gap-1 text-xs text-green-600">
+            <Badge variant="secondary" className="gap-1 text-xs text-success">
               <CheckCircle2 className="size-3" />
               Verificado
             </Badge>
@@ -210,7 +210,8 @@ export function IncidentPhotosGallery({ photos }: IncidentPhotosGalleryProps) {
 
       {/* Zoom Dialog */}
       <Dialog open={isZoomed} onOpenChange={setIsZoomed}>
-        <DialogContent className="max-w-4xl p-0 overflow-hidden" showCloseButton={false}>
+        <DialogContent className="max-w-4xl p-0 border-none bg-transparent shadow-none" showCloseButton={false}>
+          <div className="relative overflow-hidden rounded-lg bg-background">
           <DialogTitle className="sr-only">Vista ampliada de foto</DialogTitle>
           <AnimatePresence>
             {isZoomed && (
@@ -237,6 +238,7 @@ export function IncidentPhotosGallery({ photos }: IncidentPhotosGalleryProps) {
               </motion.div>
             )}
           </AnimatePresence>
+          </div>
         </DialogContent>
       </Dialog>
     </div>

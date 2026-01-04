@@ -263,7 +263,7 @@ export function IncidentForm({ open, onOpenChange, onSubmit }: IncidentFormProps
                   variants={fieldVariants}
                   initial="hidden"
                   animate="visible"
-                  className="space-y-4 p-4 border rounded-lg bg-slate-50 mb-4"
+                  className="space-y-4 p-4 border rounded-lg bg-muted mb-4"
                 >
                   <div className="grid grid-cols-2 gap-4">
                     <FormField

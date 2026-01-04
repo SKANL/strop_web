@@ -6,6 +6,8 @@
 "use client";
 
 import { motion } from "framer-motion";
+import { Badge } from "@/components/ui/badge";
+import { StatusBadge } from "@/components/shared/StatusBadge";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
@@ -99,12 +101,7 @@ export function AuditTimeline({
                   >
                     {/* Dot indicator */}
                     <div className="absolute -left-[29px] top-2">
-                      <div
-                        className={cn(
-                          "h-4 w-4 rounded-full border-2 border-background",
-                          getActionColor(log.action)
-                        )}
-                      />
+                       <StatusBadge status={getActionColor(log.action)} className="h-4 w-4 rounded-full p-0 border-2 border-background" />
                     </div>
 
                     <div className="flex items-start gap-3">
@@ -118,7 +115,7 @@ export function AuditTimeline({
                           <span className="font-medium text-sm">
                             {userInfo.name}
                           </span>
-                          <AuditActionBadge action={log.action} size="sm" />
+                          <StatusBadge status={getActionColor(log.action)} label={log.action} />
                           <span className="text-xs text-muted-foreground">
                             {formatTime(log.createdAt)}
                           </span>

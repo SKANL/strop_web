@@ -182,7 +182,7 @@ export type RegisterFormData = z.infer<typeof registerSchema>;
 export function getPasswordStrength(password: string): {
   score: number;
   label: string;
-  color: string;
+  strength: "weak" | "medium" | "strong";
 } {
   let score = 0;
 
@@ -193,9 +193,9 @@ export function getPasswordStrength(password: string): {
   if (/[0-9]/.test(password)) score++;
   if (/[^A-Za-z0-9]/.test(password)) score++;
 
-  if (score <= 2) return { score, label: "Débil", color: "bg-red-500" };
-  if (score <= 4) return { score, label: "Media", color: "bg-yellow-500" };
-  return { score, label: "Fuerte", color: "bg-green-500" };
+  if (score <= 2) return { score, label: "Débil", strength: "weak" };
+  if (score <= 4) return { score, label: "Media", strength: "medium" };
+  return { score, label: "Fuerte", strength: "strong" };
 }
 
 export function getPasswordRequirements(password: string) {

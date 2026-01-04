@@ -28,11 +28,11 @@ const iconMap: Record<IncidentType, LucideIcon> = {
 };
 
 const colorMap: Record<IncidentType, string> = {
-  ORDERS_INSTRUCTIONS: "text-blue-500",
-  REQUESTS_QUERIES: "text-purple-500",
-  CERTIFICATIONS: "text-green-500",
-  INCIDENT_NOTIFICATIONS: "text-orange-500",
-  MATERIAL_REQUEST: "text-amber-500",
+  ORDERS_INSTRUCTIONS: "text-primary",
+  REQUESTS_QUERIES: "text-primary",
+  CERTIFICATIONS: "text-success",
+  INCIDENT_NOTIFICATIONS: "text-warning",
+  MATERIAL_REQUEST: "text-warning",
 };
 
 export function IncidentTypeIcon({ 

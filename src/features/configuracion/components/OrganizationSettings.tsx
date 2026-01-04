@@ -71,7 +71,7 @@ export function OrganizationSettings() {
       <BackLink href="/dashboard/configuracion" label="Volver a Configuración" />
 
       {/* Información de la Empresa */}
-      <Card className="bg-white/80 backdrop-blur-sm border-gray-100">
+      <Card className="bg-card/80 backdrop-blur-sm border-border">
         <CardHeader>
           <CardTitle>Información de la Empresa</CardTitle>
           <CardDescription>
@@ -180,7 +180,7 @@ export function OrganizationSettings() {
       </Card>
 
       {/* Plan y Suscripción */}
-      <Card className="bg-white/80 backdrop-blur-sm border-gray-100">
+      <Card className="bg-card/80 backdrop-blur-sm border-border">
         <CardHeader>
           <div className="flex items-center justify-between">
             <div>

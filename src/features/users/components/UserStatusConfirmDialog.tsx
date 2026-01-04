@@ -51,13 +51,13 @@ export function UserStatusConfirmDialog({
             <div
               className={cn(
                 "p-2 rounded-xl",
-                isDeactivating ? "bg-red-100" : "bg-emerald-100"
+                isDeactivating ? "bg-destructive/10" : "bg-success/10"
               )}
             >
               {isDeactivating ? (
-                <UserX className="h-5 w-5 text-red-600" />
+                <UserX className="h-5 w-5 text-destructive" />
               ) : (
-                <UserCheck className="h-5 w-5 text-emerald-600" />
+                <UserCheck className="h-5 w-5 text-success" />
               )}
             </div>
             <AlertDialogTitle>
@@ -67,16 +67,16 @@ export function UserStatusConfirmDialog({
         </AlertDialogHeader>
 
         {/* User Preview */}
-        <div className="flex items-center gap-3 p-3 rounded-xl bg-gray-50 my-2">
+        <div className="flex items-center gap-3 p-3 rounded-xl bg-muted/50 my-2">
           <Avatar className="h-10 w-10 ring-2 ring-white shadow-sm">
             <AvatarImage src={user.profilePictureUrl} alt={user.fullName} />
-            <AvatarFallback className="bg-linear-to-br from-blue-500 to-purple-600 text-white text-sm font-semibold">
+            <AvatarFallback className="bg-primary text-primary-foreground text-sm font-semibold">
               {initials}
             </AvatarFallback>
           </Avatar>
           <div>
-            <p className="font-medium text-gray-900">{user.fullName}</p>
-            <p className="text-sm text-gray-500">{user.email}</p>
+            <p className="font-medium text-foreground">{user.fullName}</p>
+            <p className="text-sm text-muted-foreground">{user.email}</p>
           </div>
         </div>
 
@@ -87,7 +87,7 @@ export function UserStatusConfirmDialog({
               podrá acceder al sistema hasta ser reactivado.
               <br />
               <br />
-              <span className="flex items-center gap-2 text-amber-600">
+              <span className="flex items-center gap-2 text-warning">
                 <AlertTriangle className="h-4 w-4" />
                 Su historial de actividad se conservará.
               </span>
@@ -106,8 +106,8 @@ export function UserStatusConfirmDialog({
             onClick={onConfirm}
             className={cn(
               isDeactivating
-                ? "bg-red-600 hover:bg-red-700"
-                : "bg-emerald-600 hover:bg-emerald-700"
+                ? "bg-destructive hover:bg-destructive/90"
+                : "bg-success hover:bg-success/90"
             )}
           >
             {isDeactivating ? (

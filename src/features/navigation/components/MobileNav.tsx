@@ -43,56 +43,60 @@ export function MobileNav({ currentPath = "/dashboard" }: MobileNavProps) {
         <Button 
           variant="outline" 
           size="icon" 
-          className="fixed top-4 left-4 z-50 md:hidden h-10 w-10 rounded-full bg-[#1a1a1a] border-white/10 text-white hover:bg-[#2a2a2a] hover:text-white shadow-lg"
+          className="fixed top-4 left-4 z-50 md:hidden h-10 w-10 rounded-full bg-background border-border text-foreground hover:bg-accent hover:text-accent-foreground shadow-lg"
         >
           <Menu className="h-5 w-5" />
         </Button>
       </SheetTrigger>
       
-      <SheetContent side="left" className="w-72 bg-[#1a1a1a] border-white/10 p-0">
-        <SheetHeader className="p-4 border-b border-white/10">
+      <SheetContent side="left" className="w-72 bg-background border-r border-border p-0">
+        <div className="flex flex-col h-full">
+        <SheetHeader className="p-4 border-b border-border">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-white rounded-full flex items-center justify-center text-black font-extrabold text-lg">
+            <div className="w-10 h-10 bg-primary rounded-full flex items-center justify-center text-primary-foreground font-extrabold text-lg">
               S
             </div>
-            <SheetTitle className="text-white text-lg font-bold">Strop</SheetTitle>
+            <SheetTitle className="text-foreground text-lg font-bold">Strop</SheetTitle>
           </div>
         </SheetHeader>
         
-        <nav className="flex flex-col p-3 gap-1">
-          {navItems.map((item) => {
-            const isActive = activeItem.id === item.id;
-            const Icon = item.icon;
+        <div className="flex-1 overflow-y-auto py-2">
+          <nav className="flex flex-col p-3 gap-1">
+            {navItems.map((item) => {
+              const isActive = activeItem.id === item.id;
+              const Icon = item.icon;
 
-            return (
-              <a
-                key={item.id}
-                href={item.href}
-                onClick={() => toggleMobileMenu()}
-                className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all no-underline ${
-                  isActive
-                    ? "bg-blue-600/30 text-white"
-                    : "text-gray-400 hover:bg-white/5 hover:text-white"
-                }`}
-              >
-                <Icon className="h-5 w-5" strokeWidth={isActive ? 2.5 : 2} />
-                <span className={`text-sm font-medium ${isActive ? "font-semibold" : ""}`}>
-                  {item.label}
-                </span>
-                {item.badge && item.badge > 0 && (
-                  <Badge variant="destructive" className="ml-auto text-[10px] h-5 px-1.5">
-                    {item.badge}
-                  </Badge>
-                )}
-              </a>
-            );
-          })}
-        </nav>
+              return (
+                <a
+                  key={item.id}
+                  href={item.href}
+                  onClick={() => toggleMobileMenu()}
+                  className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all no-underline ${
+                    isActive
+                      ? "bg-primary/10 text-primary"
+                      : "text-muted-foreground hover:bg-muted/10 hover:text-foreground"
+                  }`}
+                >
+                  <Icon className="h-5 w-5" strokeWidth={isActive ? 2.5 : 2} />
+                  <span className={`text-sm font-medium ${isActive ? "font-semibold" : ""}`}>
+                    {item.label}
+                  </span>
+                  {item.badge && item.badge > 0 && (
+                    <Badge variant="destructive" size="sm" className="ml-auto h-5 px-1.5">
+                      {item.badge}
+                    </Badge>
+                  )}
+                </a>
+              );
+            })}
+          </nav>
+        </div>
 
-        <Separator className="bg-white/10 my-2" />
+        <Separator className="bg-border my-2" />
 
-        <div className="p-4">
-          <span className="text-xs text-gray-500 font-medium">Strop v2.0</span>
+        <div className="p-4 mt-auto">
+          <span className="text-xs text-muted-foreground font-medium">Strop v2.0</span>
+        </div>
         </div>
       </SheetContent>
     </Sheet>

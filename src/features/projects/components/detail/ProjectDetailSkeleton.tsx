@@ -49,7 +49,7 @@ export function ProjectDetailSkeleton() {
       {/* KPIs Grid */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         {Array.from({ length: 4 }).map((_, i) => (
-          <Card key={i} className="rounded-2xl border-gray-200/60">
+          <Card key={i} className="rounded-2xl border-border">
             <CardContent className="p-5">
               <div className="flex items-start gap-4">
                 <Skeleton className="w-12 h-12 rounded-2xl" />
@@ -65,7 +65,7 @@ export function ProjectDetailSkeleton() {
 
       {/* Progress y Presupuesto */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <Card className="rounded-2xl border-gray-200/60">
+        <Card className="rounded-2xl border-border">
           <CardHeader className="pb-2">
             <Skeleton className="h-4 w-32" />
           </CardHeader>
@@ -82,7 +82,7 @@ export function ProjectDetailSkeleton() {
           </CardContent>
         </Card>
 
-        <Card className="rounded-2xl border-gray-200/60">
+        <Card className="rounded-2xl border-border">
           <CardHeader className="pb-2">
             <Skeleton className="h-4 w-24" />
           </CardHeader>
@@ -116,7 +116,7 @@ export function ProjectMembersTableSkeleton() {
       </div>
       
       {/* Table rows */}
-      <Card className="rounded-2xl border-gray-200/60">
+      <Card className="rounded-2xl border-border">
         <div className="p-4 space-y-4">
           {Array.from({ length: 5 }).map((_, i) => (
             <div key={i} className="flex items-center gap-4 py-2">
@@ -154,7 +154,7 @@ export function ProjectIncidentsListSkeleton() {
       {/* Cards */}
       <div className="space-y-3">
         {Array.from({ length: 4 }).map((_, i) => (
-          <Card key={i} className="rounded-2xl border-gray-200/60">
+          <Card key={i} className="rounded-2xl border-border">
             <CardContent className="p-4">
               <div className="flex items-start gap-4">
                 <Skeleton className="w-10 h-10 rounded-xl" />

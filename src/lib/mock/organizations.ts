@@ -112,8 +112,8 @@ export function getOrganizationStorageUsage(organizationId: string): {
     return { usedMb: 0, quotaMb: 0, percentage: 0 };
   }
   
-  // Mock: simular uso aleatorio entre 10% y 80%
-  const usedMb = Math.floor(org.storageQuotaMb * (0.1 + Math.random() * 0.7));
+  // Mock: simular uso fijo del 45% para evitar hydration mismatch
+  const usedMb = Math.floor(org.storageQuotaMb * 0.45);
   
   return {
     usedMb,

@@ -23,7 +23,7 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
-import { EmptyState } from "@/components/ui/empty-state";
+import { EmptyState } from "@/components/shared/empty-state";
 import {
   Select,
   SelectContent,
@@ -52,20 +52,20 @@ const typeLabels: Record<string, string> = {
 const statusConfig: Record<IncidentStatus, { label: string; color: string; bg: string; icon: React.ElementType }> = {
   OPEN: { 
     label: "Abierta", 
-    color: "text-amber-600", 
-    bg: "bg-amber-100",
+    color: "text-warning", 
+    bg: "bg-warning/10",
     icon: AlertTriangle 
   },
   ASSIGNED: { 
     label: "Asignada", 
-    color: "text-blue-600", 
-    bg: "bg-blue-100",
+    color: "text-info", 
+    bg: "bg-info/10",
     icon: User 
   },
   CLOSED: { 
     label: "Cerrada", 
-    color: "text-emerald-600", 
-    bg: "bg-emerald-100",
+    color: "text-success", 
+    bg: "bg-success/10",
     icon: CheckCircle2 
   },
 };
@@ -156,27 +156,27 @@ export function ProjectIncidentsTab({ incidents }: ProjectIncidentsTabProps) {
         >
           <ToggleGroupItem 
             value="ALL" 
-            className="px-4 py-2 h-auto rounded-xl text-sm font-medium data-[state=on]:bg-gray-900 data-[state=on]:text-white data-[state=on]:shadow-lg bg-gray-100 text-gray-600 hover:bg-gray-200 border-0"
+            className="px-4 py-2 h-auto rounded-xl text-sm font-medium data-[state=on]:bg-foreground data-[state=on]:text-background data-[state=on]:shadow-lg bg-muted text-muted-foreground hover:bg-muted/80 border-0"
           >
             Todas ({stats.total})
           </ToggleGroupItem>
           <ToggleGroupItem 
             value="OPEN" 
-            className="px-4 py-2 h-auto rounded-xl text-sm font-medium gap-2 data-[state=on]:bg-amber-500 data-[state=on]:text-white data-[state=on]:shadow-lg bg-amber-50 text-amber-700 hover:bg-amber-100 border-0"
+            className="px-4 py-2 h-auto rounded-xl text-sm font-medium gap-2 data-[state=on]:bg-warning data-[state=on]:text-warning-foreground data-[state=on]:shadow-lg bg-warning/10 text-warning hover:bg-warning/20 border-0"
           >
             <AlertTriangle className="h-4 w-4" />
             Abiertas ({stats.open})
           </ToggleGroupItem>
           <ToggleGroupItem 
             value="ASSIGNED" 
-            className="px-4 py-2 h-auto rounded-xl text-sm font-medium gap-2 data-[state=on]:bg-blue-500 data-[state=on]:text-white data-[state=on]:shadow-lg bg-blue-50 text-blue-700 hover:bg-blue-100 border-0"
+            className="px-4 py-2 h-auto rounded-xl text-sm font-medium gap-2 data-[state=on]:bg-info data-[state=on]:text-info-foreground data-[state=on]:shadow-lg bg-info/10 text-info hover:bg-info/20 border-0"
           >
             <User className="h-4 w-4" />
             Asignadas ({stats.assigned})
           </ToggleGroupItem>
           <ToggleGroupItem 
             value="CLOSED" 
-            className="px-4 py-2 h-auto rounded-xl text-sm font-medium gap-2 data-[state=on]:bg-emerald-500 data-[state=on]:text-white data-[state=on]:shadow-lg bg-emerald-50 text-emerald-700 hover:bg-emerald-100 border-0"
+            className="px-4 py-2 h-auto rounded-xl text-sm font-medium gap-2 data-[state=on]:bg-success data-[state=on]:text-success-foreground data-[state=on]:shadow-lg bg-success/10 text-success hover:bg-success/20 border-0"
           >
             <CheckCircle2 className="h-4 w-4" />
             Cerradas ({stats.closed})
@@ -184,7 +184,7 @@ export function ProjectIncidentsTab({ incidents }: ProjectIncidentsTabProps) {
           {stats.critical > 0 && (
             <ToggleGroupItem 
               value="CRITICAL" 
-              className="px-4 py-2 h-auto rounded-xl text-sm font-medium gap-2 data-[state=on]:bg-red-500 data-[state=on]:text-white data-[state=on]:shadow-lg data-[state=on]:animate-pulse bg-red-50 text-red-700 hover:bg-red-100 border-0"
+              className="px-4 py-2 h-auto rounded-xl text-sm font-medium gap-2 data-[state=on]:bg-destructive data-[state=on]:text-destructive-foreground data-[state=on]:shadow-lg data-[state=on]:animate-pulse bg-destructive/10 text-destructive hover:bg-destructive/20 border-0"
             >
               <span className="w-2 h-2 rounded-full bg-current animate-pulse" />
               Críticas ({stats.critical})
@@ -201,16 +201,17 @@ export function ProjectIncidentsTab({ incidents }: ProjectIncidentsTabProps) {
         className="flex flex-col sm:flex-row gap-3"
       >
         <div className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input
             placeholder="Buscar incidencias..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-10 h-10 rounded-xl"
+            inputSize="lg"
+            className="pl-10"
           />
         </div>
         
-        <Button className="h-10 rounded-xl gap-2 bg-blue-600 hover:bg-blue-700">
+        <Button size="lg" className="gap-2 bg-primary hover:bg-primary/90">
           <Plus className="h-4 w-4" />
           Nueva Incidencia
         </Button>
@@ -238,9 +239,9 @@ export function ProjectIncidentsTab({ incidents }: ProjectIncidentsTabProps) {
                   exit={{ opacity: 0, x: -20 }}
                   transition={{ duration: 0.2, delay: index * 0.03 }}
                 >
-                  <Card className={`rounded-2xl border-gray-200/60 hover:shadow-md transition-all cursor-pointer group ${
+                  <Card className={`rounded-2xl border-border hover:shadow-md transition-all cursor-pointer group ${
                     incident.priority === "CRITICAL" && incident.status !== "CLOSED"
-                      ? "border-l-4 border-l-red-500"
+                      ? "border-l-4 border-l-destructive"
                       : ""
                   }`}>
                     <CardContent className="p-4">
@@ -248,7 +249,7 @@ export function ProjectIncidentsTab({ incidents }: ProjectIncidentsTabProps) {
                         {/* Avatar del creador */}
                         <Avatar className="h-10 w-10 shrink-0">
                           <AvatarImage src={incident.createdByAvatar} />
-                          <AvatarFallback className="text-xs bg-linear-to-br from-blue-500 to-purple-500 text-white">
+                          <AvatarFallback className="text-xs bg-primary text-primary-foreground">
                             {getInitials(incident.createdByName)}
                           </AvatarFallback>
                         </Avatar>
@@ -257,26 +258,26 @@ export function ProjectIncidentsTab({ incidents }: ProjectIncidentsTabProps) {
                         <div className="flex-1 min-w-0">
                           {/* Header con tipo y prioridad */}
                           <div className="flex items-center gap-2 mb-1 flex-wrap">
-                            <Badge variant="outline" className="text-[10px] bg-gray-50">
+                            <Badge variant="outline" size="sm" className="bg-muted">
                               {typeLabels[incident.type] || incident.type}
                             </Badge>
                             {incident.priority === "CRITICAL" && (
-                              <Badge className="text-[10px] bg-red-500 text-white animate-pulse">
+                              <Badge size="sm" className="bg-destructive text-destructive-foreground animate-pulse">
                                 CRÍTICA
                               </Badge>
                             )}
-                            <span className="text-xs text-gray-400 ml-auto">
+                            <span className="text-xs text-muted-foreground ml-auto">
                               {formatDate(incident.createdAt)}
                             </span>
                           </div>
 
                           {/* Descripción */}
-                          <p className="text-sm text-gray-900 mb-2 line-clamp-2 group-hover:text-blue-600 transition-colors">
+                          <p className="text-sm text-foreground mb-2 line-clamp-2 group-hover:text-primary transition-colors">
                             {incident.description}
                           </p>
 
                           {/* Meta info */}
-                          <div className="flex items-center flex-wrap gap-3 text-xs text-gray-500">
+                          <div className="flex items-center flex-wrap gap-3 text-xs text-muted-foreground">
                             <span className="flex items-center gap-1">
                               <User className="h-3 w-3" />
                               {incident.createdByName}
@@ -304,11 +305,11 @@ export function ProjectIncidentsTab({ incidents }: ProjectIncidentsTabProps) {
                             {incident.assignedToName && (
                               <Tooltip>
                                 <TooltipTrigger asChild>
-                                  <span className="flex items-center gap-1 text-blue-600">
+                                  <span className="flex items-center gap-1 text-primary">
                                     <ChevronRight className="h-3 w-3" />
                                     <Avatar className="h-5 w-5">
                                       <AvatarImage src={incident.assignedToAvatar} />
-                                      <AvatarFallback className="text-[8px]">
+                                      <AvatarFallback className="text-xs">
                                         {getInitials(incident.assignedToName)}
                                       </AvatarFallback>
                                     </Avatar>
@@ -372,7 +373,7 @@ export function ProjectIncidentsTab({ incidents }: ProjectIncidentsTabProps) {
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          className="text-center text-sm text-gray-500"
+          className="text-center text-sm text-muted-foreground"
         >
           Mostrando {filteredIncidents.length} de {incidents.length} incidencias
         </motion.div>

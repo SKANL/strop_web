@@ -18,6 +18,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 
@@ -69,10 +70,10 @@ export function UserFilters({
           value={statusFilter}
           onValueChange={(v) => onStatusChange(v as "ACTIVE" | "INACTIVE" | "ALL")}
         >
-          <TabsList className="bg-gray-100/50 p-1 rounded-xl">
+          <TabsList className="bg-muted/50 p-1 rounded-xl">
             <TabsTrigger
               value="ALL"
-              className="rounded-lg px-4 data-[state=active]:bg-white data-[state=active]:shadow-sm"
+              className="rounded-lg px-4 data-[state=active]:bg-card data-[state=active]:shadow-sm"
             >
               <span>Todos</span>
               <Badge variant="secondary" className="ml-2 text-xs">
@@ -81,22 +82,22 @@ export function UserFilters({
             </TabsTrigger>
             <TabsTrigger
               value="ACTIVE"
-              className="rounded-lg px-4 data-[state=active]:bg-white data-[state=active]:shadow-sm"
+              className="rounded-lg px-4 data-[state=active]:bg-card data-[state=active]:shadow-sm"
             >
               <span>Activos</span>
               <Badge
                 variant="secondary"
-                className="ml-2 text-xs bg-emerald-100 text-emerald-700"
+                className="ml-2 text-xs bg-success/10 text-success"
               >
                 {counts.active}
               </Badge>
             </TabsTrigger>
             <TabsTrigger
               value="INACTIVE"
-              className="rounded-lg px-4 data-[state=active]:bg-white data-[state=active]:shadow-sm"
+              className="rounded-lg px-4 data-[state=active]:bg-card data-[state=active]:shadow-sm"
             >
               <span>Inactivos</span>
-              <Badge variant="secondary" className="ml-2 text-xs bg-gray-200">
+              <Badge variant="secondary" className="ml-2 text-xs bg-muted">
                 {counts.inactive}
               </Badge>
             </TabsTrigger>
@@ -104,42 +105,26 @@ export function UserFilters({
         </Tabs>
 
         {/* View Mode Toggle */}
-        <div className="flex items-center gap-1 bg-gray-100/50 p-1 rounded-xl">
-          <Button
-            variant={viewMode === "grid" ? "secondary" : "ghost"}
-            size="icon"
-            className={cn(
-              "h-8 w-8 rounded-lg",
-              viewMode === "grid" && "bg-white shadow-sm"
-            )}
-            onClick={() => onViewModeChange("grid")}
-          >
+        <ToggleGroup type="single" value={viewMode} onValueChange={(v) => v && onViewModeChange(v as ViewMode)}>
+          <ToggleGroupItem value="grid" aria-label="Vista de cuadrícula">
             <LayoutGrid className="h-4 w-4" />
-          </Button>
-          <Button
-            variant={viewMode === "list" ? "secondary" : "ghost"}
-            size="icon"
-            className={cn(
-              "h-8 w-8 rounded-lg",
-              viewMode === "list" && "bg-white shadow-sm"
-            )}
-            onClick={() => onViewModeChange("list")}
-          >
+          </ToggleGroupItem>
+          <ToggleGroupItem value="list" aria-label="Vista de lista">
             <List className="h-4 w-4" />
-          </Button>
-        </div>
+          </ToggleGroupItem>
+        </ToggleGroup>
       </div>
 
       {/* Search and Role Filter */}
       <div className="flex items-center gap-3 flex-wrap">
         {/* Search Input */}
         <div className="relative flex-1 min-w-[250px]">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input
             placeholder="Buscar por nombre, email o teléfono..."
             value={searchQuery}
             onChange={(e) => onSearchChange(e.target.value)}
-            className="pl-10 h-11 rounded-xl bg-gray-50/50 border-gray-200 focus:bg-white transition-colors"
+            className="pl-10 bg-muted/50 border-border focus:bg-card transition-colors h-10"
           />
           {searchQuery && (
             <Button
@@ -155,9 +140,9 @@ export function UserFilters({
 
         {/* Role Filter */}
         <Select value={roleFilter} onValueChange={(v) => onRoleChange(v as UserRole | "ALL")}>
-          <SelectTrigger className="w-[180px] h-11 rounded-xl bg-gray-50/50 border-gray-200">
+          <SelectTrigger size="lg" className="w-[180px] rounded-xl bg-muted/50 border-border">
             <div className="flex items-center gap-2">
-              <Filter className="h-4 w-4 text-gray-400" />
+              <Filter className="h-4 w-4 text-muted-foreground" />
               <SelectValue placeholder="Filtrar por rol" />
             </div>
           </SelectTrigger>
@@ -191,7 +176,7 @@ export function UserFilters({
           <Button
             variant="ghost"
             size="sm"
-            className="text-gray-500 hover:text-gray-700"
+            className="text-muted-foreground hover:text-foreground"
             onClick={() => {
               onSearchChange("");
               onRoleChange("ALL");
@@ -209,7 +194,7 @@ export function UserFilters({
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          className="flex items-center gap-2 text-sm text-gray-500"
+          className="flex items-center gap-2 text-sm text-muted-foreground"
         >
           <Users2 className="h-4 w-4" />
           <span>

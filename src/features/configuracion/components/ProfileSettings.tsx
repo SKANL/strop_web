@@ -87,7 +87,7 @@ export function ProfileSettings() {
     >
       <BackLink href="/dashboard/configuracion" label="Volver a Configuración" />
 
-      <Card className="bg-white/80 backdrop-blur-sm border-gray-100">
+      <Card className="bg-card/80 backdrop-blur-sm border-border">
         <CardHeader>
           <CardTitle>Perfil Personal</CardTitle>
           <CardDescription>

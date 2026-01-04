@@ -46,9 +46,9 @@ interface IncidentFiltersProps {
 }
 
 const statusIcons: Record<IncidentStatus, React.ReactNode> = {
-  OPEN: <Circle className="size-3 text-yellow-500" />,
-  ASSIGNED: <Clock className="size-3 text-blue-500" />,
-  CLOSED: <CheckCircle2 className="size-3 text-green-500" />,
+  OPEN: <Circle className="size-3 text-warning" />,
+  ASSIGNED: <Clock className="size-3 text-info" />,
+  CLOSED: <CheckCircle2 className="size-3 text-success" />,
 };
 
 const tagVariants = {

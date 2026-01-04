@@ -1,0 +1,31 @@
+---
+---
+<script is:inline>
+  // Script para prevenir Flash of Unstyled Content (FOUC)
+  // Se ejecuta inmediatamente antes de que el navegador renderice el body
+  (function() {
+    function getThemePreference() {
+      if (typeof localStorage !== 'undefined' && localStorage.getItem('mode')) {
+        return localStorage.getItem('mode');
+      }
+      return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+    }
+
+    function setTheme(theme) {
+      if (theme === 'dark') {
+        document.documentElement.classList.add('dark');
+      } else {
+        document.documentElement.classList.remove('dark');
+      }
+    }
+
+    // Inicialización
+    const theme = getThemePreference();
+    setTheme(theme);
+
+    // Soporte para Astro View Transitions
+    document.addEventListener('astro:after-swap', () => {
+      setTheme(getThemePreference());
+    });
+  })();
+</script>

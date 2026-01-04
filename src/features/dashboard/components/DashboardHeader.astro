@@ -14,16 +14,16 @@ const { firstName, organizationName, isOnline = true } = Astro.props;
 <header class="mb-6 flex items-center gap-4">
   <div class="flex items-center gap-2">
     {isOnline && (
-      <span class="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
+      <span class="w-2 h-2 rounded-full bg-success animate-pulse" />
     )}
     <Badge
       variant="outline"
-      className="text-xs font-medium px-2 py-0.5 bg-gray-50"
+      className="text-xs font-medium px-2 py-0.5 bg-muted"
     >
       {organizationName}
     </Badge>
   </div>
-  <h1 class="text-xl md:text-2xl font-bold text-gray-900">
+  <h1 class="text-xl md:text-2xl font-bold text-foreground">
     Hola, {firstName}
   </h1>
 </header>

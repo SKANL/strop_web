@@ -165,7 +165,7 @@ export default function LoginForm() {
               type="button"
               disabled={oauthLoading !== null || isLoading}
               onClick={() => handleOAuthLogin("google")}
-              className="h-11"
+              size="lg"
             >
               {oauthLoading === "google" ? (
                 <Loader2 className="h-4 w-4 animate-spin" />
@@ -181,7 +181,7 @@ export default function LoginForm() {
               type="button"
               disabled={oauthLoading !== null || isLoading}
               onClick={() => handleOAuthLogin("microsoft")}
-              className="h-11"
+              size="lg"
             >
               {oauthLoading === "microsoft" ? (
                 <Loader2 className="h-4 w-4 animate-spin" />
@@ -299,7 +299,8 @@ export default function LoginForm() {
             >
               <Button
                 type="submit"
-                className="w-full h-11"
+                size="lg"
+                className="w-full"
                 disabled={isLoading || oauthLoading !== null}
               >
                 {isLoading ? (

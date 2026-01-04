@@ -97,7 +97,7 @@ export function UserDetail({
                       src={user.profilePictureUrl}
                       alt={user.fullName}
                     />
-                    <AvatarFallback className="bg-linear-to-br from-blue-500 to-purple-600 text-white text-2xl font-bold">
+                    <AvatarFallback className="bg-primary text-primary-foreground text-2xl font-bold">
                       {initials}
                     </AvatarFallback>
                   </Avatar>
@@ -105,7 +105,7 @@ export function UserDetail({
                     <div
                       className={cn(
                         "w-6 h-6 rounded-full border-4 border-white",
-                        user.isActive ? "bg-emerald-500" : "bg-gray-400"
+                        user.isActive ? "bg-success" : "bg-muted-foreground"
                       )}
                     />
                   </div>
@@ -113,10 +113,10 @@ export function UserDetail({
 
                 {/* Name and Role */}
                 <div className="text-center">
-                  <DrawerTitle className="text-xl font-bold text-gray-900">
+                  <DrawerTitle className="text-xl font-bold text-foreground">
                     {user.fullName}
                   </DrawerTitle>
-                  <DrawerDescription className="text-gray-500">
+                  <DrawerDescription className="text-muted-foreground">
                     {user.email}
                   </DrawerDescription>
                 </div>
@@ -205,7 +205,7 @@ export function UserDetail({
                   transition={{ duration: 0.3 }}
                 >
                   {userProjects.length === 0 ? (
-                    <div className="text-center py-8 text-gray-500">
+                    <div className="text-center py-8 text-muted-foreground">
                       <FolderKanban className="h-12 w-12 mx-auto mb-3 opacity-30" />
                       <p className="text-sm">No tiene proyectos asignados</p>
                     </div>
@@ -220,7 +220,7 @@ export function UserDetail({
                         >
                           <AccordionItem
                             value={member.id}
-                            className="border rounded-xl px-4 bg-white"
+                            className="border rounded-xl px-4 bg-card"
                           >
                             <AccordionTrigger className="hover:no-underline py-3">
                               <div className="flex items-center gap-3 text-left">
@@ -228,33 +228,33 @@ export function UserDetail({
                                   className={cn(
                                     "w-2 h-2 rounded-full",
                                     project?.status === "ACTIVE"
-                                      ? "bg-emerald-500"
+                                      ? "bg-success"
                                       : project?.status === "PAUSED"
-                                      ? "bg-amber-500"
-                                      : "bg-gray-400"
+                                      ? "bg-warning"
+                                      : "bg-muted-foreground"
                                   )}
                                 />
                                 <div>
-                                  <p className="font-medium text-gray-900">
+                                  <p className="font-medium text-foreground">
                                     {project?.name || "Proyecto desconocido"}
                                   </p>
-                                  <p className="text-xs text-gray-500">
+                                  <p className="text-xs text-muted-foreground">
                                     {roleLabels[member.assignedRole]}
                                   </p>
                                 </div>
                               </div>
                             </AccordionTrigger>
                             <AccordionContent className="pb-3">
-                              <div className="space-y-2 text-sm text-gray-600">
+                              <div className="space-y-2 text-sm text-muted-foreground">
                                 <div className="flex justify-between">
                                   <span>Ubicación</span>
-                                  <span className="text-gray-900">
+                                  <span className="text-foreground">
                                     {project?.location}
                                   </span>
                                 </div>
                                 <div className="flex justify-between">
                                   <span>Asignado</span>
-                                  <span className="text-gray-900">
+                                  <span className="text-foreground">
                                     {format(
                                       new Date(member.assignedAt),
                                       "d MMM yyyy",
@@ -278,11 +278,11 @@ export function UserDetail({
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.3 }}
-                  className="text-center py-8 text-gray-500"
+                  className="text-center py-8 text-muted-foreground"
                 >
                   <Activity className="h-12 w-12 mx-auto mb-3 opacity-30" />
                   <p className="text-sm">Historial de actividad próximamente</p>
-                  <p className="text-xs text-gray-400 mt-1">
+                  <p className="text-xs text-muted-foreground/60 mt-1">
                     Se mostrará el registro de acciones del usuario
                   </p>
                 </motion.div>
@@ -294,7 +294,8 @@ export function UserDetail({
               <div className="flex gap-3">
                 <Button
                   variant="outline"
-                  className="flex-1 h-11 rounded-xl"
+                  size="lg"
+                  className="flex-1"
                   onClick={() => onEdit?.(user)}
                 >
                   <Edit className="h-4 w-4 mr-2" />
@@ -302,9 +303,10 @@ export function UserDetail({
                 </Button>
                 <Button
                   variant={user.isActive ? "destructive" : "default"}
+                  size="lg"
                   className={cn(
-                    "flex-1 h-11 rounded-xl",
-                    !user.isActive && "bg-emerald-600 hover:bg-emerald-700"
+                    "flex-1",
+                    !user.isActive && "bg-success hover:bg-success/90"
                   )}
                   onClick={() => onToggleStatus?.(user)}
                 >
@@ -340,13 +342,13 @@ function InfoItem({
   value: string;
 }) {
   return (
-    <div className="flex items-center gap-3 p-3 rounded-xl bg-gray-50/50">
-      <div className="p-2 rounded-lg bg-white shadow-sm text-gray-400">
+    <div className="flex items-center gap-3 p-3 rounded-xl bg-muted/50">
+      <div className="p-2 rounded-lg bg-background shadow-sm text-muted-foreground">
         {icon}
       </div>
       <div className="flex-1 min-w-0">
-        <p className="text-xs text-gray-500">{label}</p>
-        <p className="font-medium text-gray-900 truncate">{value}</p>
+        <p className="text-xs text-muted-foreground">{label}</p>
+        <p className="font-medium text-foreground truncate">{value}</p>
       </div>
     </div>
   );

@@ -27,10 +27,10 @@ const weatherIcons: Record<WeatherCondition, React.ElementType> = {
 };
 
 const weatherColors: Record<WeatherCondition, string> = {
-  sun: "bg-amber-100 text-amber-600",
-  cloud: "bg-gray-100 text-gray-600",
-  rain: "bg-blue-100 text-blue-600",
-  storm: "bg-purple-100 text-purple-600",
+  sun: "bg-warning/20 text-warning",
+  cloud: "bg-muted text-muted-foreground",
+  rain: "bg-info/20 text-info",
+  storm: "bg-primary/20 text-primary",
 };
 
 function formatDateHeader(dateStr: string): string {

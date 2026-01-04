@@ -25,18 +25,18 @@ export function IncidentsTable({ incidents, maxItems = 6 }: IncidentsTableProps)
 
   const getPriorityVariant = (priority: IncidentUI["priority"]) => {
     return priority === "CRITICAL" 
-      ? "bg-red-100 text-red-700 border-red-200" 
-      : "bg-gray-100 text-gray-600 border-gray-200";
+      ? "bg-destructive/10 text-destructive border-destructive/20" 
+      : "bg-muted text-muted-foreground border-border";
   };
 
   const getStatusVariant = (status: IncidentUI["status"]) => {
     switch (status) {
       case "OPEN":
-        return "bg-amber-100 text-amber-700 border-amber-200";
+        return "bg-warning/10 text-warning border-warning/20";
       case "ASSIGNED":
-        return "bg-blue-100 text-blue-700 border-blue-200";
+        return "bg-info/10 text-info border-info/20";
       case "CLOSED":
-        return "bg-green-100 text-green-700 border-green-200";
+        return "bg-success/10 text-success border-success/20";
     }
   };
 
@@ -59,16 +59,16 @@ export function IncidentsTable({ incidents, maxItems = 6 }: IncidentsTableProps)
   };
 
   return (
-    <Card className="rounded-3xl border-gray-200/60 shadow-sm py-0 gap-0">
+    <Card className="rounded-3xl border-border shadow-sm py-0 gap-0">
       <CardHeader className="p-4 pb-3 border-b-0">
         <div className="flex items-center gap-2">
-          <div className="p-2 rounded-xl bg-amber-100">
-            <AlertTriangle className="h-4 w-4 text-amber-600" />
+          <div className="p-2 rounded-xl bg-warning/20">
+            <AlertTriangle className="h-4 w-4 text-warning" />
           </div>
-          <CardTitle className="text-sm font-semibold text-gray-700">Incidencias</CardTitle>
+          <CardTitle className="text-sm font-semibold text-foreground">Incidencias</CardTitle>
         </div>
         <CardAction>
-          <a href="/dashboard/incidencias" className="text-xs text-gray-400 hover:text-gray-600 flex items-center gap-0.5">
+          <a href="/dashboard/incidencias" className="text-xs text-muted-foreground hover:text-foreground flex items-center gap-0.5">
             Ver todas <ChevronRight className="h-3 w-3" />
           </a>
         </CardAction>
@@ -87,32 +87,32 @@ export function IncidentsTable({ incidents, maxItems = 6 }: IncidentsTableProps)
                     transition={{ duration: 0.15, delay: index * 0.02 }}
                     className={`block p-2.5 rounded-lg border transition-all group cursor-pointer ${
                       incident.priority === "CRITICAL" 
-                        ? "border-red-200 bg-red-50/40 hover:bg-red-50/70" 
-                        : "border-gray-100 hover:border-gray-200 hover:bg-gray-50/50"
+                        ? "border-destructive/20 bg-destructive/5 hover:bg-destructive/10" 
+                        : "border-border hover:border-border hover:bg-muted/50"
                     }`}
                   >
                     <div className="flex items-start gap-2">
                       <Avatar className="h-6 w-6 shrink-0 mt-0.5">
                         <AvatarImage src={incident.createdByAvatar} alt={incident.createdBy} />
-                        <AvatarFallback className="text-[9px] bg-gray-100">{getInitials(incident.createdBy)}</AvatarFallback>
+                        <AvatarFallback className="text-xs bg-muted">{getInitials(incident.createdBy)}</AvatarFallback>
                       </Avatar>
 
                       <div className="flex-1 min-w-0">
-                        <p className="text-xs text-gray-700 group-hover:text-gray-900 line-clamp-2 leading-relaxed">
+                        <p className="text-xs text-muted-foreground group-hover:text-foreground line-clamp-2 leading-relaxed">
                           {incident.priority === "CRITICAL" && (
-                            <span className="inline-flex items-center gap-1 text-red-600 font-medium mr-1">
-                              <span className="h-1.5 w-1.5 rounded-full bg-red-500 animate-pulse" />
+                            <span className="inline-flex items-center gap-1 text-destructive font-medium mr-1">
+                              <span className="h-1.5 w-1.5 rounded-full bg-destructive animate-pulse" />
                             </span>
                           )}
                           {incident.description}
                         </p>
                         
                         <div className="flex items-center gap-3 mt-1.5">
-                          <span className="text-[10px] text-gray-400">{incident.projectName}</span>
-                          <Badge variant="outline" className={`text-[8px] px-1.5 h-4 ${getStatusVariant(incident.status)}`}>
+                          <span className="text-xs text-muted-foreground">{incident.projectName}</span>
+                          <Badge variant="outline" size="sm" className={`${getStatusVariant(incident.status)}`}>
                             {incident.status === "OPEN" ? "Abierta" : incident.status === "ASSIGNED" ? "Asignada" : "Cerrada"}
                           </Badge>
-                          <span className="text-[10px] text-gray-400 ml-auto">{formatDate(incident.createdAt)}</span>
+                          <span className="text-xs text-muted-foreground ml-auto">{formatDate(incident.createdAt)}</span>
                         </div>
                       </div>
                     </div>
@@ -127,17 +127,17 @@ export function IncidentsTable({ incidents, maxItems = 6 }: IncidentsTableProps)
                         <AvatarFallback>{getInitials(incident.createdBy)}</AvatarFallback>
                       </Avatar>
                       <div className="flex-1 min-w-0">
-                        <p className="text-xs font-medium text-gray-900">{incident.createdBy}</p>
-                        <p className="text-[10px] text-gray-400">{formatDate(incident.createdAt)}</p>
+                        <p className="text-xs font-medium text-foreground">{incident.createdBy}</p>
+                        <p className="text-xs text-muted-foreground">{formatDate(incident.createdAt)}</p>
                       </div>
-                      <Badge className={`text-[9px] ${getPriorityVariant(incident.priority)}`}>
+                      <Badge size="sm" className={`${getPriorityVariant(incident.priority)}`}>
                         {incident.priority === "CRITICAL" ? "Crítico" : "Normal"}
                       </Badge>
                     </div>
 
-                    <p className="text-xs text-gray-700 leading-relaxed">{incident.description}</p>
+                    <p className="text-xs text-muted-foreground leading-relaxed">{incident.description}</p>
 
-                    <div className="flex items-center gap-3 pt-1 border-t text-[10px] text-gray-500">
+                    <div className="flex items-center gap-3 pt-1 border-t text-xs text-muted-foreground">
                       <span className="flex items-center gap-1">
                         <MapPin className="h-2.5 w-2.5" /> {incident.projectName}
                       </span>

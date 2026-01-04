@@ -26,14 +26,10 @@ interface PlaceholderPageProps {
 
 export function PlaceholderPage({ title, description, currentPath }: PlaceholderPageProps) {
   return (
-    <div className="flex min-h-screen w-full bg-[#fafafa] overflow-hidden relative">
+    <div className="flex min-h-screen w-full bg-background overflow-hidden relative">
       {/* Patrón de fondo */}
       <div 
-        className="absolute inset-0 opacity-[0.03] pointer-events-none" 
-        style={{ 
-          backgroundImage: "radial-gradient(#000 1px, transparent 1px)", 
-          backgroundSize: "24px 24px" 
-        }} 
+        className="absolute inset-0 opacity-[0.03] pointer-events-none bg-[radial-gradient(var(--foreground)_1px,transparent_1px)] bg-size-[24px_24px]" 
       />
 
       {/* Navegación Flotante (Desktop) */}
@@ -70,25 +66,25 @@ export function PlaceholderPage({ title, description, currentPath }: Placeholder
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, ease: [0.25, 0.46, 0.45, 0.94] }}
           >
-            <Card className="border-dashed border-2 border-gray-200 bg-white/50 backdrop-blur-sm">
+            <Card className="border-dashed border-2 border-border bg-card/50 backdrop-blur-sm">
               <CardHeader className="text-center pb-2">
-                <div className="mx-auto w-16 h-16 rounded-2xl bg-gray-100 flex items-center justify-center mb-4">
-                  <Construction className="h-8 w-8 text-gray-400" />
+                <div className="mx-auto w-16 h-16 rounded-2xl bg-muted flex items-center justify-center mb-4">
+                  <Construction className="h-8 w-8 text-muted-foreground" />
                 </div>
-                <CardTitle className="text-2xl font-bold text-gray-900">{title}</CardTitle>
-                <CardDescription className="text-base text-gray-500 max-w-md mx-auto">
+                <CardTitle className="text-2xl font-bold text-foreground">{title}</CardTitle>
+                <CardDescription className="text-base text-muted-foreground max-w-md mx-auto">
                   {description}
                 </CardDescription>
               </CardHeader>
               <CardContent className="text-center pt-4 pb-8">
-                <Badge variant="outline" className="bg-amber-50 text-amber-700 border-amber-200 mb-6">
+                <Badge variant="outline" className="bg-muted text-muted-foreground border-border mb-6">
                   <span className="relative flex h-2 w-2 mr-2">
-                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75"></span>
-                    <span className="relative inline-flex rounded-full h-2 w-2 bg-amber-500"></span>
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75"></span>
+                    <span className="relative inline-flex rounded-full h-2 w-2 bg-primary"></span>
                   </span>
                   En desarrollo
                 </Badge>
-                <p className="text-sm text-gray-500 mb-6 max-w-sm mx-auto">
+                <p className="text-sm text-muted-foreground mb-6 max-w-sm mx-auto">
                   Esta sección estará disponible próximamente. Estamos trabajando para traerte la mejor experiencia.
                 </p>
                 <Button 
@@ -117,12 +113,12 @@ export function PlaceholderPage({ title, description, currentPath }: Placeholder
             ].map((feature, index) => {
               const Icon = feature.icon;
               return (
-                <Card key={index} className="border-gray-100">
+                <Card key={index} className="border-border">
                   <CardContent className="pt-4">
                     <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center mb-3">
                       <Icon className="h-4 w-4 text-primary" />
                     </div>
-                    <h3 className="font-medium text-gray-900 mb-1">{feature.title}</h3>
+                    <h3 className="font-medium text-foreground mb-1">{feature.title}</h3>
                     <p className="text-sm text-muted-foreground">{feature.desc}</p>
                   </CardContent>
                 </Card>

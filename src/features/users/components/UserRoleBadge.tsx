@@ -15,10 +15,10 @@ interface UserRoleBadgeProps {
 }
 
 const roleStyles: Record<UserRole, string> = {
-  OWNER: "bg-amber-100 text-amber-800 border-amber-200 hover:bg-amber-100/80",
-  SUPERINTENDENT: "bg-purple-100 text-purple-800 border-purple-200 hover:bg-purple-100/80",
-  RESIDENT: "bg-blue-100 text-blue-800 border-blue-200 hover:bg-blue-100/80",
-  CABO: "bg-emerald-100 text-emerald-800 border-emerald-200 hover:bg-emerald-100/80",
+  OWNER: "bg-warning/10 text-warning border-warning/20 hover:bg-warning/15",
+  SUPERINTENDENT: "bg-primary/10 text-primary border-primary/20 hover:bg-primary/15",
+  RESIDENT: "bg-info/10 text-info border-info/20 hover:bg-info/15",
+  CABO: "bg-success/10 text-success border-success/20 hover:bg-success/15",
 };
 
 const roleIcons: Record<UserRole, string> = {
@@ -30,7 +30,7 @@ const roleIcons: Record<UserRole, string> = {
 
 export function UserRoleBadge({ role, size = "default", className }: UserRoleBadgeProps) {
   const sizeClasses = {
-    sm: "text-[10px] px-1.5 py-0.5",
+    sm: "text-xs px-1.5 py-0.5",
     default: "text-xs px-2 py-0.5",
     lg: "text-sm px-3 py-1",
   };

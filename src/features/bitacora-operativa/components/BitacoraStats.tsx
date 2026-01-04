@@ -6,7 +6,7 @@
 "use client";
 
 import { Activity, AlertTriangle, Clock, Link } from "lucide-react";
-import { StatCard, StatCardGrid } from "@/components/ui/stat-card";
+import { StatCard, StatCardGrid } from "@/components/shared/stat-card";
 import { getBitacoraStats } from "@/lib/mock/operational-logs";
 
 interface BitacoraStatsProps {

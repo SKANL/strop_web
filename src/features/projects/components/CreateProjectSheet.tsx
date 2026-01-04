@@ -167,7 +167,8 @@ export function CreateProjectSheet({
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent className="w-full sm:max-w-lg overflow-y-auto">
+      <SheetContent className="sm:max-w-lg w-full p-0 bg-card border-l border-border shadow-2xl flex flex-col h-full">
+        <div className="flex-1 overflow-y-auto custom-scrollbar p-6">
         <SheetHeader className="pb-4">
           <motion.div
             initial={{ opacity: 0, y: -10 }}
@@ -175,8 +176,8 @@ export function CreateProjectSheet({
             transition={{ duration: 0.3 }}
           >
             <div className="flex items-center gap-3 mb-2">
-              <div className="p-2 rounded-xl bg-blue-100">
-                <Building2 className="h-5 w-5 text-blue-600" />
+              <div className="p-2 rounded-xl bg-primary/10">
+                <Building2 className="h-5 w-5 text-primary" />
               </div>
               <div>
                 <SheetTitle className="text-lg">
@@ -201,7 +202,7 @@ export function CreateProjectSheet({
               animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.3, delay: 0.1 }}
             >
-              <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-4">
+              <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-4">
                 Información General
               </h3>
 
@@ -215,7 +216,7 @@ export function CreateProjectSheet({
                       <FormControl>
                         <Input 
                           placeholder="Ej: Torre Residencial Norte"
-                          className="h-11 rounded-xl"
+                          inputSize="lg"
                           {...field}
                         />
                       </FormControl>
@@ -253,10 +254,11 @@ export function CreateProjectSheet({
                       <FormLabel>Ubicación *</FormLabel>
                       <FormControl>
                         <div className="relative">
-                          <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+                          <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                           <Input 
                             placeholder="Ej: Av. Reforma 1500, CDMX"
-                            className="h-11 pl-10 rounded-xl"
+                            inputSize="lg"
+                            className="pl-10"
                             {...field}
                           />
                         </div>
@@ -276,7 +278,7 @@ export function CreateProjectSheet({
               animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.3, delay: 0.2 }}
             >
-              <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-4">
+              <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-4">
                 Fechas del Proyecto
               </h3>
 
@@ -293,7 +295,7 @@ export function CreateProjectSheet({
                             <Button
                               variant="outline"
                               className={cn(
-                                "h-11 rounded-xl pl-3 text-left font-normal",
+                                "pl-3 text-left font-normal",
                                 !field.value && "text-muted-foreground"
                               )}
                             >
@@ -332,7 +334,7 @@ export function CreateProjectSheet({
                             <Button
                               variant="outline"
                               className={cn(
-                                "h-11 rounded-xl pl-3 text-left font-normal",
+                                "pl-3 text-left font-normal",
                                 !field.value && "text-muted-foreground"
                               )}
                             >
@@ -372,7 +374,7 @@ export function CreateProjectSheet({
               animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.3, delay: 0.3 }}
             >
-              <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-4">
+              <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-4">
                 Asignación
               </h3>
 
@@ -385,7 +387,7 @@ export function CreateProjectSheet({
                       <FormLabel>Superintendente Responsable *</FormLabel>
                       <Select onValueChange={field.onChange} value={field.value}>
                         <FormControl>
-                          <SelectTrigger className="h-11 rounded-xl">
+                          <SelectTrigger size="lg" className="rounded-xl">
                             <SelectValue placeholder="Selecciona un superintendente" />
                           </SelectTrigger>
                         </FormControl>
@@ -393,7 +395,7 @@ export function CreateProjectSheet({
                           {superintendents.map((user) => (
                             <SelectItem key={user.id} value={user.id}>
                               <div className="flex items-center gap-2">
-                                <div className="w-6 h-6 rounded-full bg-linear-to-br from-blue-500 to-purple-500 flex items-center justify-center text-white text-xs font-medium">
+                                <div className="w-6 h-6 rounded-full bg-primary flex items-center justify-center text-primary-foreground text-xs font-medium">
                                   {user.fullName.charAt(0)}
                                 </div>
                                 <span>{user.fullName}</span>
@@ -418,20 +420,20 @@ export function CreateProjectSheet({
                       <FormLabel>Estado Inicial</FormLabel>
                       <Select onValueChange={field.onChange} value={field.value}>
                         <FormControl>
-                          <SelectTrigger className="h-11 rounded-xl">
+                          <SelectTrigger size="lg" className="rounded-xl">
                             <SelectValue />
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
                           <SelectItem value="ACTIVE">
                             <div className="flex items-center gap-2">
-                              <span className="w-2 h-2 rounded-full bg-emerald-500" />
+                              <span className="w-2 h-2 rounded-full bg-success" />
                               Activo
                             </div>
                           </SelectItem>
                           <SelectItem value="PAUSED">
                             <div className="flex items-center gap-2">
-                              <span className="w-2 h-2 rounded-full bg-amber-500" />
+                              <span className="w-2 h-2 rounded-full bg-warning" />
                               Pausado
                             </div>
                           </SelectItem>
@@ -450,14 +452,16 @@ export function CreateProjectSheet({
                   type="button"
                   variant="outline"
                   onClick={() => onOpenChange(false)}
-                  className="flex-1 h-11 rounded-xl"
+                  size="lg"
+                  className="flex-1"
                   disabled={isSubmitting}
                 >
                   Cancelar
                 </Button>
                 <Button
                   type="submit"
-                  className="flex-1 h-11 rounded-xl bg-blue-600 hover:bg-blue-700"
+                  size="lg"
+                  className="flex-1 bg-primary hover:bg-primary/90"
                   disabled={isSubmitting || submitStatus === "success"}
                 >
                   <AnimatePresence mode="wait">
@@ -497,6 +501,7 @@ export function CreateProjectSheet({
             </SheetFooter>
           </form>
         </Form>
+        </div>
       </SheetContent>
     </Sheet>
   );

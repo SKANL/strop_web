@@ -49,36 +49,36 @@ export function DashboardTabs() {
         <TabsList className="inline-flex h-auto items-center justify-start gap-2 bg-transparent p-0">
           <TabsTrigger 
             value="overview" 
-            className="gap-2 px-4 py-2.5 text-sm font-medium text-gray-700 rounded-xl transition-all border border-transparent hover:border-gray-200 hover:bg-gray-50 data-[state=active]:bg-gray-900 data-[state=active]:text-white data-[state=active]:border-gray-900 data-[state=active]:shadow-md"
+            className="gap-2 px-4 py-2.5 text-sm font-medium text-muted-foreground rounded-xl transition-all border border-transparent hover:border-border hover:bg-muted data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:border-primary data-[state=active]:shadow-md"
           >
             <BarChart3 className="h-4 w-4" />
             <span>Resumen</span>
           </TabsTrigger>
           <TabsTrigger 
             value="projects" 
-            className="gap-2 px-4 py-2.5 text-sm font-medium text-gray-700 rounded-xl transition-all border border-transparent hover:border-gray-200 hover:bg-gray-50 data-[state=active]:bg-gray-900 data-[state=active]:text-white data-[state=active]:border-gray-900 data-[state=active]:shadow-md"
+            className="gap-2 px-4 py-2.5 text-sm font-medium text-muted-foreground rounded-xl transition-all border border-transparent hover:border-border hover:bg-muted data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:border-primary data-[state=active]:shadow-md"
           >
             <FolderKanban className="h-4 w-4" />
             <span>Proyectos</span>
-            <span className="ml-1 flex h-5 w-5 items-center justify-center rounded-full bg-blue-100 text-[10px] font-semibold text-blue-700">
+            <span className="ml-1 flex h-5 w-5 items-center justify-center rounded-full bg-primary/10 text-xs font-semibold text-primary">
               {mockProjectsUI.filter(p => p.status === "ACTIVE").length}
             </span>
           </TabsTrigger>
           <TabsTrigger 
             value="incidents" 
-            className="gap-2 px-4 py-2.5 text-sm font-medium text-gray-700 rounded-xl transition-all border border-transparent hover:border-gray-200 hover:bg-gray-50 data-[state=active]:bg-gray-900 data-[state=active]:text-white data-[state=active]:border-gray-900 data-[state=active]:shadow-md"
+            className="gap-2 px-4 py-2.5 text-sm font-medium text-muted-foreground rounded-xl transition-all border border-transparent hover:border-border hover:bg-muted data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:border-primary data-[state=active]:shadow-md"
           >
             <AlertTriangle className="h-4 w-4" />
             <span>Incidencias</span>
             {mockIncidentsUI.filter(i => i.priority === "CRITICAL" && i.status !== "CLOSED").length > 0 && (
-              <span className="ml-1 flex h-5 w-5 items-center justify-center rounded-full bg-red-500 text-[10px] font-semibold text-white animate-pulse">
+              <span className="ml-1 flex h-5 w-5 items-center justify-center rounded-full bg-destructive text-xs font-semibold text-destructive-foreground animate-pulse">
                 {mockIncidentsUI.filter(i => i.priority === "CRITICAL" && i.status !== "CLOSED").length}
               </span>
             )}
           </TabsTrigger>
           <TabsTrigger 
             value="activity" 
-            className="gap-2 px-4 py-2.5 text-sm font-medium text-gray-700 rounded-xl transition-all border border-transparent hover:border-gray-200 hover:bg-gray-50 data-[state=active]:bg-gray-900 data-[state=active]:text-white data-[state=active]:border-gray-900 data-[state=active]:shadow-md"
+            className="gap-2 px-4 py-2.5 text-sm font-medium text-muted-foreground rounded-xl transition-all border border-transparent hover:border-border hover:bg-muted data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:border-primary data-[state=active]:shadow-md"
           >
             <Activity className="h-4 w-4" />
             <span>Actividad</span>
@@ -102,13 +102,13 @@ export function DashboardTabs() {
         <TabsContent value="incidents" className="mt-6 space-y-4">
           <div className="flex items-center gap-3 flex-wrap">
             <div className="relative flex-1 min-w-50 max-w-md">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input
                 type="search"
                 placeholder="Buscar..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-10 h-10 bg-white border-gray-200 rounded-xl text-sm"
+                className="pl-10 bg-card border-border text-sm h-10"
               />
             </div>
             
@@ -116,8 +116,8 @@ export function DashboardTabs() {
               <DropdownMenuTrigger asChild>
                 <Button 
                   variant="outline" 
-                  size="sm" 
-                  className="h-10 gap-2 px-4 rounded-xl border-gray-200 bg-white hover:bg-gray-50"
+                  size="lg" 
+                  className="gap-2 px-4 border-border bg-card hover:bg-muted"
                 >
                   <Filter className="h-4 w-4" />
                   <span>{statusFilters.find(f => f.value === statusFilter)?.label || "Estado"}</span>
@@ -129,7 +129,7 @@ export function DashboardTabs() {
                   <DropdownMenuItem 
                     key={filter.label}
                     onClick={() => setStatusFilter(filter.value)}
-                    className={`rounded-lg ${statusFilter === filter.value ? "bg-gray-100 font-medium" : ""}`}
+                    className={`rounded-lg ${statusFilter === filter.value ? "bg-muted font-medium" : ""}`}
                   >
                     {filter.label}
                   </DropdownMenuItem>
@@ -142,7 +142,7 @@ export function DashboardTabs() {
                 variant="ghost" 
                 size="sm"
                 onClick={() => { setSearchQuery(""); setStatusFilter(null); }}
-                className="h-10 text-xs text-gray-500 hover:text-gray-700"
+                className="text-xs text-muted-foreground hover:text-foreground"
               >
                 Limpiar
               </Button>

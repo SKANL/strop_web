@@ -61,7 +61,8 @@ export function LogDetailSheet() {
 
   return (
     <Sheet open={!!detailLogId} onOpenChange={(open) => !open && closeDetail()}>
-      <SheetContent className="w-[500px] sm:w-[600px]">
+      <SheetContent className="w-[500px] sm:w-[600px] p-0 flex flex-col h-full bg-card shadow-2xl border-l border-border">
+        <div className="flex-1 overflow-y-auto custom-scrollbar p-6">
         <SheetHeader>
           <div className="flex items-center gap-2">
             <Badge
@@ -72,7 +73,7 @@ export function LogDetailSheet() {
             </Badge>
             <Badge variant="secondary">{statusLabels[log.status]}</Badge>
             {isLate && (
-              <Badge className="bg-amber-100 text-amber-700">Extemporáneo</Badge>
+              <Badge className="bg-warning/20 text-warning">Extemporáneo</Badge>
             )}
           </div>
           <SheetTitle className="text-left">
@@ -159,8 +160,8 @@ export function LogDetailSheet() {
                   className={cn(
                     "p-4 rounded-lg border",
                     log.gps.inGeofence
-                      ? "bg-emerald-50 border-emerald-200"
-                      : "bg-amber-50 border-amber-200"
+                      ? "bg-success/10 border-success/30"
+                      : "bg-warning/10 border-warning/30"
                   )}
                 >
                   <div className="flex items-center gap-2 mb-2">
@@ -185,8 +186,8 @@ export function LogDetailSheet() {
                   className={cn(
                     "p-4 rounded-lg border",
                     log.integrity.verified
-                      ? "bg-emerald-50 border-emerald-200"
-                      : "bg-red-50 border-red-200"
+                      ? "bg-success/10 border-success/30"
+                      : "bg-destructive/10 border-destructive/30"
                   )}
                 >
                   <div className="flex items-center gap-2 mb-2">
@@ -260,6 +261,7 @@ export function LogDetailSheet() {
             </TabsContent>
           </ScrollArea>
         </Tabs>
+        </div>
       </SheetContent>
     </Sheet>
   );

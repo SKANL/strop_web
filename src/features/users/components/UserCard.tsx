@@ -85,7 +85,7 @@ export function UserCard({
       <Card
         className={cn(
           "group relative overflow-hidden transition-all duration-200",
-          "hover:shadow-lg hover:shadow-gray-200/50 hover:border-gray-300",
+          "hover:shadow-lg hover:shadow-muted hover:border-border",
           "cursor-pointer",
           !user.isActive && "opacity-70"
         )}
@@ -107,7 +107,7 @@ export function UserCard({
                 </div>
               </div>
               <div className="min-w-0">
-                <h3 className="font-semibold text-gray-900 truncate">
+                <h3 className="font-semibold text-foreground truncate">
                   {user.fullName}
                 </h3>
                 <UserRoleBadge role={user.role} size="sm" />
@@ -138,7 +138,7 @@ export function UserCard({
                 <DropdownMenuSeparator />
                 <DropdownMenuItem
                   onClick={() => onToggleStatus?.(user)}
-                  className={user.isActive ? "text-red-600" : "text-emerald-600"}
+                  className={user.isActive ? "text-destructive" : "text-success"}
                 >
                   {user.isActive ? (
                     <>
@@ -157,11 +157,11 @@ export function UserCard({
           </div>
 
           {/* Contact Info */}
-          <div className="space-y-1.5 text-sm text-gray-600">
+          <div className="space-y-1.5 text-sm text-muted-foreground">
             <Tooltip>
               <TooltipTrigger asChild>
                 <div className="flex items-center gap-2 truncate">
-                  <Mail className="h-3.5 w-3.5 text-gray-400 shrink-0" />
+                  <Mail className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
                   <span className="truncate">{user.email}</span>
                 </div>
               </TooltipTrigger>
@@ -170,12 +170,12 @@ export function UserCard({
 
             {user.phone && (
               <div className="flex items-center gap-2">
-                <Phone className="h-3.5 w-3.5 text-gray-400" />
+                <Phone className="h-3.5 w-3.5 text-muted-foreground" />
                 <span>{user.phone}</span>
               </div>
             )}
 
-            <div className="flex items-center gap-2 text-gray-400">
+            <div className="flex items-center gap-2 text-muted-foreground">
               <Calendar className="h-3.5 w-3.5" />
               <span className="text-xs">Último acceso: {lastLoginText}</span>
             </div>

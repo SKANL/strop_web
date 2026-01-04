@@ -5,6 +5,8 @@
  * Diseño split-screen: branding a la izquierda, formulario a la derecha
  */
 import { ClientRouter } from 'astro:transitions';
+import "@/styles/global.css";
+import ThemeHead from "@/components/ThemeHead.astro";
 
 interface Props {
   title: string;
@@ -24,6 +26,7 @@ const { title, description = "Gestión inteligente de obras de construcción" } 
     <meta name="generator" content={Astro.generator} />
     <title>{title} | Strop</title>
     <!-- View Transitions para navegación suave entre páginas de auth -->
+    <ThemeHead />
     <ClientRouter />
   </head>
   <body class="h-full overflow-hidden bg-background antialiased">
@@ -180,30 +183,3 @@ const { title, description = "Gestión inteligente de obras de construcción" } 
   </body>
 </html>
 
-<style is:global>
-  @import "../styles/global.css";
-  
-  /* Scrollbar estilizado para el panel derecho */
-  .auth-panel-scrollbar::-webkit-scrollbar {
-    width: 6px;
-  }
-
-  .auth-panel-scrollbar::-webkit-scrollbar-track {
-    background: transparent;
-  }
-
-  .auth-panel-scrollbar::-webkit-scrollbar-thumb {
-    background: hsl(var(--muted-foreground) / 0.3);
-    border-radius: 3px;
-  }
-
-  .auth-panel-scrollbar::-webkit-scrollbar-thumb:hover {
-    background: hsl(var(--muted-foreground) / 0.5);
-  }
-
-  /* Para Firefox */
-  .auth-panel-scrollbar {
-    scrollbar-color: hsl(var(--muted-foreground) / 0.3) transparent;
-    scrollbar-width: thin;
-  }
-</style>

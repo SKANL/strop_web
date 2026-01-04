@@ -58,9 +58,9 @@ const priorityColors: Record<string, string> = {
 };
 
 const statusColors: Record<string, string> = {
-  OPEN: "bg-yellow-500/20 text-yellow-700 dark:text-yellow-400 border-yellow-500/30",
-  ASSIGNED: "bg-blue-500/20 text-blue-700 dark:text-blue-400 border-blue-500/30",
-  CLOSED: "bg-green-500/20 text-green-700 dark:text-green-400 border-green-500/30",
+  OPEN: "bg-warning/20 text-warning border-warning/30",
+  ASSIGNED: "bg-info/20 text-info border-info/30",
+  CLOSED: "bg-success/20 text-success border-success/30",
 };
 
 const contentStagger = {
@@ -106,7 +106,8 @@ export function IncidentDetail({ incident, open, onClose }: IncidentDetailProps)
   return (
     <>
       <Sheet open={open} onOpenChange={(isOpen) => !isOpen && onClose()}>
-        <SheetContent className="sm:max-w-xl w-full overflow-hidden flex flex-col">
+        <SheetContent className="sm:max-w-xl w-full p-0 flex flex-col h-full bg-card shadow-2xl border-l border-border">
+          <div className="flex-1 overflow-y-auto custom-scrollbar p-6">
           <SheetHeader className="pr-8">
             <div className="flex items-center gap-2 mb-1">
               <IncidentTypeIcon type={incident.type} size={20} />
@@ -168,7 +169,7 @@ export function IncidentDetail({ incident, open, onClose }: IncidentDetailProps)
                     <Image className="size-3.5" />
                     Fotos
                     {photos.length > 0 && (
-                      <Badge variant="secondary" className="size-5 p-0 justify-center text-[10px]">
+                      <Badge variant="secondary" size="sm" className="size-5 p-0 justify-center">
                         {photos.length}
                       </Badge>
                     )}
@@ -292,9 +293,9 @@ export function IncidentDetail({ incident, open, onClose }: IncidentDetailProps)
                     {incident.isImmutable && (
                       <motion.div
                         variants={itemVariants}
-                        className="bg-amber-500/10 border border-amber-500/30 rounded-lg p-3"
+                        className="bg-warning/10 border border-warning/30 rounded-lg p-3"
                       >
-                        <p className="text-xs text-amber-700 dark:text-amber-400">
+                        <p className="text-xs text-warning">
                           ⚠️ Este registro es inalterable y forma parte de la bitácora digital oficial.
                         </p>
                       </motion.div>
@@ -311,6 +312,7 @@ export function IncidentDetail({ incident, open, onClose }: IncidentDetailProps)
               </Tabs>
             </motion.div>
           </ScrollArea>
+          </div>
         </SheetContent>
       </Sheet>
 

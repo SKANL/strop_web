@@ -193,8 +193,8 @@ function OrganizationStep({
           )}
           {!subdomainStatus.checking && subdomainStatus.available === true && (
             <>
-              <Check className="h-3 w-3 text-green-500" />
-              <span className="text-green-600">{subdomainStatus.message}</span>
+              <Check className="h-3 w-3 text-success" />
+              <span className="text-success">{subdomainStatus.message}</span>
             </>
           )}
           {!subdomainStatus.checking && subdomainStatus.available === false && (
@@ -249,7 +249,7 @@ function OrganizationStep({
         )}
       </div>
 
-      <Button type="submit" className="w-full h-11">
+      <Button type="submit" size="lg" className="w-full">
         Continuar
       </Button>
     </form>
@@ -358,7 +358,13 @@ function UserStep({
             <div className="flex items-center gap-2">
               <div className="flex-1 h-1.5 bg-muted rounded-full overflow-hidden">
                 <div
-                  className={`h-full transition-all ${passwordStrength.color}`}
+                  className={`h-full transition-all ${
+                    passwordStrength.strength === "weak"
+                      ? "bg-status-weak"
+                      : passwordStrength.strength === "medium"
+                      ? "bg-status-medium"
+                      : "bg-status-strong"
+                  }`}
                   style={{ width: `${(passwordStrength.score / 6) * 100}%` }}
                 />
               </div>
@@ -370,11 +376,11 @@ function UserStep({
               {passwordRequirements.map((req) => (
                 <div key={req.label} className="flex items-center gap-1.5 text-xs">
                   {req.met ? (
-                    <Check className="h-3 w-3 text-green-500" />
+                    <Check className="h-3 w-3 text-success" />
                   ) : (
                     <div className="h-3 w-3 rounded-full border border-muted-foreground/30" />
                   )}
-                  <span className={req.met ? "text-green-600" : "text-muted-foreground"}>
+                  <span className={req.met ? "text-success" : "text-muted-foreground"}>
                     {req.label}
                   </span>
                 </div>
@@ -415,10 +421,10 @@ function UserStep({
 
       {/* Botones */}
       <div className="flex gap-3">
-        <Button type="button" variant="outline" onClick={onBack} className="flex-1 h-11">
+        <Button type="button" variant="outline" onClick={onBack} size="lg" className="flex-1">
           Atrás
         </Button>
-        <Button type="submit" className="flex-1 h-11">
+        <Button type="submit" size="lg" className="flex-1">
           Continuar
         </Button>
       </div>
@@ -472,7 +478,7 @@ function PlanStep({
           >
             {plan.popular && (
               <div className="absolute -top-3 left-4 flex items-center gap-1 rounded-full bg-primary px-2.5 py-0.5 text-xs font-medium text-primary-foreground">
-                <Star className="h-4 w-4 text-yellow-500 fill-yellow-500" />
+                <Star className="h-4 w-4 text-warning fill-warning" />
                 Popular
               </div>
             )}
@@ -492,7 +498,7 @@ function PlanStep({
                 <ul className="mt-3 space-y-1.5">
                   {plan.features.slice(0, 4).map((feature) => (
                     <li key={feature} className="flex items-center gap-2 text-sm text-muted-foreground">
-                      <Check className="h-3.5 w-3.5 text-green-500 shrink-0" />
+                      <Check className="h-3.5 w-3.5 text-success shrink-0" />
                       {feature}
                     </li>
                   ))}
@@ -533,22 +539,22 @@ function PlanStep({
       )}
 
       {/* Info de trial */}
-      <div className="rounded-lg bg-green-50 dark:bg-green-950/30 border border-green-200 dark:border-green-900 p-4 text-sm">
-        <div className="flex items-center gap-2 text-green-700 dark:text-green-400">
+      <div className="rounded-lg bg-success/10 border border-success/30 p-4 text-sm">
+        <div className="flex items-center gap-2 text-success">
           <Check className="h-4 w-4" />
           <span className="font-medium">14 días de prueba gratis</span>
         </div>
-        <p className="mt-1 text-green-600 dark:text-green-500">
+        <p className="mt-1 text-success/80">
           Sin tarjeta de crédito requerida. Cancela cuando quieras.
         </p>
       </div>
 
       {/* Botones */}
       <div className="flex gap-3">
-        <Button type="button" variant="outline" onClick={onBack} disabled={isLoading} className="flex-1 h-11">
+        <Button type="button" variant="outline" onClick={onBack} disabled={isLoading} size="lg" className="flex-1">
           Atrás
         </Button>
-        <Button type="submit" disabled={isLoading} className="flex-1 h-11">
+        <Button type="submit" disabled={isLoading} size="lg" className="flex-1">
           {isLoading ? (
             <>
               <Spinner className="h-4 w-4" />

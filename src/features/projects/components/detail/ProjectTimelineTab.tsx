@@ -35,30 +35,31 @@ interface ProjectTimelineTabProps {
 }
 
 // Configuración del chart para shadcn
+// Configuración del chart para shadcn
 const chartConfig = {
   completed: {
     label: "Completado",
-    color: "hsl(160, 84%, 39%)", // emerald-500
+    color: "var(--color-success)", 
   },
   remaining: {
     label: "Pendiente",
-    color: "hsl(215, 20%, 85%)", // slate-300
+    color: "var(--color-muted)",
   },
 } satisfies ChartConfig;
 
 // Colores según status para las barras
 const statusColors: Record<CriticalPathStatus, { completed: string; remaining: string }> = {
   COMPLETED: {
-    completed: "hsl(160, 84%, 39%)", // emerald-500
-    remaining: "hsl(160, 84%, 85%)", // emerald-200
+    completed: "var(--color-success)", 
+    remaining: "var(--color-muted)", 
   },
   IN_PROGRESS: {
-    completed: "hsl(217, 91%, 60%)", // blue-500
-    remaining: "hsl(214, 32%, 91%)", // slate-200
+    completed: "var(--color-info)", 
+    remaining: "var(--color-muted)", 
   },
   PENDING: {
-    completed: "hsl(215, 20%, 65%)", // slate-400
-    remaining: "hsl(214, 32%, 91%)", // slate-200
+    completed: "var(--color-warning)", 
+    remaining: "var(--color-muted)", 
   },
 };
 
@@ -133,57 +134,57 @@ export function ProjectTimelineTab({ items, projectId = "mock-project-id" }: Pro
     <div className="space-y-6">
       {/* Stats Cards */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <Card className="border-slate-200">
+        <Card className="border-border">
           <CardContent className="pt-4 pb-3">
             <div className="flex items-center gap-3">
-              <div className="p-2 rounded-lg bg-slate-100">
-                <Calendar className="h-4 w-4 text-slate-600" />
+              <div className="p-2 rounded-lg bg-muted">
+                <Calendar className="h-4 w-4 text-muted-foreground" />
               </div>
               <div>
-                <p className="text-2xl font-bold text-slate-900">{stats.total}</p>
-                <p className="text-xs text-slate-500">Actividades</p>
+                <p className="text-2xl font-bold text-foreground">{stats.total}</p>
+                <p className="text-xs text-muted-foreground">Actividades</p>
               </div>
             </div>
           </CardContent>
         </Card>
         
-        <Card className="border-emerald-200 bg-emerald-50/50">
+        <Card className="border-success/20 bg-success/10">
           <CardContent className="pt-4 pb-3">
             <div className="flex items-center gap-3">
-              <div className="p-2 rounded-lg bg-emerald-100">
-                <CheckCircle2 className="h-4 w-4 text-emerald-600" />
+              <div className="p-2 rounded-lg bg-success/20">
+                <CheckCircle2 className="h-4 w-4 text-success" />
               </div>
               <div>
-                <p className="text-2xl font-bold text-emerald-700">{stats.completed}</p>
-                <p className="text-xs text-emerald-600">Completadas</p>
+                <p className="text-2xl font-bold text-success">{stats.completed}</p>
+                <p className="text-xs text-success/80">Completadas</p>
               </div>
             </div>
           </CardContent>
         </Card>
         
-        <Card className="border-blue-200 bg-blue-50/50">
+        <Card className="border-info/20 bg-info/10">
           <CardContent className="pt-4 pb-3">
             <div className="flex items-center gap-3">
-              <div className="p-2 rounded-lg bg-blue-100">
-                <Clock className="h-4 w-4 text-blue-600" />
+              <div className="p-2 rounded-lg bg-info/20">
+                <Clock className="h-4 w-4 text-info" />
               </div>
               <div>
-                <p className="text-2xl font-bold text-blue-700">{stats.inProgress}</p>
-                <p className="text-xs text-blue-600">En Progreso</p>
+                <p className="text-2xl font-bold text-info">{stats.inProgress}</p>
+                <p className="text-xs text-info/80">En Progreso</p>
               </div>
             </div>
           </CardContent>
         </Card>
         
-        <Card className="border-amber-200 bg-amber-50/50">
+        <Card className="border-warning/20 bg-warning/10">
           <CardContent className="pt-4 pb-3">
             <div className="flex items-center gap-3">
-              <div className="p-2 rounded-lg bg-amber-100">
-                <AlertCircle className="h-4 w-4 text-amber-600" />
+              <div className="p-2 rounded-lg bg-warning/20">
+                <AlertCircle className="h-4 w-4 text-warning" />
               </div>
               <div>
-                <p className="text-2xl font-bold text-amber-700">{stats.pending}</p>
-                <p className="text-xs text-amber-600">Pendientes</p>
+                <p className="text-2xl font-bold text-warning">{stats.pending}</p>
+                <p className="text-xs text-warning/80">Pendientes</p>
               </div>
             </div>
           </CardContent>
@@ -191,11 +192,11 @@ export function ProjectTimelineTab({ items, projectId = "mock-project-id" }: Pro
       </div>
 
       {/* Chart Card */}
-      <Card className="rounded-2xl border-slate-200 shadow-sm overflow-hidden">
-        <CardHeader className="border-b border-slate-100 py-5">
+      <Card className="rounded-2xl border-border shadow-sm overflow-hidden">
+        <CardHeader className="border-b border-border py-5">
           <div className="flex flex-col sm:flex-row justify-between gap-4">
             <div>
-              <CardTitle className="text-lg font-bold text-slate-900">
+              <CardTitle className="text-lg font-bold text-foreground">
                 Ruta Crítica (Timeline)
               </CardTitle>
               <CardDescription className="mt-1">
@@ -207,16 +208,16 @@ export function ProjectTimelineTab({ items, projectId = "mock-project-id" }: Pro
               {/* Leyenda visual */}
               <div className="flex gap-4 text-xs items-center">
                 <div className="flex items-center gap-1.5">
-                  <span className="w-3 h-3 rounded-sm bg-emerald-500" />
-                  <span className="text-slate-600 font-medium">Completado</span>
+                  <span className="w-3 h-3 rounded-sm bg-success" />
+                  <span className="text-muted-foreground font-medium">Completado</span>
                 </div>
                 <div className="flex items-center gap-1.5">
-                  <span className="w-3 h-3 rounded-sm bg-blue-500" />
-                  <span className="text-slate-600 font-medium">En Progreso</span>
+                  <span className="w-3 h-3 rounded-sm bg-info" />
+                  <span className="text-muted-foreground font-medium">En Progreso</span>
                 </div>
                 <div className="flex items-center gap-1.5">
-                  <span className="w-3 h-3 rounded-sm bg-slate-300" />
-                  <span className="text-slate-600 font-medium">Pendiente</span>
+                  <span className="w-3 h-3 rounded-sm bg-muted" />
+                  <span className="text-muted-foreground font-medium">Pendiente</span>
                 </div>
               </div>
 
@@ -224,9 +225,9 @@ export function ProjectTimelineTab({ items, projectId = "mock-project-id" }: Pro
                 <SheetTrigger asChild>
                   <Button 
                     variant="outline" 
-                    className="rounded-xl gap-2 border-slate-200 hover:bg-slate-50"
+                    className="rounded-xl gap-2 border-border hover:bg-muted"
                   >
-                    <FileSpreadsheet className="h-4 w-4 text-emerald-600" />
+                    <FileSpreadsheet className="h-4 w-4 text-success" />
                     Importar .xlsx
                   </Button>
                 </SheetTrigger>
@@ -238,7 +239,7 @@ export function ProjectTimelineTab({ items, projectId = "mock-project-id" }: Pro
                       El sistema detectará automáticamente las columnas compatibles.
                     </SheetDescription>
                   </SheetHeader>
-                  <div className="h-[calc(100vh-180px)]">
+                  <div className="h-[calc(100vh-180px)] overflow-y-auto custom-scrollbar">
                     <ExcelImportFlow
                       type="critical_path"
                       projectId={projectId}
@@ -274,7 +275,7 @@ export function ProjectTimelineTab({ items, projectId = "mock-project-id" }: Pro
                   axisLine={false}
                   tickMargin={8}
                   width={180}
-                  tick={{ fontSize: 12, fill: "#64748b" }}
+                  tick={{ fontSize: 12, fill: "var(--muted-foreground)" }}
                 />
                 <XAxis 
                   type="number" 
@@ -282,7 +283,7 @@ export function ProjectTimelineTab({ items, projectId = "mock-project-id" }: Pro
                   tickLine={false}
                   axisLine={false}
                   tickFormatter={(value) => `${value}%`}
-                  tick={{ fontSize: 11, fill: "#94a3b8" }}
+                  tick={{ fontSize: 11, fill: "var(--muted-foreground)" }}
                 />
                 <ChartTooltip
                   cursor={{ fill: "rgba(0,0,0,0.05)" }}
@@ -296,9 +297,9 @@ export function ProjectTimelineTab({ items, projectId = "mock-project-id" }: Pro
                             <div className="flex flex-col gap-1">
                               <span className="font-medium text-foreground">{data.fullName}</span>
                               <span className="text-muted-foreground">
-                                Progreso: <span className="font-semibold text-emerald-600">{value}%</span>
+                                Progreso: <span className="font-semibold text-success">{value}%</span>
                               </span>
-                              <span className="text-muted-foreground text-[10px]">
+                              <span className="text-muted-foreground text-xs">
                                 {data.plannedStart} → {data.plannedEnd} ({data.durationMonths} meses)
                               </span>
                             </div>
@@ -340,9 +341,9 @@ export function ProjectTimelineTab({ items, projectId = "mock-project-id" }: Pro
               </BarChart>
             </ChartContainer>
           ) : (
-            <div className="text-center py-16 text-slate-400">
+            <div className="text-center py-16 text-muted-foreground">
               <FileSpreadsheet className="h-12 w-12 mx-auto mb-4 opacity-50" />
-              <p className="text-lg font-medium text-slate-600 mb-2">Sin actividades</p>
+              <p className="text-lg font-medium text-foreground mb-2">Sin actividades</p>
               <p className="text-sm mb-4">
                 Importa tu programa de obra desde Excel
               </p>
@@ -355,9 +356,9 @@ export function ProjectTimelineTab({ items, projectId = "mock-project-id" }: Pro
         </CardContent>
 
         {items.length > 0 && (
-          <CardFooter className="flex-col items-start gap-2 text-sm border-t border-slate-100 bg-slate-50/50 py-4">
-            <div className="flex gap-2 font-medium leading-none text-slate-700">
-              <TrendingUp className="h-4 w-4 text-emerald-500" />
+          <CardFooter className="flex-col items-start gap-2 text-sm border-t border-border bg-muted/50 py-4">
+            <div className="flex gap-2 font-medium leading-none text-foreground">
+              <TrendingUp className="h-4 w-4 text-success" />
               Avance promedio del proyecto: {stats.avgProgress}%
             </div>
             <div className="leading-none text-muted-foreground text-xs">

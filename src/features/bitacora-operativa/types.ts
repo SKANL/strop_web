@@ -24,6 +24,14 @@ export type LogStatus =
   | 'PUBLISHED'  // Publicado (inmutable)
   | 'LOCKED';    // Cerrado (día firmado)
 
+/** Event source for Centro de Verdad Única (CVU) */
+export type EventSource = 
+  | 'ALL'       // Filter: show all
+  | 'SYSTEM'    // Automated audit logs
+  | 'INCIDENT'  // From incident management
+  | 'MANUAL'    // Superintendent entries
+  | 'MOBILE';   // Mobile app events
+
 /** Condiciones climáticas */
 export type WeatherCondition = 'sun' | 'cloud' | 'rain' | 'storm';
 

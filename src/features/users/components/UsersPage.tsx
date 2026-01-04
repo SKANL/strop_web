@@ -103,14 +103,14 @@ export function UsersPage({ initialUsers }: UsersPageProps) {
           className="flex flex-col sm:flex-row sm:items-center justify-between gap-4"
         >
           <div className="flex items-center gap-3">
-            <div className="p-3 rounded-2xl bg-linear-to-br from-purple-500 to-purple-600 shadow-lg shadow-purple-500/25">
-              <Users2 className="h-6 w-6 text-white" />
+            <div className="p-3 rounded-2xl bg-primary shadow-lg shadow-primary/25">
+              <Users2 className="h-6 w-6 text-primary-foreground" />
             </div>
             <div>
-              <h1 className="text-2xl font-bold text-gray-900">
+              <h1 className="text-2xl font-bold text-foreground">
                 Equipo de Trabajo
               </h1>
-              <p className="text-sm text-gray-500">
+              <p className="text-sm text-muted-foreground">
                 Gestiona los usuarios de tu organización
               </p>
             </div>
@@ -118,7 +118,8 @@ export function UsersPage({ initialUsers }: UsersPageProps) {
 
           <Button
             onClick={() => setInviteDialogOpen(true)}
-            className="h-11 px-6 rounded-xl bg-purple-600 hover:bg-purple-700 shadow-lg shadow-purple-500/25 transition-all hover:shadow-xl hover:shadow-purple-500/30"
+            size="lg"
+            className="shadow-lg shadow-primary/25 transition-all hover:shadow-xl hover:shadow-primary/30"
           >
             <UserPlus className="h-4 w-4 mr-2" />
             Invitar Usuario
@@ -153,7 +154,7 @@ export function UsersPage({ initialUsers }: UsersPageProps) {
               <Empty>
                 <EmptyHeader>
                   <EmptyMedia>
-                    <Users2 className="h-12 w-12 text-gray-400" />
+                    <Users2 className="h-12 w-12 text-muted-foreground" />
                   </EmptyMedia>
                   <EmptyTitle>
                     {searchQuery || roleFilter !== "ALL" || statusFilter !== "ALL"

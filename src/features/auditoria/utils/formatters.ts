@@ -154,16 +154,16 @@ function getResourceName(type: string): string {
 /**
  * Obtiene color para tipo de acción (para timeline)
  */
-export function getActionColor(action: string): string {
-  const colors: Record<string, string> = {
-    CREATE: "bg-green-500",
-    UPDATE: "bg-blue-500",
-    DELETE: "bg-red-500",
-    LOGIN: "bg-purple-500",
-    LOGOUT: "bg-gray-500",
-    EXPORT: "bg-yellow-500",
-    IMPORT: "bg-orange-500",
-    VIEW: "bg-cyan-500",
+export function getActionColor(action: string): "strong" | "info" | "weak" | "neutral" | "medium" {
+  const colors: Record<string, "strong" | "info" | "weak" | "neutral" | "medium"> = {
+    CREATE: "strong",
+    UPDATE: "info",
+    DELETE: "weak",
+    LOGIN: "neutral", // Was purple, mapping to neutral/secondary or info? Let's use neutral for now or info if we want color
+    LOGOUT: "neutral",
+    EXPORT: "medium",
+    IMPORT: "medium",
+    VIEW: "info",
   };
-  return colors[action] || "bg-gray-400";
+  return colors[action] || "neutral";
 }

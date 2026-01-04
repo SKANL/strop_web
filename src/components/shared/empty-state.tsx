@@ -41,17 +41,17 @@ function EmptyState({
     <>
       <div
         className={cn(
-          "w-16 h-16 rounded-2xl bg-gray-100 flex items-center justify-center mb-4",
+          "w-16 h-16 rounded-2xl bg-muted flex items-center justify-center mb-4",
           iconContainerClassName
         )}
       >
-        <Icon className={cn("h-8 w-8 text-gray-400", iconClassName)} />
+        <Icon className={cn("h-8 w-8 text-muted-foreground", iconClassName)} />
       </div>
 
-      <h3 className="text-lg font-semibold text-gray-900 mb-1">{title}</h3>
+      <h3 className="text-lg font-semibold text-foreground mb-1">{title}</h3>
 
       {description && (
-        <p className="text-sm text-gray-500 text-center max-w-sm mb-4">
+        <p className="text-sm text-muted-foreground text-center max-w-sm mb-4">
           {description}
         </p>
       )}
@@ -171,8 +171,8 @@ function CreateEmptyState({
       description={
         description || `Aún no tienes ningún ${resourceName}. Comienza creando uno.`
       }
-      iconContainerClassName="bg-gradient-to-br from-blue-500 to-blue-600 shadow-xl shadow-blue-500/30"
-      iconClassName="text-white"
+      iconContainerClassName="bg-primary shadow-xl shadow-primary/30"
+      iconClassName="text-primary-foreground"
       action={{
         label: `Crear ${resourceName}`,
         onClick: onCreate,

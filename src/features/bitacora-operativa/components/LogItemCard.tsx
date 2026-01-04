@@ -125,7 +125,7 @@ export function LogItemCard({ log, index = 0 }: LogItemCardProps) {
               {isLate && (
                 <Tooltip>
                   <TooltipTrigger>
-                    <Badge variant="secondary" className="text-xs gap-1 bg-amber-100 text-amber-700">
+                    <Badge variant="secondary" className="text-xs gap-1 bg-warning/20 text-warning">
                       <AlertCircle className="h-3 w-3" />
                       Extemporáneo
                     </Badge>
@@ -145,7 +145,7 @@ export function LogItemCard({ log, index = 0 }: LogItemCardProps) {
               <div className="flex items-center gap-1">
                 <Avatar className="h-5 w-5">
                   <AvatarImage src={log.author.avatar} />
-                  <AvatarFallback className="text-[8px]">
+                  <AvatarFallback className="text-xs">
                     {getInitials(log.author.name)}
                   </AvatarFallback>
                 </Avatar>
@@ -173,8 +173,8 @@ export function LogItemCard({ log, index = 0 }: LogItemCardProps) {
                   className={cn(
                     "p-1 rounded-full",
                     log.integrity.verified
-                      ? "bg-emerald-100 text-emerald-600"
-                      : "bg-red-100 text-red-600"
+                      ? "bg-success/20 text-success"
+                      : "bg-destructive/20 text-destructive"
                   )}
                 >
                   <Link2 className="h-3 w-3" />
@@ -183,7 +183,7 @@ export function LogItemCard({ log, index = 0 }: LogItemCardProps) {
               <TooltipContent>
                 {log.integrity.verified ? "Cadena verificada" : "Cadena rota"}
                 <br />
-                <code className="text-[10px]">{log.integrity.hash}</code>
+                <code className="text-xs">{log.integrity.hash}</code>
               </TooltipContent>
             </Tooltip>
 
@@ -194,8 +194,8 @@ export function LogItemCard({ log, index = 0 }: LogItemCardProps) {
                   className={cn(
                     "p-1 rounded-full",
                     log.gps.inGeofence
-                      ? "bg-emerald-100 text-emerald-600"
-                      : "bg-amber-100 text-amber-600"
+                      ? "bg-success/20 text-success"
+                      : "bg-warning/20 text-warning"
                   )}
                 >
                   <MapPin className="h-3 w-3" />

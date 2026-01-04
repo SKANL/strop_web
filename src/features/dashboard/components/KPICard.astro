@@ -30,26 +30,26 @@ const {
 const getVariantStyles = () => {
   switch (variant) {
     case "primary":
-      return "bg-blue-50/80 border-blue-200/60";
+      return "bg-primary/5 border-primary/20";
     case "warning":
-      return "bg-amber-50/80 border-amber-200/60";
+      return "bg-warning/10 border-warning/20";
     case "destructive":
-      return "bg-red-50/80 border-red-200/60";
+      return "bg-destructive/10 border-destructive/20";
     default:
-      return "bg-white border-gray-200/60";
+      return "bg-card border-border";
   }
 };
 
 const getIconStyles = () => {
   switch (variant) {
     case "primary":
-      return "bg-blue-100 text-blue-600";
+      return "bg-primary/10 text-primary";
     case "warning":
-      return "bg-amber-100 text-amber-600";
+      return "bg-warning/20 text-warning";
     case "destructive":
-      return "bg-red-100 text-red-600";
+      return "bg-destructive/10 text-destructive";
     default:
-      return "bg-gray-100 text-gray-600";
+      return "bg-muted text-muted-foreground";
   }
 };
 ---
@@ -71,21 +71,21 @@ const getIconStyles = () => {
         {/* Content */}
         <div class="flex-1 min-w-0">
           <div class="flex items-center justify-between gap-2">
-            <p class="text-xs font-medium text-gray-500 truncate">{title}</p>
+            <p class="text-xs font-medium text-muted-foreground truncate">{title}</p>
             {trend && (
               <Badge
                 variant="outline"
-                className={`text-[10px] font-semibold px-1.5 py-0 h-4 border-0 gap-0.5 shrink-0 ${
+                className={`text-xs font-semibold px-1.5 py-0 h-4 border-0 gap-0.5 shrink-0 ${
                   trend.isPositive
-                    ? "bg-green-100 text-green-700"
-                    : "bg-red-100 text-red-600"
+                    ? "bg-success/10 text-success"
+                    : "bg-destructive/10 text-destructive"
                 }`}
               >
                 {trend.isPositive ? "↑" : "↓"} {trend.value}%
               </Badge>
             )}
           </div>
-          <span class="text-2xl font-bold tracking-tight text-gray-900"
+          <span class="text-2xl font-bold tracking-tight text-foreground"
             >{value}</span
           >
         </div>

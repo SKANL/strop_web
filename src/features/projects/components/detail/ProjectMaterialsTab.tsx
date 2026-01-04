@@ -72,31 +72,31 @@ export function ProjectMaterialsTab({ materials, projectId = "mock-project-id" }
     <div className="space-y-6">
       {/* KPIs */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <Card className="border-slate-200">
+        <Card className="border-border">
           <CardContent className="pt-4 pb-3">
             <div className="flex items-center gap-3">
-              <div className="p-2 rounded-lg bg-indigo-100">
-                <Package className="h-4 w-4 text-indigo-600" />
+              <div className="p-2 rounded-lg bg-primary/10">
+                <Package className="h-4 w-4 text-primary" />
               </div>
               <div>
-                <p className="text-2xl font-bold text-slate-900">{stats.total}</p>
-                <p className="text-xs text-slate-500">Materiales Totales</p>
+                <p className="text-2xl font-bold text-foreground">{stats.total}</p>
+                <p className="text-xs text-muted-foreground">Materiales Totales</p>
               </div>
             </div>
           </CardContent>
         </Card>
 
-        <Card className={stats.withDeviation > 0 ? "border-red-200 bg-red-50/50" : "border-slate-200"}>
+        <Card className={stats.withDeviation > 0 ? "border-destructive/20 bg-destructive/5" : "border-border"}>
           <CardContent className="pt-4 pb-3">
             <div className="flex items-center gap-3">
-              <div className={`p-2 rounded-lg ${stats.withDeviation > 0 ? 'bg-red-100' : 'bg-slate-100'}`}>
-                <AlertTriangle className={`h-4 w-4 ${stats.withDeviation > 0 ? 'text-red-600' : 'text-slate-600'}`} />
+              <div className={`p-2 rounded-lg ${stats.withDeviation > 0 ? 'bg-destructive/10' : 'bg-muted'}`}>
+                <AlertTriangle className={`h-4 w-4 ${stats.withDeviation > 0 ? 'text-destructive' : 'text-muted-foreground'}`} />
               </div>
               <div>
-                <p className={`text-2xl font-bold ${stats.withDeviation > 0 ? 'text-red-700' : 'text-slate-900'}`}>
+                <p className={`text-2xl font-bold ${stats.withDeviation > 0 ? 'text-destructive' : 'text-foreground'}`}>
                   {stats.withDeviation}
                 </p>
-                <p className={`text-xs ${stats.withDeviation > 0 ? 'text-red-600' : 'text-slate-500'}`}>
+                <p className={`text-xs ${stats.withDeviation > 0 ? 'text-destructive' : 'text-muted-foreground'}`}>
                   Con Desviación
                 </p>
               </div>
@@ -104,17 +104,17 @@ export function ProjectMaterialsTab({ materials, projectId = "mock-project-id" }
           </CardContent>
         </Card>
 
-        <Card className="border-slate-200">
+        <Card className="border-border">
           <CardContent className="pt-4 pb-3">
             <div className="flex items-center gap-3">
-              <div className="p-2 rounded-lg bg-emerald-100">
-                <ArrowRightLeft className="h-4 w-4 text-emerald-600" />
+              <div className="p-2 rounded-lg bg-success/10">
+                <ArrowRightLeft className="h-4 w-4 text-success" />
               </div>
               <div>
-                <p className="text-2xl font-bold text-slate-900">
+                <p className="text-2xl font-bold text-foreground">
                   {Math.round((stats.totalRequested / stats.totalPlanned) * 100) || 0}%
                 </p>
-                <p className="text-xs text-slate-500">Consumo Global</p>
+                <p className="text-xs text-muted-foreground">Consumo Global</p>
               </div>
             </div>
           </CardContent>
@@ -123,7 +123,7 @@ export function ProjectMaterialsTab({ materials, projectId = "mock-project-id" }
 
       {/* Tabla de Materiales */}
       <Card>
-        <CardHeader className="flex flex-col sm:flex-row justify-between gap-4 py-5 border-b border-slate-100">
+        <CardHeader className="flex flex-col sm:flex-row justify-between gap-4 py-5 border-b border-border">
           <div className="space-y-1">
             <CardTitle>Explosión de Insumos</CardTitle>
             <CardDescription>Gestión y control de materiales del proyecto</CardDescription>
@@ -133,7 +133,7 @@ export function ProjectMaterialsTab({ materials, projectId = "mock-project-id" }
               <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
               <Input 
                 placeholder="Buscar material..." 
-                className="pl-9 bg-slate-50 border-slate-200"
+                className="pl-9 bg-muted/50 border-border"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
               />
@@ -141,8 +141,8 @@ export function ProjectMaterialsTab({ materials, projectId = "mock-project-id" }
             
             <Sheet open={isImportOpen} onOpenChange={setIsImportOpen}>
               <SheetTrigger asChild>
-                <Button variant="outline" className="gap-2 border-slate-200">
-                  <FileSpreadsheet className="h-4 w-4 text-emerald-600" />
+                <Button variant="outline" className="gap-2 border-border">
+                  <FileSpreadsheet className="h-4 w-4 text-success" />
                   <span className="hidden sm:inline">Importar</span>
                 </Button>
               </SheetTrigger>
@@ -154,7 +154,7 @@ export function ProjectMaterialsTab({ materials, projectId = "mock-project-id" }
                       El sistema detectará automáticamente las columnas compatible.
                     </SheetDescription>
                   </SheetHeader>
-                  <div className="h-[calc(100vh-180px)]">
+                  <div className="h-[calc(100vh-180px)] overflow-y-auto custom-scrollbar">
                     <ExcelImportFlow
                       type="materials"
                       projectId={projectId}
@@ -168,7 +168,7 @@ export function ProjectMaterialsTab({ materials, projectId = "mock-project-id" }
         </CardHeader>
         <CardContent className="p-0">
           <Table>
-            <TableHeader className="bg-slate-50">
+            <TableHeader className="bg-muted/50">
               <TableRow>
                 <TableHead>Material</TableHead>
                 <TableHead>Unidad</TableHead>
@@ -182,31 +182,31 @@ export function ProjectMaterialsTab({ materials, projectId = "mock-project-id" }
               {filteredMaterials.length > 0 ? (
                 filteredMaterials.map((material) => (
                   <TableRow key={material.id}>
-                    <TableCell className="font-medium text-slate-700">
+                    <TableCell className="font-medium text-foreground">
                       {material.name}
                     </TableCell>
-                    <TableCell className="text-slate-500 text-xs uppercase">
+                    <TableCell className="text-muted-foreground text-xs uppercase">
                       {material.unit}
                     </TableCell>
-                    <TableCell className="text-right text-slate-600 font-medium">
+                    <TableCell className="text-right text-foreground font-medium">
                       {material.plannedQuantity}
                     </TableCell>
-                    <TableCell className="text-right text-slate-600">
+                    <TableCell className="text-right text-muted-foreground">
                       {material.requestedQuantity}
                     </TableCell>
                     <TableCell className={
-                      `text-right font-bold ${material.availableQuantity < 0 ? 'text-red-600' : 'text-emerald-600'}`
+                      `text-right font-bold ${material.availableQuantity < 0 ? 'text-destructive' : 'text-success'}`
                     }>
                       {material.availableQuantity}
                     </TableCell>
                     <TableCell className="text-center">
                       {material.hasDeviation ? (
-                        <Badge variant="destructive" className="text-[10px] gap-1 px-2">
+                        <Badge variant="destructive" size="sm" className="gap-1 px-2">
                           <AlertTriangle className="h-3 w-3" />
                           Excedido
                         </Badge>
                       ) : (
-                        <Badge variant="outline" className="text-[10px] text-emerald-600 bg-emerald-50 border-emerald-200 gap-1 px-2">
+                        <Badge variant="outline" size="sm" className="text-success bg-success/10 border-success/20 gap-1 px-2">
                           <CheckCircle2 className="h-3 w-3" />
                           OK
                         </Badge>
@@ -216,7 +216,7 @@ export function ProjectMaterialsTab({ materials, projectId = "mock-project-id" }
                 ))
               ) : (
                 <TableRow>
-                  <TableCell colSpan={6} className="h-24 text-center text-slate-400">
+                  <TableCell colSpan={6} className="h-24 text-center text-muted-foreground">
                     No se encontraron materiales.
                   </TableCell>
                 </TableRow>

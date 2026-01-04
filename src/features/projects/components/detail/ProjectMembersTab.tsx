@@ -59,7 +59,7 @@ import {
   HoverCardContent,
   HoverCardTrigger,
 } from "@/components/ui/hover-card";
-import { EmptyState } from "@/components/ui/empty-state";
+import { EmptyState } from "@/components/shared/empty-state";
 
 interface ProjectMembersTabProps {
   projectId: string;
@@ -73,9 +73,9 @@ const roleLabels: Record<ProjectRole, string> = {
 };
 
 const roleColors: Record<ProjectRole, { bg: string; text: string; border: string }> = {
-  SUPERINTENDENT: { bg: "bg-purple-100", text: "text-purple-700", border: "border-purple-200" },
-  RESIDENT: { bg: "bg-blue-100", text: "text-blue-700", border: "border-blue-200" },
-  CABO: { bg: "bg-gray-100", text: "text-gray-700", border: "border-gray-200" },
+  SUPERINTENDENT: { bg: "bg-primary/10", text: "text-primary", border: "border-primary/20" },
+  RESIDENT: { bg: "bg-info/10", text: "text-info", border: "border-info/20" },
+  CABO: { bg: "bg-muted", text: "text-muted-foreground", border: "border-border" },
 };
 
 export function ProjectMembersTab({ projectId, members }: ProjectMembersTabProps) {
@@ -115,18 +115,19 @@ export function ProjectMembersTab({ projectId, members }: ProjectMembersTabProps
         className="flex flex-col sm:flex-row gap-4 justify-between"
       >
         <div className="relative flex-1 max-w-sm">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input
             placeholder="Buscar miembro..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-10 h-10 rounded-xl"
+            inputSize="lg"
+            className="pl-10"
           />
         </div>
 
         <Dialog open={addDialogOpen} onOpenChange={setAddDialogOpen}>
           <DialogTrigger asChild>
-            <Button className="h-10 rounded-xl gap-2 bg-blue-600 hover:bg-blue-700">
+            <Button size="lg" className="gap-2 bg-primary hover:bg-primary/90">
               <Plus className="h-4 w-4" />
               Agregar Miembro
             </Button>
@@ -152,19 +153,19 @@ export function ProjectMembersTab({ projectId, members }: ProjectMembersTabProps
                           <div className="flex items-center gap-2">
                             <Avatar className="h-6 w-6">
                               <AvatarImage src={user.profilePictureUrl} />
-                              <AvatarFallback className="text-[10px]">
+                              <AvatarFallback className="text-xs">
                                 {getInitials(user.fullName)}
                               </AvatarFallback>
                             </Avatar>
                             <span>{user.fullName}</span>
-                            <Badge variant="outline" className="text-[10px] ml-auto">
+                            <Badge variant="outline" size="sm" className="ml-auto">
                               {user.role}
                             </Badge>
                           </div>
                         </SelectItem>
                       ))
                     ) : (
-                      <div className="p-4 text-center text-sm text-gray-500">
+                      <div className="p-4 text-center text-sm text-muted-foreground">
                         No hay usuarios disponibles
                       </div>
                     )}
@@ -181,19 +182,19 @@ export function ProjectMembersTab({ projectId, members }: ProjectMembersTabProps
                   <SelectContent>
                     <SelectItem value="SUPERINTENDENT">
                       <div className="flex items-center gap-2">
-                        <span className="w-2 h-2 rounded-full bg-purple-500" />
+                        <span className="w-2 h-2 rounded-full bg-primary" />
                         Superintendente
                       </div>
                     </SelectItem>
                     <SelectItem value="RESIDENT">
                       <div className="flex items-center gap-2">
-                        <span className="w-2 h-2 rounded-full bg-blue-500" />
+                        <span className="w-2 h-2 rounded-full bg-info" />
                         Residente
                       </div>
                     </SelectItem>
                     <SelectItem value="CABO">
                       <div className="flex items-center gap-2">
-                        <span className="w-2 h-2 rounded-full bg-gray-500" />
+                        <span className="w-2 h-2 rounded-full bg-muted-foreground" />
                         Cabo
                       </div>
                     </SelectItem>
@@ -206,7 +207,7 @@ export function ProjectMembersTab({ projectId, members }: ProjectMembersTabProps
                 Cancelar
               </Button>
               <Button 
-                className="bg-blue-600 hover:bg-blue-700"
+                className="bg-primary hover:bg-primary/90"
                 disabled={!selectedUser || !selectedRole}
               >
                 Agregar
@@ -222,20 +223,20 @@ export function ProjectMembersTab({ projectId, members }: ProjectMembersTabProps
         animate={{ opacity: 1 }}
         transition={{ delay: 0.1 }}
       >
-        <Card className="rounded-2xl border-slate-200 overflow-hidden">
+        <Card className="rounded-2xl border-border overflow-hidden">
           <Table>
             <TableHeader>
-              <TableRow className="bg-slate-50 border-b border-slate-100">
-                <TableHead className="font-bold text-slate-700 text-xs uppercase tracking-wider py-4">
+              <TableRow className="bg-muted/50 border-b border-border">
+                <TableHead className="font-bold text-foreground text-xs uppercase tracking-wider py-4">
                   Usuario
                 </TableHead>
-                <TableHead className="font-bold text-slate-700 text-xs uppercase tracking-wider">
+                <TableHead className="font-bold text-foreground text-xs uppercase tracking-wider">
                   Rol
                 </TableHead>
-                <TableHead className="font-bold text-slate-700 text-xs uppercase tracking-wider hidden md:table-cell">
+                <TableHead className="font-bold text-foreground text-xs uppercase tracking-wider hidden md:table-cell">
                   Asignado
                 </TableHead>
-                <TableHead className="w-16 text-right font-bold text-slate-700 text-xs uppercase tracking-wider">
+                <TableHead className="w-16 text-right font-bold text-foreground text-xs uppercase tracking-wider">
                   Acciones
                 </TableHead>
               </TableRow>
@@ -251,7 +252,7 @@ export function ProjectMembersTab({ projectId, members }: ProjectMembersTabProps
                       animate={{ opacity: 1, y: 0 }}
                       exit={{ opacity: 0, x: -20 }}
                       transition={{ duration: 0.2, delay: index * 0.03 }}
-                      className="group hover:bg-slate-50/50 border-b border-slate-100 last:border-0"
+                      className="group hover:bg-muted/50 border-b border-border last:border-0"
                     >
                       <TableCell className="py-3">
                         <HoverCard>
@@ -259,13 +260,13 @@ export function ProjectMembersTab({ projectId, members }: ProjectMembersTabProps
                             <div className="flex items-center gap-3 cursor-pointer">
                               <Avatar className="h-10 w-10 ring-2 ring-white shadow-sm">
                                 <AvatarImage src={member.userAvatar} alt={member.userName} />
-                                <AvatarFallback className="text-xs bg-linear-to-br from-blue-500 to-purple-500 text-white font-medium">
+                                <AvatarFallback className="text-xs bg-primary text-primary-foreground font-medium">
                                   {getInitials(member.userName)}
                                 </AvatarFallback>
                               </Avatar>
                               <div>
-                                <p className="font-semibold text-slate-900">{member.userName}</p>
-                                <p className="text-xs text-slate-500">{member.userEmail}</p>
+                                <p className="font-semibold text-foreground">{member.userName}</p>
+                                <p className="text-xs text-muted-foreground">{member.userEmail}</p>
                               </div>
                             </div>
                           </HoverCardTrigger>
@@ -274,7 +275,7 @@ export function ProjectMembersTab({ projectId, members }: ProjectMembersTabProps
                               <div className="flex items-center gap-3">
                                 <Avatar className="h-12 w-12">
                                   <AvatarImage src={member.userAvatar} />
-                                  <AvatarFallback className="bg-linear-to-br from-blue-500 to-purple-500 text-white">
+                                  <AvatarFallback className="bg-primary text-primary-foreground">
                                     {getInitials(member.userName)}
                                   </AvatarFallback>
                                 </Avatar>
@@ -282,25 +283,25 @@ export function ProjectMembersTab({ projectId, members }: ProjectMembersTabProps
                                   <p className="font-semibold">{member.userName}</p>
                                   <Badge 
                                     variant="outline"
-                                    className={`text-[10px] ${colors.bg} ${colors.text} ${colors.border}`}
+                                    className={`${colors.bg} ${colors.text} ${colors.border}`}
                                   >
                                     {roleLabels[member.assignedRole]}
                                   </Badge>
                                 </div>
                               </div>
-                              <div className="space-y-2 text-sm text-slate-600">
+                              <div className="space-y-2 text-sm text-muted-foreground">
                                 <div className="flex items-center gap-2">
-                                  <Mail className="h-4 w-4 text-slate-400" />
+                                  <Mail className="h-4 w-4 text-muted-foreground" />
                                   {member.userEmail}
                                 </div>
                                 {member.userPhone && (
                                   <div className="flex items-center gap-2">
-                                    <Phone className="h-4 w-4 text-slate-400" />
+                                    <Phone className="h-4 w-4 text-muted-foreground" />
                                     {member.userPhone}
                                   </div>
                                 )}
                                 <div className="flex items-center gap-2">
-                                  <Calendar className="h-4 w-4 text-slate-400" />
+                                  <Calendar className="h-4 w-4 text-muted-foreground" />
                                   Asignado el {formatDate(member.assignedAt)}
                                 </div>
                               </div>
@@ -317,26 +318,26 @@ export function ProjectMembersTab({ projectId, members }: ProjectMembersTabProps
                           <SelectContent>
                             <SelectItem value="SUPERINTENDENT">
                               <div className="flex items-center gap-2">
-                                <span className="w-2 h-2 rounded-full bg-purple-500" />
+                                <span className="w-2 h-2 rounded-full bg-primary" />
                                 Superintendente
                               </div>
                             </SelectItem>
                             <SelectItem value="RESIDENT">
                               <div className="flex items-center gap-2">
-                                <span className="w-2 h-2 rounded-full bg-blue-500" />
+                                <span className="w-2 h-2 rounded-full bg-info" />
                                 Residente
                               </div>
                             </SelectItem>
                             <SelectItem value="CABO">
                               <div className="flex items-center gap-2">
-                                <span className="w-2 h-2 rounded-full bg-slate-500" />
+                                <span className="w-2 h-2 rounded-full bg-muted-foreground" />
                                 Cabo
                               </div>
                             </SelectItem>
                           </SelectContent>
                         </Select>
                       </TableCell>
-                      <TableCell className="hidden md:table-cell text-sm text-slate-500">
+                      <TableCell className="hidden md:table-cell text-sm text-muted-foreground">
                         {formatDate(member.assignedAt)}
                       </TableCell>
                       <TableCell className="text-right">
@@ -345,7 +346,7 @@ export function ProjectMembersTab({ projectId, members }: ProjectMembersTabProps
                             <Button 
                               variant="ghost" 
                               size="icon"
-                              className="h-8 w-8 text-red-500 hover:text-red-600 hover:bg-red-50"
+                              className="h-8 w-8 text-destructive hover:text-destructive hover:bg-destructive/10"
                             >
                               <UserMinus className="h-4 w-4" />
                             </Button>
@@ -353,8 +354,8 @@ export function ProjectMembersTab({ projectId, members }: ProjectMembersTabProps
                           <AlertDialogContent>
                             <AlertDialogHeader>
                               <div className="flex items-center gap-3 mb-2">
-                                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-red-100">
-                                  <AlertTriangle className="h-5 w-5 text-red-600" />
+                                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-destructive/10">
+                                  <AlertTriangle className="h-5 w-5 text-destructive" />
                                 </div>
                                 <AlertDialogTitle>Quitar miembro del proyecto</AlertDialogTitle>
                               </div>
@@ -368,7 +369,7 @@ export function ProjectMembersTab({ projectId, members }: ProjectMembersTabProps
                             <AlertDialogFooter>
                               <AlertDialogCancel>Cancelar</AlertDialogCancel>
                               <AlertDialogAction 
-                                className="bg-red-600 hover:bg-red-700 focus:ring-red-600"
+                                className="bg-destructive hover:bg-destructive/90 focus:ring-destructive"
                                 onClick={() => {
                                   // TODO: Implementar eliminación real
                                   console.log("Quitar miembro:", member.userId);

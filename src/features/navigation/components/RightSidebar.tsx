@@ -63,12 +63,12 @@ export function RightSidebar() {
 
   const getNotificationColor = (type: NotificationType) => {
     switch (type) {
-      case 'MENTION': return "bg-purple-100 text-purple-600";
-      case 'ASSIGNMENT': return "bg-blue-100 text-blue-600";
-      case 'PROJECT_UPDATE': return "bg-emerald-100 text-emerald-600";
-      case 'CRITICAL': return "bg-red-100 text-red-600";
-      case 'DEVIATION': return "bg-amber-100 text-amber-600";
-      default: return "bg-gray-100 text-gray-600";
+      case 'MENTION': return "bg-primary/10 text-primary";
+      case 'ASSIGNMENT': return "bg-info/20 text-info";
+      case 'PROJECT_UPDATE': return "bg-success/20 text-success";
+      case 'CRITICAL': return "bg-destructive/20 text-destructive";
+      case 'DEVIATION': return "bg-warning/20 text-warning";
+      default: return "bg-muted text-muted-foreground";
     }
   };
 
@@ -89,7 +89,7 @@ export function RightSidebar() {
     <TooltipProvider>
       <motion.div
         layout
-        className="fixed right-6 top-6 z-50 bg-white shadow-2xl shadow-black/10 border border-gray-200/80 overflow-hidden"
+        className="fixed right-6 top-6 z-50 bg-background shadow-2xl shadow-black/5 border border-border/80 overflow-hidden"
         style={{
           width: isExpanded ? 340 : 72,
           height: isExpanded ? "auto" : 130,
@@ -104,15 +104,15 @@ export function RightSidebar() {
         <div className="flex flex-col w-full">
           <div
             onClick={() => toggleRightSidebar()}
-            className={`w-full flex items-center transition-all shrink-0 cursor-pointer hover:bg-gray-50 border-b border-gray-200 ${
+            className={`w-full flex items-center transition-all shrink-0 cursor-pointer hover:bg-muted/50 border-b border-border ${
               isExpanded ? "h-16 px-4 justify-between" : "h-16 justify-center"
             }`}
           >
             <Tooltip>
               <TooltipTrigger asChild>
-                <Avatar className="h-10 w-10 shrink-0 ring-2 ring-white shadow-md">
+                <Avatar className="h-10 w-10 shrink-0 ring-2 ring-background shadow-md">
                   <AvatarImage src={mockCurrentUserUI.avatarUrl} alt={mockCurrentUserUI.name} />
-                  <AvatarFallback className="bg-linear-to-br from-blue-500 to-purple-600 text-white font-bold text-sm">
+                  <AvatarFallback className="bg-primary/10 text-primary font-bold text-sm">
                     {getInitials(mockCurrentUserUI.name)}
                   </AvatarFallback>
                 </Avatar>
@@ -132,8 +132,8 @@ export function RightSidebar() {
                   exit={{ opacity: 0 }}
                   className="flex-1 ml-4 mr-2"
                 >
-                  <p className="font-semibold text-gray-900 text-sm">{mockCurrentUserUI.name}</p>
-                  <Badge variant="outline" className="text-[10px] px-1.5 py-0 h-4 bg-blue-50 text-blue-700 border-blue-200">
+                  <p className="font-semibold text-foreground text-sm">{mockCurrentUserUI.name}</p>
+                  <Badge variant="outline" size="sm" className="bg-primary/10 text-primary border-primary/20">
                     {roleLabels[mockCurrentUserUI.role]}
                   </Badge>
                 </motion.div>
@@ -148,7 +148,7 @@ export function RightSidebar() {
                   exit={{ opacity: 0 }}
                 >
                   <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full">
-                    <X className="h-4 w-4 text-gray-400" />
+                    <X className="h-4 w-4 text-muted-foreground" />
                   </Button>
                 </motion.div>
               )}
@@ -168,9 +168,9 @@ export function RightSidebar() {
                 <Tooltip>
                   <TooltipTrigger asChild>
                     <div className="relative cursor-pointer">
-                      <Bell size={24} className="text-gray-600" strokeWidth={2} />
+                      <Bell size={24} className="text-muted-foreground hover:text-foreground transition-colors" strokeWidth={2} />
                       {unreadCount > 0 && (
-                        <Badge className="absolute -top-1 -right-2 h-4 w-4 p-0 flex items-center justify-center text-[10px] font-bold bg-red-500 border-2 border-white">
+                        <Badge size="sm" className="absolute -top-1 -right-2 h-4 w-4 p-0 flex items-center justify-center font-bold bg-destructive text-destructive-foreground border-2 border-background">
                           {unreadCount}
                         </Badge>
                       )}
@@ -193,10 +193,10 @@ export function RightSidebar() {
                 transition={{ duration: 0.2, delay: 0.05 }}
                 className="flex flex-col px-4 py-3"
               >
-                <div className="flex items-center gap-3 px-3 py-2.5 rounded-xl bg-gray-50/80 border border-gray-100 mb-4">
-                  <Building2 className="h-4 w-4 text-gray-400 shrink-0" />
-                  <span className="text-xs text-gray-600 truncate font-medium">{mockOrganizationUI.name}</span>
-                  <Badge variant="outline" className="ml-auto text-[9px] px-1.5 py-0 h-4 bg-purple-50 text-purple-700 border-purple-200">
+                <div className="flex items-center gap-3 px-3 py-2.5 rounded-xl bg-muted/30 border border-border mb-4">
+                  <Building2 className="h-4 w-4 text-muted-foreground shrink-0" />
+                  <span className="text-xs text-foreground truncate font-medium">{mockOrganizationUI.name}</span>
+                  <Badge variant="outline" size="sm" className="ml-auto bg-primary/5 text-primary border-primary/20">
                     {mockOrganizationUI.plan}
                   </Badge>
                 </div>
@@ -205,8 +205,8 @@ export function RightSidebar() {
                   <Tabs defaultValue="all" className="w-full">
                     <div className="flex items-center justify-between mb-3 px-1">
                       <div className="flex items-center gap-2">
-                         <Bell className="h-4 w-4 text-gray-400" />
-                         <span className="text-xs font-bold text-gray-600 uppercase tracking-wider">Notificaciones</span>
+                         <Bell className="h-4 w-4 text-muted-foreground" />
+                         <span className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Notificaciones</span>
                       </div>
                       {unreadCount > 0 && (
                         <Tooltip>
@@ -214,7 +214,7 @@ export function RightSidebar() {
                             <Button 
                               variant="ghost" 
                               size="icon" 
-                              className="h-6 w-6 hover:bg-blue-50 hover:text-blue-600"
+                              className="h-6 w-6 hover:bg-info/10 hover:text-info"
                               onClick={() => markAllAsRead()}
                             >
                               <CheckCheck className="h-3.5 w-3.5" />
@@ -225,12 +225,12 @@ export function RightSidebar() {
                       )}
                     </div>
 
-                    <TabsList className="w-full h-9 p-1 bg-gray-100/50 mb-2">
+                    <TabsList className="w-full h-9 p-1 bg-muted/50 mb-2">
                       <TabsTrigger value="all" className="flex-1 text-xs h-7">Todas</TabsTrigger>
                       <TabsTrigger value="urgent" className="flex-1 text-xs h-7">
                         Urgentes
                         {urgentCount > 0 && (
-                           <span className="ml-1.5 flex h-4 w-4 items-center justify-center rounded-full bg-red-100 text-[9px] font-bold text-red-600 animate-pulse">
+                           <span className="ml-1.5 flex h-4 w-4 items-center justify-center rounded-full bg-destructive/10 text-xs font-bold text-destructive animate-pulse">
                              {urgentCount}
                            </span>
                         )}
@@ -238,7 +238,7 @@ export function RightSidebar() {
                       <TabsTrigger value="unread" className="flex-1 text-xs h-7">
                         No leídas
                         {unreadCount > 0 && (
-                           <span className="ml-1.5 flex h-4 w-4 items-center justify-center rounded-full bg-blue-100 text-[9px] font-bold text-blue-600">
+                           <span className="ml-1.5 flex h-4 w-4 items-center justify-center rounded-full bg-info/10 text-xs font-bold text-info">
                              {unreadCount}
                            </span>
                         )}
@@ -254,10 +254,10 @@ export function RightSidebar() {
                               return (
                                 <div
                                   key={notification.id}
-                                  className={`group p-2.5 rounded-lg border transition-all hover:bg-gray-50/80 ${
+                                  className={`group p-2.5 rounded-lg border transition-all hover:bg-muted/30 ${
                                     notification.isRead
-                                      ? "bg-white border-gray-100 opacity-60 hover:opacity-100"
-                                      : "bg-blue-50/30 border-blue-100"
+                                      ? "bg-card border-border opacity-70 hover:opacity-100"
+                                      : "bg-info/5 border-info/20"
                                   }`}
                                 >
                                   <div className="flex items-start gap-3">
@@ -270,14 +270,14 @@ export function RightSidebar() {
                                     </div>
                                     <div className="flex-1 min-w-0">
                                       <div className="flex items-start justify-between gap-2 mb-0.5">
-                                        <p className={`text-[11px] leading-tight ${!notification.isRead ? "font-semibold text-gray-900" : "font-medium text-gray-700"}`}>
+                                        <p className={`text-xs leading-tight ${!notification.isRead ? "font-semibold text-foreground" : "font-medium text-muted-foreground"}`}>
                                           {notification.title}
                                         </p>
                                         {!notification.isRead && (
                                           <Button 
                                             variant="ghost" 
                                             size="icon" 
-                                            className="h-4 w-4 -mt-1 -mr-1 text-gray-400 opacity-0 group-hover:opacity-100 hover:text-blue-600 transition-opacity"
+                                            className="h-4 w-4 -mt-1 -mr-1 text-muted-foreground opacity-0 group-hover:opacity-100 hover:text-info transition-opacity"
                                             onClick={(e) => {
                                               e.stopPropagation();
                                               markAsRead(notification.id);
@@ -287,10 +287,10 @@ export function RightSidebar() {
                                           </Button>
                                         )}
                                       </div>
-                                      <p className="text-[10px] text-gray-500 line-clamp-2 leading-relaxed">
+                                      <p className="text-xs text-muted-foreground line-clamp-2 leading-relaxed">
                                         {notification.message}
                                       </p>
-                                      <p className="text-[9px] text-gray-400 mt-1.5">
+                                      <p className="text-xs text-muted-foreground/70 mt-1.5">
                                         {formatTime(notification.timestamp)}
                                       </p>
                                     </div>
@@ -299,7 +299,7 @@ export function RightSidebar() {
                               );
                             })
                           ) : (
-                            <div className="flex flex-col items-center justify-center h-40 text-gray-400">
+                            <div className="flex flex-col items-center justify-center h-40 text-muted-foreground">
                               <Bell className="h-8 w-8 mb-2 opacity-20" />
                               <p className="text-xs">Sin notificaciones</p>
                             </div>
@@ -320,10 +320,10 @@ export function RightSidebar() {
                               return (
                                 <div
                                   key={notification.id}
-                                  className={`group p-2.5 rounded-lg border transition-all hover:bg-gray-50/80 ${
+                                  className={`group p-2.5 rounded-lg border transition-all hover:bg-muted/30 ${
                                     isCritical 
-                                      ? "bg-red-50/50 border-red-200" 
-                                      : "bg-amber-50/50 border-amber-200"
+                                      ? "bg-destructive/5 border-destructive/20" 
+                                      : "bg-warning/5 border-warning/20"
                                   }`}
                                 >
                                   <div className="flex items-start gap-3">
@@ -336,13 +336,13 @@ export function RightSidebar() {
                                     </div>
                                     <div className="flex-1 min-w-0">
                                       <div className="flex items-start justify-between gap-2 mb-0.5">
-                                        <p className="text-[11px] leading-tight font-semibold text-gray-900">
+                                        <p className="text-xs leading-tight font-semibold text-foreground">
                                           {notification.title}
                                         </p>
                                         <Button 
                                           variant="ghost" 
                                           size="icon" 
-                                          className="h-4 w-4 -mt-1 -mr-1 text-gray-400 opacity-0 group-hover:opacity-100 hover:text-blue-600 transition-opacity"
+                                          className="h-4 w-4 -mt-1 -mr-1 text-muted-foreground opacity-0 group-hover:opacity-100 hover:text-info transition-opacity"
                                           onClick={(e) => {
                                             e.stopPropagation();
                                             markAsRead(notification.id);
@@ -351,10 +351,10 @@ export function RightSidebar() {
                                           <Check className="h-3 w-3" />
                                         </Button>
                                       </div>
-                                      <p className="text-[10px] text-gray-500 line-clamp-2 leading-relaxed">
+                                      <p className="text-xs text-muted-foreground line-clamp-2 leading-relaxed">
                                         {notification.message}
                                       </p>
-                                      <p className="text-[9px] text-gray-400 mt-1.5">
+                                      <p className="text-xs text-muted-foreground/70 mt-1.5">
                                         {formatTime(notification.timestamp)}
                                       </p>
                                     </div>
@@ -363,10 +363,10 @@ export function RightSidebar() {
                               );
                             })
                           ) : (
-                            <div className="flex flex-col items-center justify-center h-40 text-gray-400">
+                            <div className="flex flex-col items-center justify-center h-40 text-muted-foreground">
                               <AlertTriangle className="h-8 w-8 mb-2 opacity-20" />
                               <p className="text-xs">Sin alertas urgentes</p>
-                              <p className="text-[10px] text-gray-300 mt-1">¡Todo en orden!</p>
+                              <p className="text-xs text-muted-foreground/70 mt-1">¡Todo en orden!</p>
                             </div>
                           )}
                         </div>
@@ -382,9 +382,9 @@ export function RightSidebar() {
                               .map((notification) => {
                                 const Icon = getNotificationIcon(notification.type);
                                 return (
-                                  <div
+                                <div
                                   key={notification.id}
-                                  className="group p-2.5 rounded-lg border bg-blue-50/30 border-blue-100 transition-all hover:bg-gray-50/80"
+                                  className="group p-2.5 rounded-lg border bg-info/5 border-info/20 transition-all hover:bg-muted/30"
                                 >
                                   <div className="flex items-start gap-3">
                                     <div
@@ -396,13 +396,13 @@ export function RightSidebar() {
                                     </div>
                                     <div className="flex-1 min-w-0">
                                       <div className="flex items-start justify-between gap-2 mb-0.5">
-                                        <p className="text-[11px] leading-tight font-semibold text-gray-900">
+                                        <p className="text-xs leading-tight font-semibold text-foreground">
                                           {notification.title}
                                         </p>
                                         <Button 
                                             variant="ghost" 
                                             size="icon" 
-                                            className="h-4 w-4 -mt-1 -mr-1 text-gray-400 opacity-0 group-hover:opacity-100 hover:text-blue-600 transition-opacity"
+                                            className="h-4 w-4 -mt-1 -mr-1 text-muted-foreground opacity-0 group-hover:opacity-100 hover:text-info transition-opacity"
                                             onClick={(e) => {
                                               e.stopPropagation();
                                               markAsRead(notification.id);
@@ -411,10 +411,10 @@ export function RightSidebar() {
                                             <Check className="h-3 w-3" />
                                         </Button>
                                       </div>
-                                      <p className="text-[10px] text-gray-500 line-clamp-2 leading-relaxed">
+                                      <p className="text-xs text-muted-foreground line-clamp-2 leading-relaxed">
                                         {notification.message}
                                       </p>
-                                      <p className="text-[9px] text-gray-400 mt-1.5">
+                                      <p className="text-xs text-muted-foreground/70 mt-1.5">
                                         {formatTime(notification.timestamp)}
                                       </p>
                                     </div>
@@ -423,7 +423,7 @@ export function RightSidebar() {
                                 );
                               })
                           ) : (
-                            <div className="flex flex-col items-center justify-center h-40 text-gray-400">
+                            <div className="flex flex-col items-center justify-center h-40 text-muted-foreground">
                               <CheckCheck className="h-8 w-8 mb-2 opacity-20" />
                               <p className="text-xs">Todo leído</p>
                             </div>
@@ -451,7 +451,7 @@ export function RightSidebar() {
                   <Button
                     variant="outline"
                     size="sm"
-                    className="flex-1 h-9 text-xs rounded-lg text-red-600 hover:text-red-700"
+                    className="flex-1 h-9 text-xs rounded-lg text-destructive hover:text-destructive hover:bg-destructive/10 hover:border-destructive/30"
                   >
                     <LogOut className="h-3.5 w-3.5 mr-1.5" />
                     Salir

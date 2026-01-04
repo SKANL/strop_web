@@ -36,9 +36,9 @@ const priorityVariants: Record<string, "default" | "destructive" | "secondary" |
 };
 
 const statusColors: Record<string, string> = {
-  OPEN: "bg-yellow-500/20 text-yellow-700 dark:text-yellow-400 border-yellow-500/30",
-  ASSIGNED: "bg-blue-500/20 text-blue-700 dark:text-blue-400 border-blue-500/30",
-  CLOSED: "bg-green-500/20 text-green-700 dark:text-green-400 border-green-500/30",
+  OPEN: "bg-warning/20 text-warning border-warning/30",
+  ASSIGNED: "bg-info/20 text-info border-info/30",
+  CLOSED: "bg-success/20 text-success border-success/30",
 };
 
 export function IncidentCard({ incident, onClick }: IncidentCardProps) {
@@ -120,7 +120,7 @@ export function IncidentCard({ incident, onClick }: IncidentCardProps) {
                     <TooltipTrigger asChild>
                       <Avatar className="size-6">
                         <AvatarImage src={incident.createdByAvatar} />
-                        <AvatarFallback className="text-[10px]">
+                        <AvatarFallback className="text-xs">
                           {getInitials(incident.createdByName)}
                         </AvatarFallback>
                       </Avatar>
@@ -137,7 +137,7 @@ export function IncidentCard({ incident, onClick }: IncidentCardProps) {
                       <TooltipTrigger asChild>
                         <Avatar className="size-6">
                           <AvatarImage src={incident.assignedToAvatar} />
-                          <AvatarFallback className="text-[10px]">
+                          <AvatarFallback className="text-xs">
                             {getInitials(incident.assignedToName)}
                           </AvatarFallback>
                         </Avatar>

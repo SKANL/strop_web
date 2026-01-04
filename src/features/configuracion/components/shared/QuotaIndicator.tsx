@@ -22,10 +22,10 @@ export function QuotaIndicator({
 }: QuotaIndicatorProps) {
   const percentage = total > 0 ? Math.round((used / total) * 100) : 0;
   
-  // Determinar color según porcentaje
-  const getColorClass = () => {
-    if (percentage >= 90) return "bg-destructive";
-    if (percentage >= 75) return "bg-amber-500";
+  // Calcular color basado en porcentaje
+  const getProgressColor = (percent: number) => {
+    if (percent >= 100) return "bg-destructive";
+    if (percent >= 80) return "bg-warning";
     return "bg-primary";
   };
 
@@ -47,7 +47,7 @@ export function QuotaIndicator({
         <Progress
           value={percentage}
           className="h-2"
-          indicatorClassName={getColorClass()}
+          indicatorClassName={getProgressColor(percentage)}
         />
       </motion.div>
     </div>

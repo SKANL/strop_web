@@ -14,6 +14,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
+import { ThemeToggle } from "@/components/ThemeToggle";
 import { SettingsCard } from "./shared/SettingsCard";
 import { QuotaIndicator } from "./shared/QuotaIndicator";
 import { mockCurrentUser } from "@/lib/mock/users";
@@ -88,7 +89,7 @@ export function ConfigurationHub() {
       <div className="grid gap-6 lg:grid-cols-2">
         {/* Card de Perfil Rápido */}
         <motion.div variants={itemVariants}>
-          <Card className="bg-white/80 backdrop-blur-sm border-gray-100">
+          <Card className="bg-card/80 backdrop-blur-sm border-border">
             <CardContent className="p-6">
               <div className="flex items-center gap-4">
                 <div className="relative group">
@@ -117,7 +118,7 @@ export function ConfigurationHub() {
                   </Button>
                 </div>
                 <div className="flex-1 min-w-0">
-                  <h2 className="text-lg font-semibold text-gray-900 truncate">
+                  <h2 className="text-lg font-semibold text-foreground truncate">
                     {mockCurrentUser.fullName}
                   </h2>
                   <p className="text-sm text-muted-foreground truncate">
@@ -140,7 +141,7 @@ export function ConfigurationHub() {
 
         {/* Card de Resumen de Cuota */}
         <motion.div variants={itemVariants}>
-          <Card className="bg-white/80 backdrop-blur-sm border-gray-100">
+          <Card className="bg-card/80 backdrop-blur-sm border-border">
             <CardHeader className="pb-3">
               <div className="flex items-center justify-between">
                 <CardTitle className="text-base font-semibold">
@@ -177,7 +178,7 @@ export function ConfigurationHub() {
       <div>
         <motion.h2
           variants={itemVariants}
-          className="text-lg font-semibold text-gray-900 mb-4"
+          className="text-lg font-semibold text-foreground mb-4"
         >
           Configuración
         </motion.h2>
@@ -197,6 +198,26 @@ export function ConfigurationHub() {
           ))}
         </motion.div>
       </div>
+
+      {/* Seccion de Apariencia */}
+      <motion.div variants={itemVariants}>
+        <Card className="bg-card/80 backdrop-blur-sm border-border">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-base font-semibold">Apariencia</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="flex items-center justify-between">
+                <div className="space-y-1">
+                  <p className="text-sm font-medium leading-none">Tema</p>
+                  <p className="text-sm text-muted-foreground">
+                    Selecciona tu preferencia de tema para la interfaz.
+                  </p>
+                </div>
+                <ThemeToggle />
+              </div>
+            </CardContent>
+        </Card>
+      </motion.div>
     </motion.div>
   );
 }

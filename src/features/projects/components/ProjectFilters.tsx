@@ -22,6 +22,7 @@ import {
   SheetTrigger,
   SheetFooter,
 } from "@/components/ui/sheet";
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { Separator } from "@/components/ui/separator";
 
 export type SortOption = "name" | "progress" | "created" | "incidents";
@@ -84,19 +85,19 @@ export function ProjectFilters({
       <div className="flex flex-col sm:flex-row gap-3">
         {/* Búsqueda */}
         <div className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input
             placeholder="Buscar proyectos..."
             value={searchQuery}
             onChange={(e) => onSearchChange(e.target.value)}
-            className="pl-10 h-10 rounded-xl border-gray-200 focus:border-blue-300 focus:ring-blue-200"
+            className="pl-10 border-border focus:border-primary focus:ring-primary h-10"
           />
           {searchQuery && (
             <button
               onClick={() => onSearchChange("")}
-              className="absolute right-3 top-1/2 -translate-y-1/2 p-1 hover:bg-gray-100 rounded-full transition-colors"
+              className="absolute right-3 top-1/2 -translate-y-1/2 p-1 hover:bg-muted rounded-full transition-colors"
             >
-              <X className="h-3 w-3 text-gray-400" />
+              <X className="h-3 w-3 text-muted-foreground" />
             </button>
           )}
         </div>
@@ -104,7 +105,7 @@ export function ProjectFilters({
         {/* Filtros Desktop */}
         <div className="hidden md:flex items-center gap-2">
           <Select value={statusFilter} onValueChange={(v) => onStatusChange(v as ProjectStatus | "ALL")}>
-            <SelectTrigger className="w-44 h-10 rounded-xl border-gray-200">
+            <SelectTrigger size="lg" className="w-44 rounded-xl border-border">
               <SelectValue placeholder="Estado" />
             </SelectTrigger>
             <SelectContent>
@@ -117,7 +118,7 @@ export function ProjectFilters({
           </Select>
 
           <Select value={sortBy} onValueChange={(v) => onSortChange(v as SortOption)}>
-            <SelectTrigger className="w-40 h-10 rounded-xl border-gray-200">
+            <SelectTrigger size="lg" className="w-40 rounded-xl border-border">
               <SelectValue placeholder="Ordenar" />
             </SelectTrigger>
             <SelectContent>
@@ -134,25 +135,26 @@ export function ProjectFilters({
         <div className="flex md:hidden">
           <Sheet>
             <SheetTrigger asChild>
-              <Button variant="outline" className="h-10 rounded-xl gap-2">
+              <Button variant="outline" size="lg" className="gap-2">
                 <SlidersHorizontal className="h-4 w-4" />
                 Filtros
                 {hasActiveFilters && (
-                  <Badge className="h-5 w-5 p-0 flex items-center justify-center text-[10px] bg-blue-500">
+                  <Badge size="sm" className="h-5 w-5 p-0 flex items-center justify-center bg-primary">
                     !
                   </Badge>
                 )}
               </Button>
             </SheetTrigger>
-            <SheetContent side="bottom" className="rounded-t-3xl">
+            <SheetContent side="bottom" className="rounded-t-3xl p-0 flex flex-col max-h-[85vh]">
+              <div className="flex-1 overflow-y-auto p-6">
               <SheetHeader>
                 <SheetTitle>Filtros</SheetTitle>
               </SheetHeader>
               <div className="py-6 space-y-4">
                 <div>
-                  <label className="text-sm font-medium text-gray-700 mb-2 block">Estado</label>
+                  <label className="text-sm font-medium text-foreground mb-2 block">Estado</label>
                   <Select value={statusFilter} onValueChange={(v) => onStatusChange(v as ProjectStatus | "ALL")}>
-                    <SelectTrigger className="w-full h-12 rounded-xl">
+                    <SelectTrigger size="lg" className="w-full rounded-xl">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
@@ -165,9 +167,9 @@ export function ProjectFilters({
                   </Select>
                 </div>
                 <div>
-                  <label className="text-sm font-medium text-gray-700 mb-2 block">Ordenar por</label>
+                  <label className="text-sm font-medium text-foreground mb-2 block">Ordenar por</label>
                   <Select value={sortBy} onValueChange={(v) => onSortChange(v as SortOption)}>
-                    <SelectTrigger className="w-full h-12 rounded-xl">
+                    <SelectTrigger size="lg" className="w-full rounded-xl">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
@@ -185,36 +187,26 @@ export function ProjectFilters({
                   Limpiar filtros
                 </Button>
               </SheetFooter>
+              </div>
             </SheetContent>
           </Sheet>
         </div>
 
-        {/* Toggle Vista */}
-        <div className="flex items-center gap-1 bg-gray-100 p-1 rounded-xl">
-          <Button
-            variant={viewMode === "grid" ? "default" : "ghost"}
-            size="icon"
-            className={`h-8 w-8 rounded-lg ${viewMode === "grid" ? "bg-white shadow-sm" : ""}`}
-            onClick={() => onViewModeChange("grid")}
-          >
+        <ToggleGroup type="single" value={viewMode} onValueChange={(v) => v && onViewModeChange(v as ViewMode)}>
+          <ToggleGroupItem value="grid" aria-label="Vista de cuadrícula">
             <LayoutGrid className="h-4 w-4" />
-          </Button>
-          <Button
-            variant={viewMode === "list" ? "default" : "ghost"}
-            size="icon"
-            className={`h-8 w-8 rounded-lg ${viewMode === "list" ? "bg-white shadow-sm" : ""}`}
-            onClick={() => onViewModeChange("list")}
-          >
+          </ToggleGroupItem>
+          <ToggleGroupItem value="list" aria-label="Vista de lista">
             <List className="h-4 w-4" />
-          </Button>
-        </div>
+          </ToggleGroupItem>
+        </ToggleGroup>
       </div>
 
       {/* Contador y filtros activos */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <span className="text-sm text-gray-500">
-            Mostrando <span className="font-semibold text-gray-700">{filteredCount}</span> de {totalProjects} proyectos
+          <span className="text-sm text-muted-foreground">
+            Mostrando <span className="font-semibold text-foreground">{filteredCount}</span> de {totalProjects} proyectos
           </span>
           
           {hasActiveFilters && (
@@ -228,12 +220,12 @@ export function ProjectFilters({
               {statusFilter !== "ALL" && (
                 <Badge 
                   variant="secondary" 
-                  className="gap-1 pr-1 bg-blue-50 text-blue-700 hover:bg-blue-100"
+                  className="gap-1 pr-1 bg-primary/10 text-primary hover:bg-primary/20"
                 >
                   {statusOptions.find(s => s.value === statusFilter)?.label}
                   <button
                     onClick={() => onStatusChange("ALL")}
-                    className="ml-1 p-0.5 hover:bg-blue-200 rounded-full"
+                    className="ml-1 p-0.5 hover:bg-primary/20 rounded-full"
                   >
                     <X className="h-3 w-3" />
                   </button>
@@ -243,12 +235,12 @@ export function ProjectFilters({
               {searchQuery && (
                 <Badge 
                   variant="secondary" 
-                  className="gap-1 pr-1 bg-gray-100 text-gray-700 hover:bg-gray-200"
+                  className="gap-1 pr-1 bg-muted text-foreground hover:bg-muted/80"
                 >
                   "{searchQuery}"
                   <button
                     onClick={() => onSearchChange("")}
-                    className="ml-1 p-0.5 hover:bg-gray-300 rounded-full"
+                    className="ml-1 p-0.5 hover:bg-muted-foreground/20 rounded-full"
                   >
                     <X className="h-3 w-3" />
                   </button>
@@ -257,7 +249,7 @@ export function ProjectFilters({
 
               <button
                 onClick={clearFilters}
-                className="text-xs text-blue-600 hover:text-blue-800 font-medium"
+                className="text-xs text-primary hover:text-primary/80 font-medium"
               >
                 Limpiar todo
               </button>

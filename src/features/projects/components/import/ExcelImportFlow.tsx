@@ -319,7 +319,7 @@ export function ExcelImportFlow({
             <Card className="mb-6">
               <CardHeader className="pb-3">
                 <CardTitle className="text-base flex items-center gap-2">
-                  <FileSpreadsheet className="h-5 w-5 text-emerald-600" />
+                  <FileSpreadsheet className="h-5 w-5 text-success" />
                   Resumen de Importación
                 </CardTitle>
               </CardHeader>
@@ -393,8 +393,8 @@ export function ExcelImportFlow({
             animate={{ opacity: 1, scale: 1 }}
             className="flex-1 flex flex-col items-center justify-center py-12"
           >
-            <div className="p-4 rounded-full bg-emerald-100 dark:bg-emerald-900/30 mb-4">
-              <Check className="h-12 w-12 text-emerald-600 dark:text-emerald-400" />
+            <div className="p-4 rounded-full bg-success/20 mb-4">
+              <Check className="h-12 w-12 text-success" />
             </div>
             <h3 className="text-lg font-semibold mb-2">
               ¡Importación Exitosa!

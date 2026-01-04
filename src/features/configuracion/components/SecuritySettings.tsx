@@ -140,7 +140,7 @@ export function SecuritySettings() {
       <BackLink href="/dashboard/configuracion" label="Volver a Configuración" />
 
       {/* Cambiar Contraseña */}
-      <Card className="bg-white/80 backdrop-blur-sm border-gray-100">
+      <Card className="bg-card/80 backdrop-blur-sm border-border">
         <CardHeader>
           <div className="flex items-center gap-2">
             <Shield className="h-5 w-5 text-primary" />
@@ -264,7 +264,7 @@ export function SecuritySettings() {
       </Card>
 
       {/* Sesiones Activas */}
-      <Card className="bg-white/80 backdrop-blur-sm border-gray-100">
+      <Card className="bg-card/80 backdrop-blur-sm border-border">
         <CardHeader>
           <div className="flex items-center gap-2">
             <Monitor className="h-5 w-5 text-primary" />
@@ -325,7 +325,7 @@ export function SecuritySettings() {
                     </TableCell>
                     <TableCell>
                       {session.isCurrent && (
-                        <Badge variant="secondary" className="bg-green-100 text-green-700 border-0">
+                        <Badge variant="secondary" className="bg-success/20 text-success border-0">
                           Actual
                         </Badge>
                       )}
@@ -373,7 +373,7 @@ export function SecuritySettings() {
       </Card>
 
       {/* 2FA - Próximamente */}
-      <Card className="bg-white/80 backdrop-blur-sm border-gray-100 border-dashed">
+      <Card className="bg-card/80 backdrop-blur-sm border-border border-dashed">
         <CardContent className="py-6">
           <Alert>
             <AlertCircle className="h-4 w-4" />

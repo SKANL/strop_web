@@ -27,15 +27,15 @@ const RESOURCE_CONFIG: Record<
   AuditResourceType,
   { label: string; icon: typeof FileText; color: string }
 > = {
-  incident: { label: "Incidencia", icon: FileText, color: "text-orange-500" },
-  project: { label: "Proyecto", icon: FolderKanban, color: "text-blue-500" },
-  user: { label: "Usuario", icon: User, color: "text-purple-500" },
-  comment: { label: "Comentario", icon: MessageSquare, color: "text-green-500" },
-  photo: { label: "Foto", icon: Image, color: "text-pink-500" },
-  organization: { label: "Organización", icon: Building2, color: "text-indigo-500" },
-  critical_path: { label: "Ruta Crítica", icon: Route, color: "text-yellow-500" },
-  project_member: { label: "Miembro", icon: Users, color: "text-teal-500" },
-  report: { label: "Reporte", icon: FileBarChart, color: "text-red-500" },
+  incident: { label: "Incidencia", icon: FileText, color: "text-warning" },
+  project: { label: "Proyecto", icon: FolderKanban, color: "text-primary" },
+  user: { label: "Usuario", icon: User, color: "text-primary" },
+  comment: { label: "Comentario", icon: MessageSquare, color: "text-success" },
+  photo: { label: "Foto", icon: Image, color: "text-primary" },
+  organization: { label: "Organización", icon: Building2, color: "text-primary" },
+  critical_path: { label: "Ruta Crítica", icon: Route, color: "text-warning" },
+  project_member: { label: "Miembro", icon: Users, color: "text-info" },
+  report: { label: "Reporte", icon: FileBarChart, color: "text-destructive" },
 };
 
 export function AuditResourceBadge({ type, id, size = "default" }: AuditResourceBadgeProps) {

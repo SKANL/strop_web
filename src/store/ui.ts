@@ -2,6 +2,11 @@ import { persistentAtom } from '@nanostores/persistent';
 
 export type Theme = 'light' | 'dark' | 'system';
 
+export const themeAtom = persistentAtom<Theme>('mode', 'system', {
+  encode: (val) => val,
+  decode: (val) => val as Theme,
+});
+
 // Persistent atoms for UI state so preferences survive reloads
 // 'strop:sidebar' is the key in localStorage
 export const isSidebarCollapsed = persistentAtom<boolean>('strop:sidebar', false, {

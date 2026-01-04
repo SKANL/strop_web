@@ -3,16 +3,53 @@
 
 import * as React from "react";
 import { motion } from "motion/react";
-import { TrendingUp, TrendingDown } from "lucide-react";
+import { TrendingUp, TrendingDown, type LucideIcon } from "lucide-react";
+import { cva, type VariantProps } from "class-variance-authority";
+
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
-import type { LucideIcon } from "lucide-react";
 
-type StatCardVariant = "default" | "primary" | "success" | "warning" | "destructive";
+const statCardVariants = cva(
+  "rounded-2xl shadow-sm hover:shadow-md transition-shadow",
+  {
+    variants: {
+      variant: {
+        default: "bg-card border-border",
+        primary: "bg-primary/5 border-primary/20",
+        success: "bg-success/5 border-success/20",
+        warning: "bg-warning/5 border-warning/20",
+        destructive: "bg-destructive/5 border-destructive/20",
+      },
+    },
+    defaultVariants: {
+      variant: "default",
+    },
+  }
+);
 
-interface StatCardProps {
+const statCardIconVariants = cva(
+  "rounded-xl flex items-center justify-center shrink-0",
+  {
+    variants: {
+      variant: {
+        default: "bg-muted text-muted-foreground",
+        primary: "bg-primary/10 text-primary",
+        success: "bg-success/10 text-success",
+        warning: "bg-warning/10 text-warning",
+        destructive: "bg-destructive/10 text-destructive",
+      },
+    },
+    defaultVariants: {
+      variant: "default",
+    },
+  }
+);
+
+export interface StatCardProps
+  extends React.HTMLAttributes<HTMLDivElement>,
+    VariantProps<typeof statCardVariants> {
   title: string;
   value: string | number;
   subtitle?: string;
@@ -21,40 +58,10 @@ interface StatCardProps {
     value: number;
     label?: string;
   };
-  variant?: StatCardVariant;
   tooltip?: string;
-  className?: string;
   animated?: boolean;
   compact?: boolean;
 }
-
-const variantStyles: Record<StatCardVariant, { card: string; icon: string; badge: string }> = {
-  default: {
-    card: "bg-white border-gray-200/60",
-    icon: "bg-gray-100 text-gray-600",
-    badge: "bg-gray-100 text-gray-700",
-  },
-  primary: {
-    card: "bg-blue-50/80 border-blue-200/60",
-    icon: "bg-blue-100 text-blue-600",
-    badge: "bg-blue-100 text-blue-700",
-  },
-  success: {
-    card: "bg-emerald-50/80 border-emerald-200/60",
-    icon: "bg-emerald-100 text-emerald-600",
-    badge: "bg-emerald-100 text-emerald-700",
-  },
-  warning: {
-    card: "bg-amber-50/80 border-amber-200/60",
-    icon: "bg-amber-100 text-amber-600",
-    badge: "bg-amber-100 text-amber-700",
-  },
-  destructive: {
-    card: "bg-red-50/80 border-red-200/60",
-    icon: "bg-red-100 text-red-600",
-    badge: "bg-red-100 text-red-700",
-  },
-};
 
 function StatCard({
   title,
@@ -62,13 +69,13 @@ function StatCard({
   subtitle,
   icon: Icon,
   trend,
-  variant = "default",
+  variant,
   tooltip,
   className,
   animated = true,
   compact = false,
+  ...props
 }: StatCardProps) {
-  const styles = variantStyles[variant];
   const isPositive = trend ? trend.value >= 0 : undefined;
   const TrendIcon = isPositive ? TrendingUp : TrendingDown;
 
@@ -85,19 +92,18 @@ function StatCard({
     <CardWrapper {...cardMotionProps}>
       <Card
         className={cn(
-          styles.card,
-          "rounded-2xl shadow-sm hover:shadow-md transition-shadow",
+          statCardVariants({ variant }),
           compact ? "py-3" : "py-4",
           tooltip && "cursor-help",
           className
         )}
+        {...props}
       >
         <CardContent className={cn("flex items-center gap-4", compact ? "p-3" : "p-4", "pt-0 pb-0")}>
           {Icon && (
             <div
               className={cn(
-                styles.icon,
-                "rounded-xl flex items-center justify-center shrink-0",
+                statCardIconVariants({ variant }),
                 compact ? "w-10 h-10" : "w-12 h-12"
               )}
             >
@@ -109,7 +115,7 @@ function StatCard({
             <div className="flex items-center justify-between gap-2">
               <span
                 className={cn(
-                  "font-bold text-gray-900 truncate",
+                  "font-bold text-foreground truncate",
                   compact ? "text-xl" : "text-2xl"
                 )}
               >
@@ -121,10 +127,10 @@ function StatCard({
                   variant="secondary"
                   className={cn(
                     "shrink-0 gap-0.5 border-0",
-                    compact ? "text-[10px] px-1.5 h-5" : "text-xs px-2 h-6",
+                    compact ? "text-xs px-1.5 h-5" : "text-xs px-2 h-6",
                     isPositive
-                      ? "bg-emerald-100 text-emerald-700"
-                      : "bg-red-100 text-red-600"
+                      ? "bg-success/10 text-success"
+                      : "bg-destructive/10 text-destructive"
                   )}
                 >
                   <TrendIcon className={compact ? "h-3 w-3" : "h-3.5 w-3.5"} />
@@ -134,12 +140,12 @@ function StatCard({
               )}
             </div>
 
-            <p className={cn("text-gray-500 truncate", compact ? "text-xs" : "text-sm")}>
+            <p className={cn("text-muted-foreground truncate", compact ? "text-xs" : "text-sm")}>
               {title}
             </p>
 
             {subtitle && (
-              <p className="text-xs text-gray-400 mt-0.5 truncate">{subtitle}</p>
+              <p className="text-xs text-muted-foreground/70 mt-0.5 truncate">{subtitle}</p>
             )}
           </div>
         </CardContent>
@@ -185,4 +191,3 @@ function StatCardGrid({ children, columns = 4, className }: StatCardGridProps) {
 }
 
 export { StatCard, StatCardGrid };
-export type { StatCardProps, StatCardVariant };

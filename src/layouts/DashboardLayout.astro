@@ -1,6 +1,8 @@
 ---
 // DashboardLayout.astro - Structure overhaul to include Navs and Breadcrumbs
 import { ClientRouter } from 'astro:transitions';
+import "@/styles/global.css";
+import ThemeHead from "@/components/ThemeHead.astro";
 import { FloatingNav } from "@/features/navigation/components/FloatingNav";
 import { MobileNav } from "@/features/navigation/components/MobileNav";
 import { RightSidebar } from "@/features/navigation/components/RightSidebar";
@@ -45,17 +47,16 @@ const breadcrumbs = pathSegments.map((segment, index) => {
     <meta name="description" content={description} />
     <meta name="generator" content={Astro.generator} />
     <title>{title}</title>
+    <ThemeHead />
     <ClientRouter />
+    <!-- Add inside <head> -->
+<script src="https://tweakcn.com/live-preview.min.js"></script>
   </head>
   <body class="min-h-screen bg-background text-foreground antialiased overflow-hidden">
-    <div class="flex min-h-screen w-full bg-[#fafafa] overflow-hidden relative">
+    <div class="flex min-h-screen w-full bg-background overflow-hidden relative">
         {/* Background Pattern */}
         <div 
-          class="absolute inset-0 opacity-[0.03] pointer-events-none" 
-          style={{ 
-            backgroundImage: "radial-gradient(#000 1px, transparent 1px)", 
-            backgroundSize: "24px 24px" 
-          }} 
+          class="absolute inset-0 opacity-[0.03] pointer-events-none bg-[radial-gradient(var(--foreground)_1px,transparent_1px)] bg-size-[24px_24px]"
         />
     
         {/* Islands: Navigation & Sidebar - Persist across checking view transitions */}
@@ -97,13 +98,4 @@ const breadcrumbs = pathSegments.map((segment, index) => {
   </body>
 </html>
 
-<style>
-  @import "../styles/global.css";
 
-  html,
-  body {
-    margin: 0;
-    width: 100%;
-    min-height: 100%;
-  }
-</style>

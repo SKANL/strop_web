@@ -41,22 +41,22 @@ const eventConfig: Record<
 > = {
   created: {
     icon: Plus,
-    color: "bg-green-500",
+    color: "bg-success",
     label: "Incidencia creada",
   },
   assigned: {
     icon: UserPlus,
-    color: "bg-blue-500",
+    color: "bg-info",
     label: "Asignación",
   },
   comment: {
     icon: MessageSquare,
-    color: "bg-purple-500",
+    color: "bg-primary",
     label: "Comentario",
   },
   closed: {
     icon: CheckCircle2,
-    color: "bg-emerald-500",
+    color: "bg-success",
     label: "Cerrada",
   },
 };
@@ -185,12 +185,12 @@ export function IncidentTimeline({ incident, comments }: IncidentTimelineProps) 
                   <div className="flex items-center gap-2">
                     <Avatar className="size-5">
                       <AvatarImage src={event.userAvatar} />
-                      <AvatarFallback className="text-[8px]">
+                      <AvatarFallback className="text-xs">
                         {getInitials(event.userName)}
                       </AvatarFallback>
                     </Avatar>
                     <span className="text-sm font-medium">{event.userName}</span>
-                    <Badge variant="secondary" className="text-[10px] px-1.5">
+                    <Badge variant="secondary" size="sm">
                       {config.label}
                     </Badge>
                   </div>

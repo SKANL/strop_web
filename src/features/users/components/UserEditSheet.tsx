@@ -171,7 +171,8 @@ export function UserEditSheet({
   return (
     <>
       <Sheet open={open} onOpenChange={onOpenChange}>
-        <SheetContent className="w-full sm:max-w-md overflow-y-auto">
+        <SheetContent className="sm:max-w-lg w-full p-0 bg-card border-l border-border shadow-2xl flex flex-col h-full">
+        <div className="flex-1 overflow-y-auto custom-scrollbar p-6">
           <SheetHeader className="pb-4">
             <motion.div
               initial={{ opacity: 0, y: -10 }}
@@ -179,8 +180,8 @@ export function UserEditSheet({
               transition={{ duration: 0.3 }}
             >
               <div className="flex items-center gap-3 mb-2">
-                <div className="p-2 rounded-xl bg-blue-100">
-                  <Edit3 className="h-5 w-5 text-blue-600" />
+                <div className="p-2 rounded-xl bg-primary/10">
+                  <Edit3 className="h-5 w-5 text-primary" />
                 </div>
                 <div>
                   <SheetTitle className="text-lg">Editar Usuario</SheetTitle>
@@ -197,17 +198,17 @@ export function UserEditSheet({
             initial={{ opacity: 0, x: -10 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.3, delay: 0.05 }}
-            className="flex items-center gap-3 p-4 rounded-xl bg-gray-50 mb-6"
+            className="flex items-center gap-3 p-4 rounded-xl bg-muted/50 mb-6"
           >
             <Avatar className="h-12 w-12 ring-2 ring-white shadow-md">
               <AvatarImage src={user.profilePictureUrl} alt={user.fullName} />
-              <AvatarFallback className="bg-linear-to-br from-blue-500 to-purple-600 text-white font-semibold">
+              <AvatarFallback className="bg-primary text-primary-foreground font-semibold">
                 {initials}
               </AvatarFallback>
             </Avatar>
             <div className="min-w-0">
-              <p className="font-medium text-gray-900 truncate">{user.fullName}</p>
-              <p className="text-sm text-gray-500 truncate">{user.email}</p>
+              <p className="font-medium text-foreground truncate">{user.fullName}</p>
+              <p className="text-sm text-muted-foreground truncate">{user.email}</p>
             </div>
           </motion.div>
 
@@ -219,7 +220,7 @@ export function UserEditSheet({
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ duration: 0.3, delay: 0.1 }}
               >
-                <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-4">
+                <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-4">
                   Información Personal
                 </h3>
 
@@ -232,10 +233,11 @@ export function UserEditSheet({
                         <FormLabel>Nombre completo *</FormLabel>
                         <FormControl>
                           <div className="relative">
-                            <UserIcon className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+                            <UserIcon className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                             <Input
                               placeholder="Nombre Apellido Apellido"
-                              className="h-11 pl-10 rounded-xl"
+                              inputSize="lg"
+                              className="pl-10"
                               {...field}
                             />
                           </div>
@@ -253,10 +255,11 @@ export function UserEditSheet({
                         <FormLabel>Teléfono</FormLabel>
                         <FormControl>
                           <div className="relative">
-                            <Phone className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+                            <Phone className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                             <Input
                               placeholder="+52 55 1234 5678"
-                              className="h-11 pl-10 rounded-xl"
+                              inputSize="lg"
+                              className="pl-10"
                               {...field}
                             />
                           </div>
@@ -268,15 +271,16 @@ export function UserEditSheet({
 
                   {/* Email is read-only */}
                   <div className="space-y-2">
-                    <Label className="text-sm font-medium text-gray-700">
+                    <Label className="text-sm font-medium text-foreground">
                       Email
                     </Label>
                     <Input
                       value={user.email}
                       disabled
-                      className="h-11 rounded-xl bg-gray-50 cursor-not-allowed"
+                      inputSize="lg"
+                      className="bg-muted cursor-not-allowed"
                     />
-                    <p className="text-xs text-gray-500">
+                    <p className="text-xs text-muted-foreground">
                       El email no puede ser modificado
                     </p>
                   </div>
@@ -291,7 +295,7 @@ export function UserEditSheet({
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ duration: 0.3, delay: 0.2 }}
               >
-                <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-4">
+                <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-4">
                   Rol y Estado
                 </h3>
 
@@ -307,7 +311,7 @@ export function UserEditSheet({
                           onValueChange={(v) => handleRoleChange(v as UserRole)}
                         >
                           <FormControl>
-                            <SelectTrigger className="h-11 rounded-xl">
+                            <SelectTrigger size="lg" className="rounded-xl">
                               <SelectValue />
                             </SelectTrigger>
                           </FormControl>
@@ -376,14 +380,16 @@ export function UserEditSheet({
                     type="button"
                     variant="outline"
                     onClick={() => onOpenChange(false)}
-                    className="flex-1 h-11 rounded-xl"
+                    size="lg"
+                    className="flex-1"
                     disabled={isSubmitting}
                   >
                     Cancelar
                   </Button>
                   <Button
                     type="submit"
-                    className="flex-1 h-11 rounded-xl bg-blue-600 hover:bg-blue-700"
+                    size="lg"
+                    className="flex-1 bg-primary hover:bg-primary/90"
                     disabled={isSubmitting || submitStatus === "success"}
                   >
                     <AnimatePresence mode="wait">
@@ -423,7 +429,8 @@ export function UserEditSheet({
               </SheetFooter>
             </form>
           </Form>
-        </SheetContent>
+          </div>
+      </SheetContent>
       </Sheet>
 
       {/* Role Change Confirmation Dialog */}
@@ -434,8 +441,8 @@ export function UserEditSheet({
         <AlertDialogContent>
           <AlertDialogHeader>
             <div className="flex items-center gap-3">
-              <div className="p-2 rounded-xl bg-amber-100">
-                <AlertTriangle className="h-5 w-5 text-amber-600" />
+              <div className="p-2 rounded-xl bg-warning/10">
+                <AlertTriangle className="h-5 w-5 text-warning" />
               </div>
               <AlertDialogTitle>Confirmar Cambio de Rol</AlertDialogTitle>
             </div>
@@ -456,7 +463,7 @@ export function UserEditSheet({
             <AlertDialogCancel>Cancelar</AlertDialogCancel>
             <AlertDialogAction
               onClick={confirmRoleChange}
-              className="bg-blue-600 hover:bg-blue-700"
+              className="bg-primary hover:bg-primary/90"
             >
               Confirmar Cambio
             </AlertDialogAction>

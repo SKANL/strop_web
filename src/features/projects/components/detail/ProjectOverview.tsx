@@ -66,33 +66,29 @@ export function ProjectOverview({ project, members, incidents }: ProjectOverview
       label: "Avance General",
       value: `${project.progress}%`,
       icon: TrendingUp,
-      iconColor: "text-blue-600",
-      bgColor: "bg-blue-50",
-      iconBg: "bg-blue-100",
+      iconColor: "text-info",
+      iconBg: "bg-info/10",
     },
     {
       label: "Miembros",
       value: project.membersCount,
       icon: Users,
-      iconColor: "text-amber-600",
-      bgColor: "bg-amber-50",
-      iconBg: "bg-amber-100",
+      iconColor: "text-primary",
+      iconBg: "bg-primary/10",
     },
     {
       label: "Inc. Abiertas",
       value: project.openIncidents,
       icon: AlertTriangle,
-      iconColor: project.openIncidents > 5 ? "text-red-600" : "text-amber-600",
-      bgColor: project.openIncidents > 5 ? "bg-red-50" : "bg-amber-50",
-      iconBg: project.openIncidents > 5 ? "bg-red-100" : "bg-amber-100",
+      iconColor: project.openIncidents > 5 ? "text-destructive" : "text-warning",
+      iconBg: project.openIncidents > 5 ? "bg-destructive/10" : "bg-warning/10",
     },
     {
       label: "Inc. Cerradas",
       value: project.totalIncidents - project.openIncidents,
       icon: CheckCircle2,
-      iconColor: "text-emerald-600",
-      bgColor: "bg-emerald-50",
-      iconBg: "bg-emerald-100",
+      iconColor: "text-success",
+      iconBg: "bg-success/10",
     },
   ];
 
@@ -109,7 +105,7 @@ export function ProjectOverview({ project, members, incidents }: ProjectOverview
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.4, delay: index * 0.1 }}
             >
-              <Card className="rounded-2xl border-gray-200/60 hover:shadow-md transition-shadow">
+              <Card className="rounded-2xl border-border hover:shadow-md transition-shadow">
                 <CardContent className="p-5">
                   <div className="flex items-start gap-4">
                     <div className={`p-3 rounded-2xl ${kpi.iconBg}`}>
@@ -120,11 +116,11 @@ export function ProjectOverview({ project, members, incidents }: ProjectOverview
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         transition={{ delay: 0.3 + index * 0.1 }}
-                        className="text-3xl font-bold text-gray-900"
+                        className="text-3xl font-bold text-foreground"
                       >
                         {kpi.value}
                       </motion.p>
-                      <p className="text-sm text-gray-500">{kpi.label}</p>
+                      <p className="text-sm text-muted-foreground">{kpi.label}</p>
                     </div>
                   </div>
                 </CardContent>
@@ -142,9 +138,9 @@ export function ProjectOverview({ project, members, incidents }: ProjectOverview
           animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.4, delay: 0.2 }}
         >
-          <Card className="rounded-2xl border-gray-200/60">
+          <Card className="rounded-2xl border-border">
             <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium text-gray-600">
+              <CardTitle className="text-sm font-medium text-muted-foreground">
                 Avance del Proyecto
               </CardTitle>
             </CardHeader>
@@ -155,21 +151,21 @@ export function ProjectOverview({ project, members, incidents }: ProjectOverview
                     <motion.span
                       initial={{ opacity: 0 }}
                       animate={{ opacity: 1 }}
-                      className="text-4xl font-bold text-gray-900"
+                      className="text-4xl font-bold text-foreground"
                     >
                       {project.progress}
                     </motion.span>
-                    <span className="text-2xl font-bold text-gray-400">%</span>
+                    <span className="text-2xl font-bold text-muted-foreground">%</span>
                   </div>
                   <div className="text-right">
-                    <div className="flex items-center gap-1 text-sm text-gray-500">
+                    <div className="flex items-center gap-1 text-sm text-muted-foreground">
                       <Clock className="h-4 w-4" />
                       {daysRemaining === null ? (
                         <span>Calculando...</span>
                       ) : daysRemaining > 0 ? (
                         <span>{daysRemaining} días restantes</span>
                       ) : (
-                        <span className="text-red-500">Vencido</span>
+                        <span className="text-destructive">Vencido</span>
                       )}
                     </div>
                   </div>
@@ -177,11 +173,11 @@ export function ProjectOverview({ project, members, incidents }: ProjectOverview
                 
                 <Progress 
                   value={project.progress} 
-                  className="h-4 bg-gray-100"
-                  indicatorClassName="bg-gradient-to-r from-blue-500 to-blue-600"
+                  className="h-4 bg-muted"
+                  indicatorClassName="bg-primary"
                 />
 
-                <div className="flex justify-between text-xs text-gray-500">
+                <div className="flex justify-between text-xs text-muted-foreground">
                   <span>Inicio: {new Date(project.startDate).toLocaleDateString("es-MX", { month: "short", year: "2-digit" })}</span>
                   <span>Fin: {new Date(project.endDate).toLocaleDateString("es-MX", { month: "short", year: "2-digit" })}</span>
                 </div>
@@ -196,9 +192,9 @@ export function ProjectOverview({ project, members, incidents }: ProjectOverview
           animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.4, delay: 0.3 }}
         >
-          <Card className="rounded-2xl border-gray-200/60">
+          <Card className="rounded-2xl border-border">
             <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium text-gray-600 flex items-center gap-2">
+              <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
                 <Wallet className="h-4 w-4" />
                 Presupuesto
               </CardTitle>
@@ -208,14 +204,14 @@ export function ProjectOverview({ project, members, incidents }: ProjectOverview
                 <div className="space-y-4">
                   <div className="flex items-end justify-between">
                     <div>
-                      <p className="text-sm text-gray-500">Ejercido</p>
-                      <p className="text-2xl font-bold text-gray-900">
+                      <p className="text-sm text-muted-foreground">Ejercido</p>
+                      <p className="text-2xl font-bold text-foreground">
                         {formatCurrency(project.budgetSpent)}
                       </p>
                     </div>
                     <div className="text-right">
-                      <p className="text-sm text-gray-500">Total</p>
-                      <p className="text-lg font-semibold text-gray-600">
+                      <p className="text-sm text-muted-foreground">Total</p>
+                      <p className="text-lg font-semibold text-muted-foreground">
                         {formatCurrency(project.budget)}
                       </p>
                     </div>
@@ -223,20 +219,20 @@ export function ProjectOverview({ project, members, incidents }: ProjectOverview
                   
                   <Progress 
                     value={Math.min(((project.budgetSpent || 0) / project.budget) * 100, 100)} 
-                    className="h-3 bg-gray-100"
+                    className="h-3 bg-muted"
                     indicatorClassName={
                       (project.budgetSpent || 0) / project.budget > 0.9 
-                        ? "bg-gradient-to-r from-red-500 to-red-600" 
-                        : "bg-gradient-to-r from-emerald-500 to-emerald-600"
+                        ? "bg-destructive" 
+                        : "bg-success"
                     }
                   />
                   
-                  <p className="text-xs text-gray-500">
+                  <p className="text-xs text-muted-foreground">
                     {Math.round(((project.budgetSpent || 0) / project.budget) * 100)}% del presupuesto utilizado
                   </p>
                 </div>
               ) : (
-                <div className="py-8 text-center text-gray-400">
+                <div className="py-8 text-center text-muted-foreground">
                   <Wallet className="h-8 w-8 mx-auto mb-2 opacity-50" />
                   <p className="text-sm">Sin presupuesto asignado</p>
                 </div>
@@ -254,15 +250,15 @@ export function ProjectOverview({ project, members, incidents }: ProjectOverview
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.4, delay: 0.4 }}
         >
-          <Card className="rounded-2xl border-gray-200/60">
+          <Card className="rounded-2xl border-border">
             <CardHeader className="pb-3">
               <div className="flex items-center justify-between">
-                <CardTitle className="text-sm font-medium text-gray-600">
+                <CardTitle className="text-sm font-medium text-muted-foreground">
                   Equipo Asignado
                 </CardTitle>
                 <a 
                   href="#"
-                  className="text-xs text-blue-600 hover:text-blue-800 flex items-center"
+                  className="text-xs text-primary hover:text-primary/80 flex items-center"
                 >
                   Ver todos <ChevronRight className="h-3 w-3" />
                 </a>
@@ -276,30 +272,30 @@ export function ProjectOverview({ project, members, incidents }: ProjectOverview
                     initial={{ opacity: 0, x: -10 }}
                     animate={{ opacity: 1, x: 0 }}
                     transition={{ duration: 0.2, delay: 0.5 + index * 0.05 }}
-                    className="flex items-center gap-3 p-2 rounded-xl hover:bg-gray-50 transition-colors"
+                    className="flex items-center gap-3 p-2 rounded-xl hover:bg-muted/50 transition-colors"
                   >
                     <Avatar className="h-9 w-9">
                       <AvatarImage src={member.userAvatar} alt={member.userName} />
-                      <AvatarFallback className="text-xs bg-linear-to-br from-blue-500 to-purple-500 text-white">
+                      <AvatarFallback className="text-xs bg-primary text-primary-foreground">
                         {getInitials(member.userName)}
                       </AvatarFallback>
                     </Avatar>
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium text-gray-900 truncate">
+                      <p className="text-sm font-medium text-foreground truncate">
                         {member.userName}
                       </p>
-                      <p className="text-xs text-gray-500">
+                      <p className="text-xs text-muted-foreground">
                         {roleLabels[member.assignedRole]}
                       </p>
                     </div>
                     <Badge 
                       variant="outline" 
-                      className={`text-[10px] ${
+                      className={`${
                         member.assignedRole === "SUPERINTENDENT" 
-                          ? "bg-purple-50 text-purple-700 border-purple-200"
+                          ? "bg-primary/10 text-primary border-primary/20"
                           : member.assignedRole === "RESIDENT"
-                            ? "bg-blue-50 text-blue-700 border-blue-200"
-                            : "bg-gray-50 text-gray-600 border-gray-200"
+                            ? "bg-info/10 text-info border-info/20"
+                            : "bg-muted text-muted-foreground border-border"
                       }`}
                     >
                       {member.assignedRole.charAt(0)}
@@ -308,7 +304,7 @@ export function ProjectOverview({ project, members, incidents }: ProjectOverview
                 ))}
                 {members.length > 4 && (
                   <div className="text-center pt-2">
-                    <span className="text-xs text-gray-500">
+                    <span className="text-xs text-muted-foreground">
                       +{members.length - 4} miembros más
                     </span>
                   </div>
@@ -324,15 +320,15 @@ export function ProjectOverview({ project, members, incidents }: ProjectOverview
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.4, delay: 0.5 }}
         >
-          <Card className="rounded-2xl border-gray-200/60">
+          <Card className="rounded-2xl border-border">
             <CardHeader className="pb-3">
               <div className="flex items-center justify-between">
-                <CardTitle className="text-sm font-medium text-gray-600">
+                <CardTitle className="text-sm font-medium text-muted-foreground">
                   Incidencias Recientes
                 </CardTitle>
                 <a 
                   href="#"
-                  className="text-xs text-blue-600 hover:text-blue-800 flex items-center"
+                  className="text-xs text-primary hover:text-primary/80 flex items-center"
                 >
                   Ver todas <ChevronRight className="h-3 w-3" />
                 </a>
@@ -347,39 +343,39 @@ export function ProjectOverview({ project, members, incidents }: ProjectOverview
                       initial={{ opacity: 0, x: -10 }}
                       animate={{ opacity: 1, x: 0 }}
                       transition={{ duration: 0.2, delay: 0.6 + index * 0.05 }}
-                      className="flex items-start gap-3 p-2 rounded-xl hover:bg-gray-50 transition-colors"
+                      className="flex items-start gap-3 p-2 rounded-xl hover:bg-muted/50 transition-colors"
                     >
                       <div className={`p-1.5 rounded-lg shrink-0 ${
                         incident.priority === "CRITICAL" 
-                          ? "bg-red-100" 
+                          ? "bg-destructive/10" 
                           : incident.status === "CLOSED"
-                            ? "bg-emerald-100"
-                            : "bg-amber-100"
+                            ? "bg-success/10"
+                            : "bg-warning/10"
                       }`}>
                         {incident.status === "CLOSED" ? (
-                          <CheckCircle2 className="h-4 w-4 text-emerald-600" />
+                          <CheckCircle2 className="h-4 w-4 text-success" />
                         ) : (
                           <AlertTriangle className={`h-4 w-4 ${
-                            incident.priority === "CRITICAL" ? "text-red-600" : "text-amber-600"
+                            incident.priority === "CRITICAL" ? "text-destructive" : "text-warning"
                           }`} />
                         )}
                       </div>
                       <div className="flex-1 min-w-0">
-                        <p className="text-sm text-gray-900 line-clamp-1">
+                        <p className="text-sm text-foreground line-clamp-1">
                           {incident.description}
                         </p>
-                        <p className="text-xs text-gray-500">
+                        <p className="text-xs text-muted-foreground">
                           {new Date(incident.createdAt).toLocaleDateString("es-MX")}
                         </p>
                       </div>
                       <Badge 
                         variant="outline" 
-                        className={`text-[10px] shrink-0 ${
+                        className={`shrink-0 ${
                           incident.status === "OPEN" 
-                            ? "bg-amber-50 text-amber-700 border-amber-200"
+                            ? "bg-warning/10 text-warning border-warning/20"
                             : incident.status === "ASSIGNED"
-                              ? "bg-blue-50 text-blue-700 border-blue-200"
-                              : "bg-emerald-50 text-emerald-700 border-emerald-200"
+                              ? "bg-info/10 text-info border-info/20"
+                              : "bg-success/10 text-success border-success/20"
                         }`}
                       >
                         {incident.status === "OPEN" ? "Abierta" : incident.status === "ASSIGNED" ? "Asignada" : "Cerrada"}
@@ -388,7 +384,7 @@ export function ProjectOverview({ project, members, incidents }: ProjectOverview
                   ))}
                 </div>
               ) : (
-                <div className="py-8 text-center text-gray-400">
+                <div className="py-8 text-center text-muted-foreground">
                   <CheckCircle2 className="h-8 w-8 mx-auto mb-2 opacity-50" />
                   <p className="text-sm">Sin incidencias registradas</p>
                 </div>

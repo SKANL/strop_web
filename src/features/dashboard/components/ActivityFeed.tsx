@@ -36,30 +36,30 @@ export function ActivityFeed({ activities, maxItems = 8 }: ActivityFeedProps) {
   const getActivityColor = (type: ActivityUI["type"]) => {
     switch (type) {
       case "incident":
-        return "bg-amber-100 text-amber-600";
+        return "bg-warning/20 text-warning";
       case "project":
-        return "bg-blue-100 text-blue-600";
+        return "bg-primary/10 text-primary";
       case "user":
-        return "bg-green-100 text-green-600";
+        return "bg-success/10 text-success";
       case "system":
-        return "bg-gray-100 text-gray-600";
+        return "bg-muted text-muted-foreground";
       default:
-        return "bg-gray-100 text-gray-600";
+        return "bg-muted text-muted-foreground";
     }
   };
 
   const getActivityBadgeColor = (type: ActivityUI["type"]) => {
     switch (type) {
       case "incident":
-        return "bg-amber-100 text-amber-700 border-amber-200";
+        return "bg-warning/10 text-warning border-warning/20";
       case "project":
-        return "bg-blue-100 text-blue-700 border-blue-200";
+        return "bg-primary/10 text-primary border-primary/20";
       case "user":
-        return "bg-green-100 text-green-700 border-green-200";
+        return "bg-success/10 text-success border-success/20";
       case "system":
-        return "bg-gray-100 text-gray-600 border-gray-200";
+        return "bg-muted text-muted-foreground border-border";
       default:
-        return "bg-gray-100 text-gray-600 border-gray-200";
+        return "bg-muted text-muted-foreground border-border";
     }
   };
 
@@ -68,16 +68,16 @@ export function ActivityFeed({ activities, maxItems = 8 }: ActivityFeedProps) {
   };
 
   return (
-    <Card className="rounded-3xl border-gray-200/60 shadow-sm py-0 gap-0 h-full">
+    <Card className="rounded-3xl border-border shadow-sm py-0 gap-0 h-full">
       <CardHeader className="p-4 pb-3 border-b-0">
         <div className="flex items-center gap-2">
-          <div className="p-2 rounded-xl bg-purple-100">
-            <ActivityIcon className="h-4 w-4 text-purple-600" />
+          <div className="p-2 rounded-xl bg-primary/10">
+            <ActivityIcon className="h-4 w-4 text-primary" />
           </div>
-          <CardTitle className="text-sm font-semibold text-gray-700">Actividad</CardTitle>
+          <CardTitle className="text-sm font-semibold text-foreground">Actividad</CardTitle>
         </div>
         <CardAction>
-          <a href="/dashboard/auditoria" className="text-xs text-gray-400 hover:text-gray-600 flex items-center gap-0.5">
+          <a href="/dashboard/auditoria" className="text-xs text-muted-foreground hover:text-foreground flex items-center gap-0.5">
             Ver todo <ChevronRight className="h-3 w-3" />
           </a>
         </CardAction>
@@ -95,14 +95,14 @@ export function ActivityFeed({ activities, maxItems = 8 }: ActivityFeedProps) {
                   initial={{ opacity: 0, x: -5 }}
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ duration: 0.15, delay: index * 0.02 }}
-                  className="flex items-center gap-2.5 p-2 rounded-lg hover:bg-gray-50/80 transition-colors cursor-default"
+                  className="flex items-center gap-2.5 p-2 rounded-lg hover:bg-muted transition-colors cursor-default"
                 >
                   <Tooltip>
                     <TooltipTrigger asChild>
                       {activity.userAvatar ? (
                         <Avatar className="h-6 w-6 shrink-0">
                           <AvatarImage src={activity.userAvatar} alt={activity.user} />
-                          <AvatarFallback className="text-[9px] bg-gray-100">{getInitials(activity.user)}</AvatarFallback>
+                          <AvatarFallback className="text-xs bg-muted">{getInitials(activity.user)}</AvatarFallback>
                         </Avatar>
                       ) : (
                         <div className={`p-1.5 rounded-lg shrink-0 ${getActivityColor(activity.type)}`}>
@@ -116,18 +116,18 @@ export function ActivityFeed({ activities, maxItems = 8 }: ActivityFeedProps) {
                   </Tooltip>
 
                   <div className="flex-1 min-w-0">
-                    <p className="text-[11px] text-gray-600 truncate">
-                      <span className="font-medium text-gray-800">{activity.user}</span>
+                    <p className="text-xs text-muted-foreground truncate">
+                      <span className="font-medium text-foreground">{activity.user}</span>
                       <span> {activity.action} </span>
                       <span className="font-medium">{activity.target}</span>
                     </p>
                   </div>
 
                   <div className="flex items-center gap-1.5 shrink-0">
-                    <Badge variant="outline" className={`text-[8px] px-1 py-0 h-3.5 ${getActivityBadgeColor(activity.type)}`}>
+                    <Badge variant="outline" size="sm" className={`${getActivityBadgeColor(activity.type)}`}>
                       {activity.type === "incident" ? "Inc" : activity.type === "project" ? "Proy" : activity.type === "user" ? "Usr" : "Sys"}
                     </Badge>
-                    <span className="text-[9px] text-gray-400">{activity.timestamp}</span>
+                    <span className="text-xs text-muted-foreground">{activity.timestamp}</span>
                   </div>
                 </motion.div>
               );

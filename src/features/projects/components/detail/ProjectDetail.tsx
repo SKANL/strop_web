@@ -70,18 +70,18 @@ interface ProjectDetailProps {
 const statusConfig = {
   ACTIVE: {
     label: "Activo",
-    variant: "bg-emerald-100 text-emerald-700 border-emerald-200",
-    dot: "bg-emerald-500",
+    variant: "bg-success/10 text-success border-success/20",
+    dot: "bg-success",
   },
   PAUSED: {
     label: "Pausado",
-    variant: "bg-amber-100 text-amber-700 border-amber-200",
-    dot: "bg-amber-500",
+    variant: "bg-warning/10 text-warning border-warning/20",
+    dot: "bg-warning",
   },
   COMPLETED: {
     label: "Completado",
-    variant: "bg-blue-100 text-blue-700 border-blue-200",
-    dot: "bg-blue-500",
+    variant: "bg-info/10 text-info border-info/20",
+    dot: "bg-info",
   },
 } as const;
 
@@ -121,28 +121,6 @@ export function ProjectDetail({
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.4 }}
         >
-          {/* Breadcrumb */}
-          <Breadcrumb className="mb-4">
-            <BreadcrumbList>
-              <BreadcrumbItem>
-                <BreadcrumbLink href="/dashboard">
-                  Dashboard
-                </BreadcrumbLink>
-              </BreadcrumbItem>
-              <BreadcrumbSeparator />
-              <BreadcrumbItem>
-                <BreadcrumbLink href="/dashboard/proyectos">
-                  Proyectos
-                </BreadcrumbLink>
-              </BreadcrumbItem>
-              <BreadcrumbSeparator />
-              <BreadcrumbItem>
-                <BreadcrumbPage className="truncate max-w-48">
-                  {project.name}
-                </BreadcrumbPage>
-              </BreadcrumbItem>
-            </BreadcrumbList>
-          </Breadcrumb>
 
           {/* Header principal */}
           <div className="flex flex-col md:flex-row md:items-start justify-between gap-4">
@@ -163,7 +141,7 @@ export function ProjectDetail({
                   <motion.span 
                     initial={{ scale: 0 }}
                     animate={{ scale: 1 }}
-                    className="absolute -top-1 -right-1 h-5 w-5 bg-red-500 rounded-full flex items-center justify-center text-[10px] font-bold text-white animate-pulse"
+                    className="absolute -top-1 -right-1 h-5 w-5 bg-destructive rounded-full flex items-center justify-center text-xs font-bold text-destructive-foreground animate-pulse"
                   >
                     {project.criticalIncidents}
                   </motion.span>
@@ -173,7 +151,7 @@ export function ProjectDetail({
               {/* Info del proyecto */}
               <div>
                 <div className="flex items-center gap-3 mb-1">
-                  <h1 className="text-2xl font-bold text-gray-900">{project.name}</h1>
+                  <h1 className="text-2xl font-bold text-foreground">{project.name}</h1>
                   <Badge 
                     variant="outline" 
                     className={`text-xs px-2 py-0.5 ${config.variant}`}
@@ -182,7 +160,7 @@ export function ProjectDetail({
                     {config.label}
                   </Badge>
                 </div>
-                <div className="flex flex-wrap items-center gap-4 text-sm text-gray-500">
+                <div className="flex flex-wrap items-center gap-4 text-sm text-muted-foreground">
                   <span className="flex items-center gap-1">
                     <MapPin className="h-4 w-4" />
                     {project.location}
@@ -193,7 +171,7 @@ export function ProjectDetail({
                   </span>
                 </div>
                 {project.description && (
-                  <p className="text-sm text-gray-600 mt-2 max-w-2xl">
+                  <p className="text-sm text-muted-foreground mt-2 max-w-2xl">
                     {project.description}
                   </p>
                 )}
@@ -239,7 +217,7 @@ export function ProjectDetail({
                   <AlertDialog>
                     <AlertDialogTrigger asChild>
                       <DropdownMenuItem 
-                        className="text-red-600 focus:text-red-600 focus:bg-red-50"
+                        className="text-destructive focus:text-destructive focus:bg-destructive/10"
                         onSelect={(e) => e.preventDefault()}
                       >
                         <Trash2 className="h-4 w-4 mr-2" />
@@ -249,8 +227,8 @@ export function ProjectDetail({
                     <AlertDialogContent>
                       <AlertDialogHeader>
                         <div className="flex items-center gap-3 mb-2">
-                          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-red-100">
-                            <AlertTriangle className="h-5 w-5 text-red-600" />
+                          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-destructive/10">
+                            <AlertTriangle className="h-5 w-5 text-destructive" />
                           </div>
                           <AlertDialogTitle>Eliminar proyecto</AlertDialogTitle>
                         </div>
@@ -263,7 +241,7 @@ export function ProjectDetail({
                             <li>La ruta crítica y timeline</li>
                             <li>Fotos y documentos asociados</li>
                           </ul>
-                          <p className="mt-3 font-medium text-red-600">
+                          <p className="mt-3 font-medium text-destructive">
                             Esta acción no se puede deshacer.
                           </p>
                         </AlertDialogDescription>
@@ -271,7 +249,7 @@ export function ProjectDetail({
                       <AlertDialogFooter>
                         <AlertDialogCancel>Cancelar</AlertDialogCancel>
                         <AlertDialogAction 
-                          className="bg-red-600 hover:bg-red-700 focus:ring-red-600"
+                          className="bg-destructive hover:bg-destructive/90 focus:ring-destructive"
                           onClick={() => {
                             // TODO: Implementar eliminación real
                             console.log("Eliminar proyecto:", project.id);
@@ -295,39 +273,39 @@ export function ProjectDetail({
           transition={{ duration: 0.4, delay: 0.1 }}
         >
           <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-            <TabsList className="h-14 w-full grid grid-cols-4 bg-gray-100/80 border border-gray-200 rounded-2xl p-1.5 gap-2">
+            <TabsList className="h-14 w-full grid grid-cols-5 bg-muted/80 border border-border rounded-2xl p-1.5 gap-2">
               <TabsTrigger 
                 value="overview" 
-                className="h-full rounded-xl text-sm font-medium text-gray-600 data-[state=active]:bg-gray-900 data-[state=active]:text-white data-[state=active]:shadow-lg transition-all duration-200"
+                className="h-full rounded-xl text-sm font-medium text-muted-foreground data-[state=active]:bg-foreground data-[state=active]:text-background data-[state=active]:shadow-lg transition-all duration-200"
               >
                 Resumen
               </TabsTrigger>
               <TabsTrigger 
                 value="members" 
-                className="h-full rounded-xl text-sm font-medium text-gray-600 data-[state=active]:bg-gray-900 data-[state=active]:text-white data-[state=active]:shadow-lg transition-all duration-200"
+                className="h-full rounded-xl text-sm font-medium text-muted-foreground data-[state=active]:bg-foreground data-[state=active]:text-background data-[state=active]:shadow-lg transition-all duration-200"
               >
                 Equipo ({members.length})
               </TabsTrigger>
               <TabsTrigger 
                 value="timeline" 
-                className="h-full rounded-xl text-sm font-medium text-gray-600 data-[state=active]:bg-gray-900 data-[state=active]:text-white data-[state=active]:shadow-lg transition-all duration-200"
+                className="h-full rounded-xl text-sm font-medium text-muted-foreground data-[state=active]:bg-foreground data-[state=active]:text-background data-[state=active]:shadow-lg transition-all duration-200"
               >
                 Ruta Crítica
               </TabsTrigger>
               <TabsTrigger 
                 value="materials" 
-                className="h-full rounded-xl text-sm font-medium text-gray-600 data-[state=active]:bg-gray-900 data-[state=active]:text-white data-[state=active]:shadow-lg transition-all duration-200 flex items-center justify-center gap-2"
+                className="h-full rounded-xl text-sm font-medium text-muted-foreground data-[state=active]:bg-foreground data-[state=active]:text-background data-[state=active]:shadow-lg transition-all duration-200 flex items-center justify-center gap-2"
               >
                 <Package className="h-4 w-4" />
                 Insumos
               </TabsTrigger>
               <TabsTrigger 
                 value="incidents" 
-                className="h-full rounded-xl text-sm font-medium text-gray-600 data-[state=active]:bg-blue-600 data-[state=active]:text-white data-[state=active]:shadow-lg transition-all duration-200 flex items-center justify-center gap-2"
+                className="h-full rounded-xl text-sm font-medium text-muted-foreground data-[state=active]:bg-foreground data-[state=active]:text-background data-[state=active]:shadow-lg transition-all duration-200 flex items-center justify-center gap-2"
               >
                 Incidencias
                 {project.openIncidents > 0 && (
-                  <span className="inline-flex items-center justify-center h-5 min-w-5 px-1 text-[10px] font-bold rounded-full bg-red-500 text-white">
+                  <span className="inline-flex items-center justify-center h-5 min-w-5 px-1 text-xs font-bold rounded-full bg-destructive text-destructive-foreground">
                     {project.openIncidents}
                   </span>
                 )}
