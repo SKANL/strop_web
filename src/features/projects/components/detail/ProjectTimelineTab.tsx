@@ -14,20 +14,12 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import {
-  Sheet,
-  SheetContent,
-  SheetDescription,
-  SheetHeader,
-  SheetTitle,
-  SheetTrigger,
-} from "@/components/ui/sheet";
-import {
   ChartContainer,
   ChartTooltip,
   ChartTooltipContent,
   type ChartConfig,
 } from "@/components/ui/chart";
-import { ExcelImportFlow } from "../import/ExcelImportFlow";
+import { LuckySheetMapper } from "../import/LuckySheetMapper";
 
 interface ProjectTimelineTabProps {
   items: CriticalPathItem[];
@@ -221,34 +213,22 @@ export function ProjectTimelineTab({ items, projectId = "mock-project-id" }: Pro
                 </div>
               </div>
 
-              <Sheet open={isImportOpen} onOpenChange={setIsImportOpen}>
-                <SheetTrigger asChild>
-                  <Button 
-                    variant="outline" 
-                    className="rounded-xl gap-2 border-border hover:bg-muted"
-                  >
-                    <FileSpreadsheet className="h-4 w-4 text-success" />
-                    Importar .xlsx
-                  </Button>
-                </SheetTrigger>
-                <SheetContent className="sm:max-w-2xl w-full" side="right">
-                  <SheetHeader className="mb-4">
-                    <SheetTitle>Importar Ruta Crítica</SheetTitle>
-                    <SheetDescription>
-                      Importa tu programa de obra desde Excel (.xlsx) o CSV.
-                      El sistema detectará automáticamente las columnas compatibles.
-                    </SheetDescription>
-                  </SheetHeader>
-                  <div className="h-[calc(100vh-180px)] overflow-y-auto custom-scrollbar">
-                    <ExcelImportFlow
-                      type="critical_path"
-                      projectId={projectId}
-                      onSuccess={handleImportSuccess}
-                      onCancel={() => setIsImportOpen(false)}
-                    />
-                  </div>
-                </SheetContent>
-              </Sheet>
+              <Button 
+                variant="outline" 
+                className="rounded-xl gap-2 border-border hover:bg-muted"
+                onClick={() => setIsImportOpen(true)}
+              >
+                <FileSpreadsheet className="h-4 w-4 text-success" />
+                Importar .xlsx
+              </Button>
+              
+              <LuckySheetMapper
+                type="critical_path"
+                projectId={projectId}
+                isOpen={isImportOpen}
+                onOpenChange={setIsImportOpen}
+                onSuccess={handleImportSuccess}
+              />
             </div>
           </div>
         </CardHeader>

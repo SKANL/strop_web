@@ -22,15 +22,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
-import {
-  Sheet,
-  SheetContent,
-  SheetDescription,
-  SheetHeader,
-  SheetTitle,
-  SheetTrigger,
-} from "@/components/ui/sheet";
-import { ExcelImportFlow } from "../import/ExcelImportFlow";
+import { LuckySheetMapper } from "../import/LuckySheetMapper";
 
 import type { MaterialWithStats } from "@/lib/mock/types";
 
@@ -139,31 +131,22 @@ export function ProjectMaterialsTab({ materials, projectId = "mock-project-id" }
               />
             </div>
             
-            <Sheet open={isImportOpen} onOpenChange={setIsImportOpen}>
-              <SheetTrigger asChild>
-                <Button variant="outline" className="gap-2 border-border">
-                  <FileSpreadsheet className="h-4 w-4 text-success" />
-                  <span className="hidden sm:inline">Importar</span>
-                </Button>
-              </SheetTrigger>
-              <SheetContent className="sm:max-w-2xl w-full" side="right">
-                  <SheetHeader className="mb-4">
-                    <SheetTitle>Importar Explosión de Insumos</SheetTitle>
-                    <SheetDescription>
-                      Importa tu catálogo de materiales desde Excel (.xlsx) o CSV.
-                      El sistema detectará automáticamente las columnas compatible.
-                    </SheetDescription>
-                  </SheetHeader>
-                  <div className="h-[calc(100vh-180px)] overflow-y-auto custom-scrollbar">
-                    <ExcelImportFlow
-                      type="materials"
-                      projectId={projectId}
-                      onSuccess={handleImportSuccess}
-                      onCancel={() => setIsImportOpen(false)}
-                    />
-                  </div>
-                </SheetContent>
-            </Sheet>
+            <Button 
+              variant="outline" 
+              className="gap-2 border-border"
+              onClick={() => setIsImportOpen(true)}
+            >
+              <FileSpreadsheet className="h-4 w-4 text-success" />
+              <span className="hidden sm:inline">Importar</span>
+            </Button>
+            
+            <LuckySheetMapper
+              type="materials"
+              projectId={projectId}
+              isOpen={isImportOpen}
+              onOpenChange={setIsImportOpen}
+              onSuccess={handleImportSuccess}
+            />
           </div>
         </CardHeader>
         <CardContent className="p-0">
