@@ -5,7 +5,6 @@ import { ProjectDetail } from "@/features/projects/components/detail/ProjectDeta
 import { 
   getProjectWithStatsById, 
   getProjectMembersWithDetailsUI,
-  getCriticalPathByProject,
   getIncidentsByProject,
   mockProjectsWithStats
 } from "@/lib/mock";
@@ -30,7 +29,6 @@ if (!project) {
 
 // Obtener datos relacionados
 const members = getProjectMembersWithDetailsUI(project.id);
-const criticalPath = getCriticalPathByProject(project.id);
 const incidents = getIncidentsByProject(project.id);
 ---
 
@@ -42,7 +40,7 @@ const incidents = getIncidentsByProject(project.id);
     client:load 
     project={project}
     members={members}
-    criticalPath={criticalPath}
     incidents={incidents}
   />
 </DashboardLayout>
+

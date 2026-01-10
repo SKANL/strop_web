@@ -29,8 +29,6 @@ export * from "./incidents";
 export * from "./photos";
 export * from "./comments";
 export * from "./auth";
-export * from "./critical-path";
-export * from "./audit-logs";
 
 // ============================================
 // RE-EXPORTS CON NOMBRES ESPECÍFICOS
@@ -44,8 +42,6 @@ export { mockProjectMembers } from "./project-members";
 export { mockIncidents, mockIncidentsWithDetails } from "./incidents";
 export { mockPhotos } from "./photos";
 export { mockComments } from "./comments";
-export { mockCriticalPathItems, getCriticalPathSummary } from "./critical-path";
-export { mockAuditLogs, getActivitySummary, getRecentActivity } from "./audit-logs";
 
 // ============================================
 // DATOS UI ADICIONALES (Notificaciones, Actividad, KPIs)

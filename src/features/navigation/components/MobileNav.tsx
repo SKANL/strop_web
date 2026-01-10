@@ -3,7 +3,7 @@
 
 import { useStore } from "@nanostores/react";
 import { isMobileMenuOpen, toggleMobileMenu } from "@/store/ui";
-import { Menu, LayoutDashboard, FolderKanban, Users, AlertTriangle, ClipboardCheck } from "lucide-react";
+import { Menu, LayoutDashboard, FolderKanban, Users, AlertTriangle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { Badge } from "@/components/ui/badge";
@@ -22,7 +22,6 @@ const navItems: NavItem[] = [
   { id: "proyectos", label: "Proyectos", icon: FolderKanban, href: "/dashboard/proyectos" },
   { id: "usuarios", label: "Usuarios", icon: Users, href: "/dashboard/usuarios" },
   { id: "incidencias", label: "Incidencias", icon: AlertTriangle, href: "/dashboard/incidencias", badge: 3 },
-  { id: "auditoria", label: "Auditoría", icon: ClipboardCheck, href: "/dashboard/auditoria" },
 ];
 
 interface MobileNavProps {

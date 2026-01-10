@@ -5,8 +5,6 @@ import { motion } from "motion/react";
 import {
   User,
   Building2,
-  Bell,
-  Shield,
   Pencil,
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -26,7 +24,7 @@ import { countUsersByRole } from "@/lib/mock/users";
 const storageUsage = getOrganizationStorageUsage(mockOrganization.id);
 const userCount = Object.values(countUsersByRole(mockOrganization.id)).reduce((a, b) => a + b, 0);
 
-// Configuración de las secciones
+// Configuración de las secciones (MVP: solo Perfil y Organización)
 const settingsSections = [
   {
     icon: User,
@@ -40,18 +38,7 @@ const settingsSections = [
     description: "Nombre de empresa, logo, email de facturación y plan",
     href: "/dashboard/configuracion/organizacion",
   },
-  {
-    icon: Bell,
-    title: "Notificaciones",
-    description: "Alertas críticas, resúmenes y preferencias de email",
-    href: "/dashboard/configuracion/notificaciones",
-  },
-  {
-    icon: Shield,
-    title: "Seguridad",
-    description: "Contraseña, sesiones activas y autenticación",
-    href: "/dashboard/configuracion/seguridad",
-  },
+  // Notificaciones y Seguridad eliminados del MVP - ver implementation_plan.md
 ];
 
 // Animación container

@@ -8,6 +8,8 @@ import tailwindcss from '@tailwindcss/vite';
 
 import react from '@astrojs/react';
 
+import { visualizer } from 'rollup-plugin-visualizer';
+
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
 // https://astro.build/config
@@ -26,7 +28,15 @@ export default defineConfig({
         }
     },
 
-    plugins: [tailwindcss()]
+    plugins: [
+      tailwindcss(),
+      visualizer({
+        emitFile: true,
+        filename: 'stats.html',
+        gzipSize: true,
+        brotliSize: true
+      })
+    ]
   },
 
   integrations: [react()]

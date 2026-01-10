@@ -2,7 +2,6 @@
 export { ProjectDetail } from "./ProjectDetail";
 export { ProjectOverview } from "./ProjectOverview";
 export { ProjectMembersTab } from "./ProjectMembersTab";
-export { ProjectTimelineTab } from "./ProjectTimelineTab";
 export { ProjectIncidentsTab } from "./ProjectIncidentsTab";
 export {
   ProjectDetailSkeleton,

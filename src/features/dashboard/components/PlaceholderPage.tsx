@@ -109,7 +109,7 @@ export function PlaceholderPage({ title, description, currentPath }: Placeholder
             {[
               { title: "Vista en tiempo real", desc: "Datos actualizados al instante", icon: LayoutGrid },
               { title: "Filtros avanzados", desc: "Encuentra lo que buscas rápido", icon: Filter },
-              { title: "Exportar datos", desc: "Genera reportes en PDF y Excel", icon: FileOutput },
+              { title: "Exportar datos", desc: "Genera reportes en PDF", icon: FileOutput },
             ].map((feature, index) => {
               const Icon = feature.icon;
               return (

@@ -5,8 +5,8 @@ export type NotificationType =
   | 'PROJECT_UPDATE' 
   | 'SYSTEM' 
   | 'ASSIGNMENT' 
-  | 'CRITICAL' 
-  | 'DEVIATION';
+  | 'CRITICAL';
+  // 'DEVIATION' eliminado del MVP - relacionado con materiales
 
 export interface Notification {
   id: string;
@@ -66,27 +66,18 @@ const INITIAL_NOTIFICATIONS: Notification[] = [
     timestamp: new Date(Date.now() - 1000 * 60 * 60 * 48).toISOString(), // 2 days ago
     isRead: true
   },
-  // Example critical/deviation notifications for demo
+  // Example critical notifications for demo
   {
     id: '5',
     type: 'CRITICAL',
-    title: '⚠️ Retraso Crítico',
-    message: 'La actividad "Cimentación" en proyecto "Torre Norte" tiene retraso de 5 días',
+    title: '⚠️ Incidencia Crítica',
+    message: 'Nueva incidencia crítica reportada en proyecto "Torre Norte" - Falla estructural',
     timestamp: new Date(Date.now() - 1000 * 60 * 30).toISOString(), // 30 min ago
     isRead: false,
-    link: '/projects/p1/timeline',
-    projectId: 'p1'
-  },
-  {
-    id: '6',
-    type: 'DEVIATION',
-    title: '📊 Desviación de Material',
-    message: 'Cemento Portland: Solicitado 1,200 sacos vs Planeado 1,000 sacos (+20%)',
-    timestamp: new Date(Date.now() - 1000 * 60 * 45).toISOString(), // 45 min ago
-    isRead: false,
-    link: '/projects/p1/materials',
+    link: '/dashboard/incidencias',
     projectId: 'p1'
   }
+  // Notificación DEVIATION eliminada del MVP - relacionada con materiales
 ];
 
 // Atoms
@@ -101,10 +92,11 @@ export const $unreadNotifications = computed($notifications, notifications =>
   notifications.filter(n => !n.isRead)
 );
 
-// Computed - Urgent (CRITICAL or DEVIATION type)
+// Computed - Urgent (CRITICAL type)
 export const $urgentNotifications = computed($notifications, notifications =>
   notifications.filter(n => 
-    (n.type === 'CRITICAL' || n.type === 'DEVIATION') && !n.isRead
+    n.type === 'CRITICAL' && !n.isRead
+    // DEVIATION removido del MVP
   )
 );
 
@@ -143,29 +135,6 @@ export function removeNotification(id: string) {
 }
 
 /**
- * Add a material deviation alert notification
- * Called when requestedQuantity > plannedQuantity for any material
- */
-export function addDeviationAlert(material: {
-  name: string;
-  requestedQuantity: number;
-  plannedQuantity: number;
-  unit: string;
-}, projectId: string, projectName?: string) {
-  const deviationPercent = Math.round(
-    ((material.requestedQuantity - material.plannedQuantity) / material.plannedQuantity) * 100
-  );
-
-  addNotification({
-    type: 'DEVIATION',
-    title: '📊 Desviación de Material Detectada',
-    message: `${material.name}: Solicitado ${material.requestedQuantity.toLocaleString()} ${material.unit} vs Planeado ${material.plannedQuantity.toLocaleString()} ${material.unit} (+${deviationPercent}%)${projectName ? ` en ${projectName}` : ''}`,
-    link: `/projects/${projectId}/materials`,
-    projectId,
-  });
-}
-
-/**
  * Add a critical incident/delay alert notification
  */
 export function addCriticalAlert(
@@ -178,8 +147,9 @@ export function addCriticalAlert(
     type: 'CRITICAL',
     title: `⚠️ ${title}`,
     message,
-    link: link ?? `/projects/${projectId}`,
+    link: link ?? `/dashboard/proyectos/${projectId}`,
     projectId,
   });
 }
 
+// addDeviationAlert eliminado del MVP - relacionado con materiales

@@ -39,14 +39,13 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Spinner } from "@/components/ui/spinner";
 import { IncidentTypeIcon } from "./IncidentTypeIcon";
-import { Plus, AlertTriangle, Check, ChevronsUpDown } from "lucide-react";
+import { Plus, AlertTriangle, Check } from "lucide-react";
 import {
   type IncidentType,
   incidentTypeLabels,
   priorityLabels,
 } from "@/lib/mock/types";
 import { mockProjects } from "@/lib/mock/projects";
-import { mockMaterials } from "@/lib/mock/materials";
 import { cn } from "@/lib/utils";
 import {
   Command,
@@ -71,7 +70,6 @@ const incidentFormSchema = z.object({
     "REQUESTS_QUERIES",
     "CERTIFICATIONS",
     "INCIDENT_NOTIFICATIONS",
-    "MATERIAL_REQUEST",
   ] as const, {
     required_error: "Selecciona un tipo de incidencia",
   }),
@@ -83,26 +81,6 @@ const incidentFormSchema = z.object({
     .min(10, "La descripción debe tener al menos 10 caracteres")
     .max(1000, "La descripción no puede exceder 1000 caracteres"),
   locationName: z.string().optional(),
-  // Material request fields
-  materialId: z.string().optional(),
-  quantity: z.coerce.number().min(0).optional(),
-}).superRefine((data, ctx) => {
-  if (data.type === "MATERIAL_REQUEST") {
-    if (!data.materialId) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        message: "Selecciona un material",
-        path: ["materialId"],
-      });
-    }
-    if (!data.quantity || data.quantity <= 0) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        message: "Ingresa una cantidad válida mayor a 0",
-        path: ["quantity"],
-      });
-    }
-  }
 });
 
 type IncidentFormValues = z.infer<typeof incidentFormSchema>;
@@ -151,8 +129,6 @@ export function IncidentForm({ open, onOpenChange, onSubmit }: IncidentFormProps
       priority: "NORMAL",
       description: "",
       locationName: "",
-      materialId: "",
-      quantity: 0,
     },
   });
 
@@ -257,136 +233,6 @@ export function IncidentForm({ open, onOpenChange, onSubmit }: IncidentFormProps
                 />
               </motion.div>
 
-              {/* Material Selection (Conditional) */}
-              {form.watch("type") === "MATERIAL_REQUEST" && (
-                <motion.div
-                  variants={fieldVariants}
-                  initial="hidden"
-                  animate="visible"
-                  className="space-y-4 p-4 border rounded-lg bg-muted mb-4"
-                >
-                  <div className="grid grid-cols-2 gap-4">
-                    <FormField
-                      control={form.control}
-                      name="materialId"
-                      render={({ field }) => (
-                        <FormItem className="flex flex-col">
-                          <FormLabel>Material</FormLabel>
-                          <Popover>
-                            <PopoverTrigger asChild>
-                              <FormControl>
-                                <Button
-                                  variant="outline"
-                                  role="combobox"
-                                  className={cn(
-                                    "w-full justify-between pl-3 text-left font-normal",
-                                    !field.value && "text-muted-foreground"
-                                  )}
-                                >
-                                  {field.value
-                                    ? mockMaterials.find(
-                                        (m) => m.id === field.value
-                                      )?.name
-                                    : "Seleccionar material"}
-                                  <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                                </Button>
-                              </FormControl>
-                            </PopoverTrigger>
-                            <PopoverContent className="w-[300px] p-0" align="start">
-                              <Command>
-                                <CommandInput placeholder="Buscar material..." />
-                                <CommandList>
-                                  <CommandEmpty>No encontrado.</CommandEmpty>
-                                  <CommandGroup>
-                                    {mockMaterials.map((material) => (
-                                      <CommandItem
-                                        value={material.name}
-                                        key={material.id}
-                                        onSelect={() => {
-                                          form.setValue("materialId", material.id);
-                                        }}
-                                      >
-                                        <Check
-                                          className={cn(
-                                            "mr-2 h-4 w-4",
-                                            material.id === field.value
-                                              ? "opacity-100"
-                                              : "opacity-0"
-                                          )}
-                                        />
-                                        <div className="flex flex-col">
-                                          <span>{material.name}</span>
-                                          <span className="text-xs text-muted-foreground">
-                                            Disp: {material.plannedQuantity - material.requestedQuantity} {material.unit}
-                                          </span>
-                                        </div>
-                                      </CommandItem>
-                                    ))}
-                                  </CommandGroup>
-                                </CommandList>
-                              </Command>
-                            </PopoverContent>
-                          </Popover>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-
-                    <FormField
-                      control={form.control}
-                      name="quantity"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Cantidad Requerida</FormLabel>
-                          <FormControl>
-                            <Input
-                              type="number"
-                              min="0"
-                              step="any"
-                              {...field}
-                              onChange={(e) => field.onChange(e.target.valueAsNumber)}
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </div>
-
-                  {/* Deviation Warning */}
-                  {(() => {
-                    const materialId = form.watch("materialId");
-                    const quantity = form.watch("quantity") || 0;
-                    const material = mockMaterials.find(m => m.id === materialId);
-                    
-                    if (material && quantity > 0) {
-                      const available = material.plannedQuantity - material.requestedQuantity;
-                      const willExceed = quantity > available;
-
-                      if (willExceed) {
-                        const excess = quantity - available;
-                        
-                        return (
-                          <motion.div
-                            initial={{ opacity: 0, height: 0 }}
-                            animate={{ opacity: 1, height: "auto" }}
-                          >
-                            <Alert variant="destructive">
-                              <AlertTriangle className="h-4 w-4" />
-                              <AlertTitle>Desviación Detectada</AlertTitle>
-                              <AlertDescription>
-                                Estás solicitando {quantity} {material.unit}, pero solo hay {available} {material.unit} disponibles.
-                                Esto generará una <strong>desviación de {excess} {material.unit}</strong>.
-                              </AlertDescription>
-                            </Alert>
-                          </motion.div>
-                        );
-                      }
-                    }
-                    return null;
-                  })()}
-                </motion.div>
-              )}
 
               {/* Priority */}
               <motion.div variants={fieldVariants}>

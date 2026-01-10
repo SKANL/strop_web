@@ -55,7 +55,7 @@ export function RightSidebar() {
       case 'ASSIGNMENT': return Info;
       case 'PROJECT_UPDATE': return Building2;
       case 'CRITICAL': return AlertCircle;
-      case 'DEVIATION': return TrendingUp;
+      // DEVIATION eliminado del MVP
       case 'SYSTEM': return Info;
       default: return Info;
     }
@@ -67,7 +67,7 @@ export function RightSidebar() {
       case 'ASSIGNMENT': return "bg-info/20 text-info";
       case 'PROJECT_UPDATE': return "bg-success/20 text-success";
       case 'CRITICAL': return "bg-destructive/20 text-destructive";
-      case 'DEVIATION': return "bg-warning/20 text-warning";
+      // DEVIATION eliminado del MVP
       default: return "bg-muted text-muted-foreground";
     }
   };
@@ -315,7 +315,7 @@ export function RightSidebar() {
                           {urgentNotifications.length > 0 ? (
                             urgentNotifications.map((notification) => {
                               const Icon = getNotificationIcon(notification.type);
-                              const isDeviation = notification.type === 'DEVIATION';
+                              // DEVIATION eliminado del MVP
                               const isCritical = notification.type === 'CRITICAL';
                               return (
                                 <div

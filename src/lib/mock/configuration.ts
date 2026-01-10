@@ -9,7 +9,7 @@
 
 export interface NotificationPreferences {
   criticalIncidents: boolean;
-  materialDeviations: boolean;
+  // materialDeviations eliminado del MVP
   newIncidents: boolean;
   incidentClosure: boolean;
   summaryFrequency: "never" | "daily" | "weekly";
@@ -33,7 +33,7 @@ export interface ActiveSession {
 
 export const mockNotificationPreferences: NotificationPreferences = {
   criticalIncidents: true,
-  materialDeviations: true,
+  // materialDeviations eliminado del MVP
   newIncidents: false,
   incidentClosure: true,
   summaryFrequency: "daily",

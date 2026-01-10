@@ -1,10 +1,9 @@
 ---
-// dashboard/index.astro - Página principal del Dashboard
+// dashboard/index.astro - Dashboard minimalista centrado en incidencias
 import DashboardLayout from "@/layouts/DashboardLayout.astro";
 import DashboardHeader from "@/features/dashboard/components/DashboardHeader.astro";
-import KPIGrid from "@/features/dashboard/components/KPIGrid.astro";
-import { DashboardTabs } from "@/features/dashboard/components/DashboardTabs";
-import { mockKPIs, mockCurrentUserUI, mockOrganizationUI } from "@/lib/mock";
+import { IncidentsDashboard } from "@/features/dashboard/components/IncidentsDashboard";
+import { mockCurrentUserUI, mockOrganizationUI } from "@/lib/mock";
 
 const firstName = mockCurrentUserUI.name.split(" ")[0];
 ---
@@ -16,11 +15,6 @@ const firstName = mockCurrentUserUI.name.split(" ")[0];
     organizationName={mockOrganizationUI.name} 
   />
 
-  {/* KPIs Grid Estático (sin JS) */}
-  <section class="mb-6">
-    <KPIGrid data={mockKPIs} />
-  </section>
-
-  {/* Tabs Interactivos - client:load (interacción principal) */}
-  <DashboardTabs client:load />
+  {/* Dashboard Minimalista centrado en Incidencias */}
+  <IncidentsDashboard client:load />
 </DashboardLayout>

@@ -1,14 +1,14 @@
 /**
  * Icono visual para cada tipo de incidencia
  * Basado en los tipos definidos en REQUIREMENTS_V2.md
+ * MVP: 4 tipos (sin MATERIAL_REQUEST)
  */
 
 import { 
   FileText, 
   MessageSquare, 
   Award, 
-  AlertTriangle, 
-  Package,
+  AlertTriangle,
   type LucideIcon
 } from "lucide-react";
 import type { IncidentType } from "@/lib/mock/types";
@@ -24,7 +24,7 @@ const iconMap: Record<IncidentType, LucideIcon> = {
   REQUESTS_QUERIES: MessageSquare,
   CERTIFICATIONS: Award,
   INCIDENT_NOTIFICATIONS: AlertTriangle,
-  MATERIAL_REQUEST: Package,
+  // MATERIAL_REQUEST eliminado del MVP
 };
 
 const colorMap: Record<IncidentType, string> = {
@@ -32,7 +32,7 @@ const colorMap: Record<IncidentType, string> = {
   REQUESTS_QUERIES: "text-primary",
   CERTIFICATIONS: "text-success",
   INCIDENT_NOTIFICATIONS: "text-warning",
-  MATERIAL_REQUEST: "text-warning",
+  // MATERIAL_REQUEST eliminado del MVP
 };
 
 export function IncidentTypeIcon({ 

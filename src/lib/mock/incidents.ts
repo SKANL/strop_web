@@ -48,7 +48,7 @@ export const mockIncidents: Incident[] = [
     organizationId: DEFAULT_ORG_ID,
     projectId: "proj-002",
     createdBy: "user-003", // María García
-    type: "MATERIAL_REQUEST",
+    type: "REQUESTS_QUERIES", // Changed from MATERIAL_REQUEST (MVP cleanup)
     description: "Solicitud de 500 sacos de cemento Portland para cimentación zona B. Urgente para continuar con el avance programado.",
     priority: "NORMAL",
     status: "ASSIGNED",
@@ -153,7 +153,7 @@ export const mockIncidents: Incident[] = [
     organizationId: DEFAULT_ORG_ID,
     projectId: "proj-001",
     createdBy: "user-004", // Roberto Sánchez
-    type: "MATERIAL_REQUEST",
+    type: "REQUESTS_QUERIES", // Changed from MATERIAL_REQUEST (MVP cleanup)
     description: "Solicitud de 200 varillas de acero corrugado #4 para armado de columnas del nivel 4.",
     priority: "NORMAL",
     status: "CLOSED",

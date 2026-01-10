@@ -19,13 +19,13 @@ export type ProjectRole = "SUPERINTENDENT" | "RESIDENT" | "CABO";
 /** Estados de proyecto */
 export type ProjectStatus = "ACTIVE" | "PAUSED" | "COMPLETED";
 
-/** Tipos de incidencia predefinidos */
+/** Tipos de incidencia predefinidos (MVP: 4 tipos) */
 export type IncidentType =
   | "ORDERS_INSTRUCTIONS"      // Órdenes e Instrucciones
   | "REQUESTS_QUERIES"         // Solicitudes y Consultas
   | "CERTIFICATIONS"           // Certificaciones
-  | "INCIDENT_NOTIFICATIONS"   // Notificaciones de Incidentes
-  | "MATERIAL_REQUEST";        // Solicitud de Material
+  | "INCIDENT_NOTIFICATIONS";  // Notificaciones de Incidentes
+  // MATERIAL_REQUEST eliminado del MVP
 
 /** Prioridad de incidencias */
 export type IncidentPriority = "NORMAL" | "CRITICAL";
@@ -36,8 +36,7 @@ export type IncidentStatus = "OPEN" | "ASSIGNED" | "CLOSED";
 /** Tipos de comentario */
 export type CommentType = "ASSIGNMENT" | "CLOSURE" | "FOLLOWUP";
 
-/** Estados de ruta crítica */
-export type CriticalPathStatus = "PENDING" | "IN_PROGRESS" | "COMPLETED";
+// CriticalPathStatus eliminado del MVP - ver implementation_plan.md
 
 // ============================================
 // INTERFACES DE ENTIDADES
@@ -224,29 +223,16 @@ export interface CommentWithAuthor extends Comment {
   authorRole: UserRole;
 }
 
-/**
- * Actividad de ruta crítica
- * @see REQUIREMENTS_V2.md Sección 2.7
- */
-export interface CriticalPathItem {
-  id: string;
-  organizationId: string;
-  projectId: string;
-  activityName: string;
-  plannedStart: string;
-  plannedEnd: string;
-  actualStart?: string;
-  actualEnd?: string;
-  status: CriticalPathStatus;
-  progressPercentage: number;
-  createdAt: string;
-  updatedAt: string;
-  updatedBy?: string;
-  deletedAt?: string;
-}
+// ============================================
+// INTERFACES POST-MVP (Reservadas para futuro)
+// ============================================
+
+// CriticalPathItem eliminado del MVP - ver implementation_plan.md
+// Esta interface se implementará cuando se agregue Timeline/Ruta Crítica
 
 /**
- * Registro de auditoría
+ * Registro de auditoría (POST-MVP)
+ * Reservado para integración futura con Bitácora SYSTEM source
  * @see REQUIREMENTS_V2.md Sección 2.8
  */
 export type AuditAction = "CREATE" | "UPDATE" | "DELETE" | "LOGIN" | "LOGOUT" | "EXPORT" | "IMPORT" | "VIEW";
@@ -258,14 +244,13 @@ export type AuditResourceType =
   | "comment" 
   | "photo" 
   | "organization"
-  | "critical_path"
   | "project_member"
   | "report";
 
 export interface AuditLog {
   id: string;
   organizationId: string;
-  userId?: string; // Opcional para acciones de sistema o intentos fallidos
+  userId?: string;
   action: AuditAction;
   resourceType: AuditResourceType;
   resourceId?: string;
@@ -331,7 +316,7 @@ export const incidentTypeLabels: Record<IncidentType, string> = {
   REQUESTS_QUERIES: "Solicitudes y Consultas",
   CERTIFICATIONS: "Certificaciones",
   INCIDENT_NOTIFICATIONS: "Notificación de Incidentes",
-  MATERIAL_REQUEST: "Solicitud de Material",
+  // MATERIAL_REQUEST eliminado del MVP
 };
 
 export const priorityLabels: Record<IncidentPriority, string> = {
@@ -466,27 +451,5 @@ export interface ProjectMemberWithDetails {
   assignedByAvatar?: string;
 }
 
-/**
- * Material/Insumo de construcción (Explosión de Insumos)
- * @see REQUIREMENTS_V2.md - RF-A03
- */
-export interface Material {
-  id: string;
-  organizationId: string;
-  projectId: string;
-  name: string;                // Nombre del material (ej: "Cemento Portland")
-  unit: string;                // Unidad de medida (ej: "m3", "ton", "pza")
-  plannedQuantity: number;     // Cantidad planeada (línea base)
-  requestedQuantity: number;   // Cantidad solicitada acumulada
-  createdAt: string;
-  updatedAt: string;
-}
-
-/**
- * Material con datos calculados (para UI)
- */
-export interface MaterialWithStats extends Material {
-  availableQuantity: number;   // plannedQuantity - requestedQuantity
-  deviationPercentage: number; // (requestedQuantity - plannedQuantity) / plannedQuantity * 100
-  hasDeviation: boolean;       // requestedQuantity > plannedQuantity
-}
+// Material y MaterialWithStats eliminados del MVP - ver implementation_plan.md
+// Estas interfaces se implementarán cuando se agregue control de materiales/insumos

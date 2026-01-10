@@ -46,7 +46,7 @@ const typeLabels: Record<string, string> = {
   REQUESTS_QUERIES: "Solicitudes y Consultas",
   CERTIFICATIONS: "Certificaciones",
   INCIDENT_NOTIFICATIONS: "Notificaciones",
-  MATERIAL_REQUEST: "Solicitud de Material",
+  // MATERIAL_REQUEST eliminado del MVP
 };
 
 const statusConfig: Record<IncidentStatus, { label: string; color: string; bg: string; icon: React.ElementType }> = {

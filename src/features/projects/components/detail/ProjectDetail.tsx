@@ -19,7 +19,6 @@ import {
 import type { 
   ProjectWithStats, 
   ProjectMemberWithDetails, 
-  CriticalPathItem,
   IncidentWithDetails 
 } from "@/lib/mock/types";
 import { Button } from "@/components/ui/button";
@@ -54,16 +53,11 @@ import {
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { ProjectOverview } from "./ProjectOverview";
 import { ProjectMembersTab } from "./ProjectMembersTab";
-import { ProjectTimelineTab } from "./ProjectTimelineTab";
 import { ProjectIncidentsTab } from "./ProjectIncidentsTab";
-import { ProjectMaterialsTab } from "./ProjectMaterialsTab";
-import { mockMaterials } from "@/lib/mock/materials";
-import { Package } from "lucide-react";
 
 interface ProjectDetailProps {
   project: ProjectWithStats;
   members: ProjectMemberWithDetails[];
-  criticalPath: CriticalPathItem[];
   incidents: IncidentWithDetails[];
 }
 
@@ -88,21 +82,10 @@ const statusConfig = {
 export function ProjectDetail({ 
   project, 
   members, 
-  criticalPath,
   incidents 
 }: ProjectDetailProps) {
   const [activeTab, setActiveTab] = useState("overview");
   const config = statusConfig[project.status];
-
-  // Calcular stats de materiales (simulación client-side)
-  const materialsWithStats: import('@/lib/mock/types').MaterialWithStats[] = useMemo(() => {
-    return mockMaterials.map(m => ({
-      ...m,
-      availableQuantity: m.plannedQuantity - m.requestedQuantity,
-      deviationPercentage: ((m.requestedQuantity - m.plannedQuantity) / m.plannedQuantity) * 100,
-      hasDeviation: m.requestedQuantity > m.plannedQuantity
-    }));
-  }, []);
 
   const formatDate = (dateStr: string) => {
     return new Date(dateStr).toLocaleDateString("es-MX", {
@@ -238,7 +221,6 @@ export function ProjectDetail({
                           <ul className="list-disc list-inside mt-2 space-y-1 text-muted-foreground">
                             <li>Todos los miembros asignados ({members.length})</li>
                             <li>Todas las incidencias ({incidents.length})</li>
-                            <li>La ruta crítica y timeline</li>
                             <li>Fotos y documentos asociados</li>
                           </ul>
                           <p className="mt-3 font-medium text-destructive">
@@ -273,7 +255,7 @@ export function ProjectDetail({
           transition={{ duration: 0.4, delay: 0.1 }}
         >
           <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-            <TabsList className="h-14 w-full grid grid-cols-5 bg-muted/80 border border-border rounded-2xl p-1.5 gap-2">
+            <TabsList className="h-14 w-full grid grid-cols-3 bg-muted/80 border border-border rounded-2xl p-1.5 gap-2">
               <TabsTrigger 
                 value="overview" 
                 className="h-full rounded-xl text-sm font-medium text-muted-foreground data-[state=active]:bg-foreground data-[state=active]:text-background data-[state=active]:shadow-lg transition-all duration-200"
@@ -285,19 +267,6 @@ export function ProjectDetail({
                 className="h-full rounded-xl text-sm font-medium text-muted-foreground data-[state=active]:bg-foreground data-[state=active]:text-background data-[state=active]:shadow-lg transition-all duration-200"
               >
                 Equipo ({members.length})
-              </TabsTrigger>
-              <TabsTrigger 
-                value="timeline" 
-                className="h-full rounded-xl text-sm font-medium text-muted-foreground data-[state=active]:bg-foreground data-[state=active]:text-background data-[state=active]:shadow-lg transition-all duration-200"
-              >
-                Ruta Crítica
-              </TabsTrigger>
-              <TabsTrigger 
-                value="materials" 
-                className="h-full rounded-xl text-sm font-medium text-muted-foreground data-[state=active]:bg-foreground data-[state=active]:text-background data-[state=active]:shadow-lg transition-all duration-200 flex items-center justify-center gap-2"
-              >
-                <Package className="h-4 w-4" />
-                Insumos
               </TabsTrigger>
               <TabsTrigger 
                 value="incidents" 
@@ -327,14 +296,6 @@ export function ProjectDetail({
                 
                 <TabsContent value="members" className="mt-0">
                   <ProjectMembersTab projectId={project.id} members={members} />
-                </TabsContent>
-                
-                <TabsContent value="timeline" className="mt-0">
-                  <ProjectTimelineTab items={criticalPath} />
-                </TabsContent>
-
-                <TabsContent value="materials" className="mt-0">
-                  <ProjectMaterialsTab materials={materialsWithStats} />
                 </TabsContent>
                 
                 <TabsContent value="incidents" className="mt-0">
