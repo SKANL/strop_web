@@ -43,11 +43,26 @@ const projects = [
   },
 ]
 
+
+
+import { useRouter } from "next/navigation"
+import { Plus } from "lucide-react"
+import { Button } from "@/components/ui/button"
+import { useState } from "react"
+import { ProjectSetupDrawer } from "./project-setup-drawer"
+
 export function ProjectGrid() {
+  const router = useRouter()
+  const [isSetupOpen, setIsSetupOpen] = useState(false)
+
   return (
     <Card className="h-full flex flex-col overflow-hidden">
-      <CardHeader className="pb-2">
+      <CardHeader className="pb-2 flex flex-row items-center justify-between space-y-0">
         <CardTitle>Proyectos Activos</CardTitle>
+        <Button size="sm" className="h-8 gap-1" onClick={() => setIsSetupOpen(true)}>
+            <Plus className="h-4 w-4" />
+            Nuevo
+        </Button>
       </CardHeader>
       <CardContent className="flex-1 overflow-auto p-0">
         <Table>
@@ -67,7 +82,11 @@ export function ProjectGrid() {
               const isCritical = healthPercentage > 80
 
               return (
-                <TableRow key={project.name} className="cursor-pointer hover:bg-muted/50">
+                <TableRow 
+                    key={project.name} 
+                    className="cursor-pointer hover:bg-muted/50"
+                    onClick={() => router.push(`/dashboard/projects/1`)} // Hardcoded for demo
+                >
                   <TableCell className="font-medium">
                     <div>{project.name}</div>
                     <div className="text-xs text-muted-foreground">Fase: {project.phase}</div>
@@ -120,6 +139,7 @@ export function ProjectGrid() {
           </TableBody>
         </Table>
       </CardContent>
+      <ProjectSetupDrawer isOpen={isSetupOpen} onClose={() => setIsSetupOpen(false)} />
     </Card>
   )
 }
