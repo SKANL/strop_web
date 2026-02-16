@@ -38,115 +38,57 @@ import { LinkIcon, Check, X, Pencil } from "lucide-react"
 import { toast } from "sonner"
 import { cn } from "@/lib/utils"
 
-// Mock data type
-type GlobalIncident = {
+// Real data types derived from Supabase result
+// We can treat this as "any" for now or define a proper interface matching the query
+interface IncidentRow {
   id: string
-  project: string
-  projectCode: string
-  evidence: string
+  folio_number: number
   description: string
-  createdBy: string
-  location: string
-  assignedTo: string
-  tradeType: "plumbing" | "electrical" | "masonry" | "painting" | "carpentry"
-  status: "open" | "in_review" | "closed"
-  cost: number
-  lastUpdate: string
+  location_detail: string | null
+  status: "OPEN" | "IN_REVIEW" | "CLOSED" | "REJECTED" | "DRAFT"
+  priority: "LOW" | "MEDIUM" | "HIGH" | "CRITICAL"
+  actual_cost: number | null
+  created_at: string
+  project: { name: string } | null
+  created_by_user: { full_name: string | null } | null
+  assigned_to_user: { full_name: string | null } | null
+  photos: { photo_url: string }[]
 }
 
-// Mock data
-const mockIncidents: GlobalIncident[] = [
-  {
-    id: "#1024",
-    project: "Torre Meriden",
-    projectCode: "TM-02",
-    evidence: "/placeholder.svg",
-    description: "Grieta en muro de carga",
-    createdBy: "Juan (Residente)",
-    location: "Nivel 3 > Depto 301",
-    assignedTo: "Yesero",
-    tradeType: "masonry",
-    status: "open",
-    cost: 1500,
-    lastUpdate: "Hace 2 horas"
-  },
-  {
-    id: "#1025",
-    project: "Plaza Altabrisa",
-    projectCode: "PA-01",
-    evidence: "/placeholder.svg",
-    description: "Fuga de agua en baño principal",
-    createdBy: "María (Residente)",
-    location: "Nivel 2 > Local 205",
-    assignedTo: "Plomero",
-    tradeType: "plumbing",
-    status: "in_review",
-    cost: 2300,
-    lastUpdate: "Hace 1 día"
-  },
-  {
-    id: "#1026",
-    project: "Torre Meriden",
-    projectCode: "TM-02",
-    evidence: "/placeholder.svg",
-    description: "Instalación eléctrica incorrecta",
-    createdBy: "Pedro (Superintendente)",
-    location: "Nivel 5 > Depto 502",
-    assignedTo: "Electricista",
-    tradeType: "electrical",
-    status: "open",
-    cost: 3200,
-    lastUpdate: "Hace 3 horas"
-  },
-  {
-    id: "#1027",
-    project: "Residencial Los Pinos",
-    projectCode: "RP-03",
-    evidence: "/placeholder.svg",
-    description: "Pintura con burbujas por humedad",
-    createdBy: "Ana (Residente)",
-    location: "Casa 12 > Sala",
-    assignedTo: "Pintor",
-    tradeType: "painting",
-    status: "closed",
-    cost: 800,
-    lastUpdate: "Hace 5 días"
-  },
-]
-
-const tradeColors = {
-  plumbing: "bg-blue-100 text-blue-800 border-blue-200",
-  electrical: "bg-yellow-100 text-yellow-800 border-yellow-200",
-  masonry: "bg-gray-100 text-gray-800 border-gray-200",
-  painting: "bg-purple-100 text-purple-800 border-purple-200",
-  carpentry: "bg-amber-100 text-amber-800 border-amber-200",
+const statusColors: Record<string, "destructive" | "default" | "secondary" | "outline"> = {
+  OPEN: "destructive",
+  IN_REVIEW: "default",
+  CLOSED: "secondary",
+  DRAFT: "outline",
 }
 
-const tradeLabels = {
-  plumbing: "🔧 Plomería",
-  electrical: "⚡ Eléctrico",
-  masonry: "🧱 Yesero",
-  painting: "🎨 Pintura",
-  carpentry: "🪚 Carpintería",
+const statusLabels: Record<string, string> = {
+  OPEN: "🔴 Abierto",
+  IN_REVIEW: "🟡 En Revisión",
+  CLOSED: "🟢 Cerrado",
+  DRAFT: "⚪ Borrador",
 }
 
-const statusColors = {
-  open: "destructive",
-  in_review: "default",
-  closed: "secondary",
-}
-
-const statusLabels = {
-  open: "🔴 Abierto",
-  in_review: "🟡 En Revisión",
-  closed: "🟢 Cerrado",
+// Helper to estimate time ago
+function getTimeAgo(dateString: string): string {
+    const date = new Date(dateString)
+    const now = new Date()
+    const diffMs = now.getTime() - date.getTime()
+    const diffMins = Math.floor(diffMs / 60000)
+    
+    if (diffMins < 60) return `Hace ${diffMins} min`
+    const diffHours = Math.floor(diffMins / 60)
+    if (diffHours < 24) return `Hace ${diffHours} horas`
+    return `Hace ${Math.floor(diffHours / 24)} días`
 }
 
 export function GlobalIncidentsTable({
+  incidents,
   searchQuery,
   activeTab,
   onIncidentClick
 }: {
+  incidents: any[] // Using any for now to avoid strict type duplication, ideal is to import from actions
   searchQuery: string
   activeTab: string
   onIncidentClick: (incidentId: string) => void
@@ -162,7 +104,7 @@ export function GlobalIncidentsTable({
 
   const handleCostSave = (incidentId: string) => {
     toast.promise(
-      new Promise((resolve) => setTimeout(resolve, 500)),
+      new Promise((resolve) => setTimeout(resolve, 500)), // TODO: Wire up server action
       {
         loading: 'Actualizando costo...',
         success: () => {
@@ -179,39 +121,39 @@ export function GlobalIncidentsTable({
     setTempCost("")
   }
 
-  const columns: ColumnDef<GlobalIncident>[] = [
+  const columns: ColumnDef<IncidentRow>[] = [
     {
-      accessorKey: "id",
+      accessorKey: "id", // Using ID for key but displaying folio
       header: "ID",
       cell: ({ row }) => (
         <span className="text-xs text-muted-foreground font-mono">
-          {row.original.id}
+          #{row.original.folio_number}
         </span>
       ),
       size: 60,
     },
     {
-      accessorKey: "project",
+      id: "project",
       header: "PROYECTO",
+      accessorFn: (row) => row.project?.name,
       cell: ({ row }) => (
         <div className="flex flex-col gap-0.5">
-          <span className="text-sm font-medium">{row.original.project}</span>
-          <span className="text-xs text-muted-foreground font-mono">
-            {row.original.projectCode}
-          </span>
+          <span className="text-sm font-medium">{row.original.project?.name || 'Sin Proyecto'}</span>
         </div>
       ),
       size: 150,
     },
     {
-      accessorKey: "evidence",
+      id: "evidence",
       header: "EVIDENCIA",
-      cell: ({ row }) => (
+      cell: ({ row }) => {
+        const photoUrl = row.original.photos?.[0]?.photo_url || '/placeholder.svg'
+        return (
         <HoverCard openDelay={200}>
           <HoverCardTrigger asChild>
             <div className="h-10 w-10 rounded border overflow-hidden cursor-pointer hover:ring-2 hover:ring-primary transition-all">
               <img 
-                src={row.original.evidence} 
+                src={photoUrl} 
                 alt="Evidence" 
                 className="w-full h-full object-cover"
               />
@@ -219,13 +161,13 @@ export function GlobalIncidentsTable({
           </HoverCardTrigger>
           <HoverCardContent side="right" className="w-80">
             <img 
-              src={row.original.evidence} 
+              src={photoUrl} 
               alt="Evidence preview" 
               className="w-full rounded"
             />
           </HoverCardContent>
         </HoverCard>
-      ),
+      )},
       size: 80,
     },
     {
@@ -237,66 +179,70 @@ export function GlobalIncidentsTable({
             {row.original.description}
           </span>
           <span className="text-xs text-muted-foreground">
-            Creado por {row.original.createdBy}
+            Creado por {row.original.created_by_user?.full_name || 'Desconocido'}
+          </span>
+           <span className="text-[10px] text-muted-foreground/70">
+            {getTimeAgo(row.original.created_at)}
           </span>
         </div>
       ),
     },
     {
-      accessorKey: "location",
+      accessorKey: "location_detail",
       header: "UBICACIÓN",
       cell: ({ row }) => (
-        <Badge variant="outline" className="text-xs font-normal">
-          {row.original.location}
+        <Badge variant="outline" className="text-xs font-normal max-w-[150px] truncate">
+          {row.original.location_detail || 'N/A'}
         </Badge>
       ),
       size: 150,
     },
     {
-      accessorKey: "assignedTo",
-      header: "ASIGNADO",
-      cell: ({ row }) => (
-        <Badge 
-          variant="outline"
-          className={cn("text-xs", tradeColors[row.original.tradeType])}
-        >
-          {tradeLabels[row.original.tradeType]}
-        </Badge>
-      ),
-      size: 140,
+        id: "priority",
+        header: "PRIORIDAD",
+        accessorKey: "priority",
+        cell: ({ row }) => (
+            <Badge variant="secondary" className={cn("text-xs font-normal", {
+                "bg-red-100 text-red-700": row.original.priority === 'CRITICAL',
+                "bg-orange-100 text-orange-700": row.original.priority === 'HIGH',
+                "bg-yellow-100 text-yellow-700": row.original.priority === 'MEDIUM',
+                "bg-blue-100 text-blue-700": row.original.priority === 'LOW',
+            })}>
+                {row.original.priority}
+            </Badge>
+        ),
+        size: 100
     },
     {
       accessorKey: "status",
       header: "ESTADO",
-      cell: ({ row }) => (
-        <Select defaultValue={row.original.status}>
-          <SelectTrigger className="h-8 w-[130px] text-xs">
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="open">🔴 Abierto</SelectItem>
-            <SelectItem value="in_review">🟡 En Revisión</SelectItem>
-            <SelectItem value="closed">🟢 Cerrado</SelectItem>
-          </SelectContent>
-        </Select>
-      ),
+      cell: ({ row }) => {
+        // Simple display for now, could be a select if we wire up the action
+        // const color = statusColors[row.original.status] || "secondary"
+        return (
+             <Badge variant={statusColors[row.original.status] || "secondary"}>
+                {statusLabels[row.original.status] || row.original.status}
+             </Badge>
+        )
+      },
       size: 140,
     },
     {
-      accessorKey: "cost",
+      accessorKey: "actual_cost",
       header: () => <div className="text-right">COSTO ($)</div>,
       cell: ({ row }) => {
         const isEditing = editingCost === row.original.id
+        const cost = row.original.actual_cost || 0
         
         return (
           <div className="text-right">
             {!isEditing ? (
               <div 
                 className="flex items-center justify-end gap-2 group cursor-pointer"
-                onClick={() => handleCostEdit(row.original.id, row.original.cost)}
+                onClick={() => handleCostEdit(row.original.id, cost)}
               >
                 <span className="font-mono font-bold text-sm">
-                  ${row.original.cost.toLocaleString('es-MX', { minimumFractionDigits: 2 })}
+                  ${cost.toLocaleString('es-MX', { minimumFractionDigits: 2 })}
                 </span>
                 <Pencil className="h-3 w-3 text-muted-foreground opacity-40 group-hover:opacity-100 transition-opacity" />
               </div>
@@ -341,8 +287,8 @@ export function GlobalIncidentsTable({
       header: "ACCIONES",
       cell: ({ row }) => {
         const copyPublicLink = async () => {
-          const mockToken = `${row.original.id.replace('#', '')}-${Date.now().toString(36)}`
-          const publicUrl = `${window.location.origin}/r/${mockToken}`
+          // TODO: Use real public token if available, or generate one
+          const publicUrl = `${window.location.origin}/r/demo-${row.original.id}` 
           
           try {
             await navigator.clipboard.writeText(publicUrl)
@@ -373,22 +319,21 @@ export function GlobalIncidentsTable({
   ]
 
   // Filter incidents based on active tab and search query
-  const filteredIncidents = React.useMemo(() => mockIncidents.filter(incident => {
+  const filteredIncidents = React.useMemo(() => incidents.filter(incident => {
     // Tab filtering
     let passesTabFilter = true
     switch (activeTab) {
       case "urgent":
-        // Mock: incidents with cost > 3000 are urgent
-        passesTabFilter = incident.cost > 3000
+        passesTabFilter = incident.priority === 'CRITICAL' || incident.priority === 'HIGH'
         break
       case "pending":
-        passesTabFilter = incident.status === "in_review"
+        passesTabFilter = incident.status === "IN_REVIEW"
         break
       case "with-cost":
-        passesTabFilter = incident.cost > 0
+        passesTabFilter = (incident.actual_cost || 0) > 0
         break
       case "closed":
-        passesTabFilter = incident.status === "closed"
+        passesTabFilter = incident.status === "CLOSED"
         break
       case "all":
       default:
@@ -396,15 +341,16 @@ export function GlobalIncidentsTable({
     }
 
     // Search filtering
+    const searchLower = searchQuery.toLowerCase()
     const passesSearchFilter = searchQuery === "" || 
-      incident.id.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      incident.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      incident.project.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      incident.location.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      incident.assignedTo.toLowerCase().includes(searchQuery.toLowerCase())
+      incident.folio_number?.toString().includes(searchLower) ||
+      incident.description?.toLowerCase().includes(searchLower) ||
+      incident.project?.name?.toLowerCase().includes(searchLower) ||
+      incident.location_detail?.toLowerCase().includes(searchLower) ||
+      incident.assigned_to_user?.full_name?.toLowerCase().includes(searchLower)
 
     return passesTabFilter && passesSearchFilter
-  }), [activeTab, searchQuery])
+  }), [activeTab, searchQuery, incidents])
 
   const table = useReactTable({
     data: filteredIncidents,

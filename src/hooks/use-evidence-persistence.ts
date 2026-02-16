@@ -14,7 +14,7 @@ export function useEvidencePersistence(token: string) {
         try {
             const saved = await get(STORAGE_KEY)
             if (saved) {
-                console.log('Restored draft from IDB')
+                // Draft restored from IDB
                 setDraftPhoto(saved)
             }
         } catch (error) {

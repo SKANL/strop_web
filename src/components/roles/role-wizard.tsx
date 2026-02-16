@@ -8,6 +8,7 @@ import { StepIdentity } from "./steps/step-identity"
 import { StepPermissions } from "./steps/step-permissions"
 import { StepPreview } from "./steps/step-preview"
 import { toast } from "sonner"
+import { createRole } from '@/app/actions/roles'
 
 interface RoleWizardProps {
   open: boolean
@@ -48,14 +49,25 @@ export function RoleWizard({ open, onOpenChange, roleToEdit }: RoleWizardProps) 
       else if (step === 'PERMISSIONS') setStep('IDENTITY')
   }
 
-  const handleSave = () => {
-      // Simulate API call
-      console.log("Saving Role:", formData)
+  const handleSave = async () => {
+    // Call server action to create role
+    const result = await createRole({
+      name: formData.name,
+      description: formData.description,
+      archetype: formData.archetype,
+      permissions: formData.permissions,
+    })
+
+    if (result.error) {
+      toast.error(result.error)
+    } else {
       toast.success("Rol guardado correctamente")
       onOpenChange(false)
       setStep('IDENTITY')
       setFormData(INITIAL_DATA)
+    }
   }
+
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>

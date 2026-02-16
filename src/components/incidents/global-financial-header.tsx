@@ -5,16 +5,51 @@ import { Badge } from "@/components/ui/badge"
 import { Progress } from "@/components/ui/progress"
 import { TrendingUp, TrendingDown, AlertTriangle, CheckCircle2 } from "lucide-react"
 
-export function GlobalFinancialHeader() {
-  // Mock data - will be replaced with Supabase queries
-  const stats = {
-    activeRisk: 145200,
-    recovered: 42500,
-    criticalIncidents: 8,
-    overdueIncidents: 15,
-    totalProjects: 12,
-    healthPercentage: 68
-  }
+export function GlobalFinancialHeader({ incidents }: { incidents: any[] }) {
+  // Calculate stats from incidents
+  const stats = incidents.reduce((acc, incident) => {
+    // Active Risk: Cost of open/in_review incidents
+    if (incident.status === 'OPEN' || incident.status === 'IN_REVIEW') {
+      acc.activeRisk += (incident.estimated_cost || 0)
+    }
+
+    // Recovered: Cost of closed incidents (assuming charged/resolved)
+    // TODO: Filter by 'charged_to_contractor' flag when available
+    if (incident.status === 'CLOSED') {
+      acc.recovered += (incident.actual_cost || incident.estimated_cost || 0)
+    }
+
+    // Critical Incidents
+    if (incident.priority === 'CRITICAL') {
+      acc.criticalIncidents += 1
+    }
+
+    // Overdue Incidents (mock logic for now: created > 7 days ago and not closed)
+    const daysSinceCreation = (new Date().getTime() - new Date(incident.created_at).getTime()) / (1000 * 3600 * 24)
+    if (daysSinceCreation > 7 && incident.status !== 'CLOSED') {
+      acc.overdueIncidents += 1
+    }
+
+    // Unique Projects
+    if (incident.project_id && !acc.projectIds.has(incident.project_id)) {
+      acc.projectIds.add(incident.project_id)
+      acc.totalProjects += 1
+    }
+
+    return acc
+  }, {
+    activeRisk: 0,
+    recovered: 0,
+    criticalIncidents: 0,
+    overdueIncidents: 0,
+    totalProjects: 0,
+    projectIds: new Set()
+  })
+
+  // Calculate Health Percentage based on closed vs total
+  const totalIncidents = incidents.length
+  const closedIncidents = incidents.filter(i => i.status === 'CLOSED').length
+  const healthPercentage = totalIncidents > 0 ? Math.round((closedIncidents / totalIncidents) * 100) : 100
 
   return (
     <div className="border-b bg-linear-to-r from-background via-muted/20 to-background">
@@ -102,11 +137,11 @@ export function GlobalFinancialHeader() {
                     </div>
                   </div>
                   <span className="text-sm font-medium">
-                    {stats.healthPercentage}%
+                    {healthPercentage}%
                   </span>
                 </div>
                 <Progress 
-                  value={stats.healthPercentage} 
+                  value={healthPercentage} 
                   className="h-2"
                 />
               </div>

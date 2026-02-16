@@ -110,38 +110,40 @@ export function IncidentDrawer({
 
                     <Separator />
 
-                    {/* Timeline / Bitácora */}
-                    <div className="space-y-3">
-                         <h4 className="text-sm font-medium text-muted-foreground uppercase tracking-wider flex items-center gap-2">
-                            <Clock className="h-3 w-3" /> Bitácora
-                         </h4>
-                         <div className="pl-2 border-l-2 border-muted space-y-6 relative ml-1">
-                            {/* Event 1 */}
-                            <div className="relative pl-6">
-                                <div className="absolute -left-[5px] top-1 h-2 w-2 rounded-full bg-muted-foreground ring-4 ring-background" />
-                                <p className="text-sm"><span className="font-semibold">{incident.createdBy}</span> creó la incidencia.</p>
-                                <span className="text-xs text-muted-foreground">{incident.createdAt}</span>
-                            </div>
-                            {/* Event 2 */}
+                     {/* Timeline / Bitácora */}
+                     <div className="space-y-3">
+                          <h4 className="text-sm font-medium text-muted-foreground uppercase tracking-wider flex items-center gap-2">
+                             <Clock className="h-3 w-3" /> Bitácora
+                          </h4>
+                          <div className="pl-2 border-l-2 border-muted space-y-6 relative ml-1">
+                             {/* Event 1 */}
                              <div className="relative pl-6">
-                                <div className="absolute -left-[5px] top-1 h-2 w-2 rounded-full bg-blue-500 ring-4 ring-background" />
-                                <p className="text-sm">Asignado a <span className="font-semibold">{incident.assignedTo}</span>.</p>
-                                <span className="text-xs text-muted-foreground">Hace 1 hora</span>
-                            </div>
-                         </div>
-                         
-                         {/* Add Note Input */}
-                         <div className="pt-2 flex gap-2">
-                            <Textarea placeholder="Agregar nota o actualización..." className="min-h-[60px] text-xs resize-none" />
-                            <Button size="icon" className="h-[60px] w-[60px] shrink-0" onClick={() => toast.success("Nota agregada a la bitácora")}>
-                                <MessageCircle className="h-4 w-4" />
-                            </Button>
-                         </div>
-                    </div>
+                                 <div className="absolute -left-[5px] top-1 h-2 w-2 rounded-full bg-muted-foreground ring-4 ring-background" />
+                                 <p className="text-sm"><span className="font-semibold">{incident.createdBy}</span> creó la incidencia.</p>
+                                 <span className="text-xs text-muted-foreground">{new Date(incident.createdAt).toLocaleDateString()} {new Date(incident.createdAt).toLocaleTimeString()}</span>
+                             </div>
+                             {/* Event 2 - Only show if assigned */}
+                             {incident.assignedTo && (
+                                <div className="relative pl-6">
+                                    <div className="absolute -left-[5px] top-1 h-2 w-2 rounded-full bg-blue-500 ring-4 ring-background" />
+                                    <p className="text-sm">Asignado a <span className="font-semibold">{incident.assignedTo}</span>.</p>
+                                    <span className="text-xs text-muted-foreground">--</span>
+                                </div>
+                             )}
+                          </div>
+                          
+                          {/* Add Note Input */}
+                          <div className="pt-2 flex gap-2">
+                             <Textarea placeholder="Agregar nota o actualización..." className="min-h-[60px] text-xs resize-none" />
+                             <Button size="icon" className="h-[60px] w-[60px] shrink-0" onClick={() => toast.success("Nota agregada a la bitácora")}>
+                                 <MessageCircle className="h-4 w-4" />
+                             </Button>
+                          </div>
+                     </div>
 
-                    <Separator />
+                     <Separator />
                 
-                     {/* Zona de Cierre (Mock) */}
+                     {/* Zona de Cierre */}
                      <div className="rounded-lg border bg-muted/40 p-4 space-y-4">
                         <h4 className="text-sm font-semibold flex items-center gap-2">
                             <CheckCircle2 className="h-4 w-4 text-green-600" /> Cierre Administrativo

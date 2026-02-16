@@ -24,22 +24,18 @@ import { UploadCloud, X, MapPin, Users } from "lucide-react"
 import React, { useState } from "react"
 import { toast } from "sonner"
 import { Badge } from "@/components/ui/badge"
+import { createProject } from "@/app/actions/projects"
 
-// Mock data for team members
-const mockStaff = [
-  { id: "1", name: "Ing. Juan Pérez", role: "Superintendente" },
-  { id: "2", name: "Arq. Luisa M.", role: "Superintendente" },
-  { id: "3", name: "Ing. Carlos R.", role: "Residente" },
-  { id: "4", name: "Arq. María G.", role: "Residente" },
-  { id: "5", name: "Ing. Pedro L.", role: "Residente" },
-]
+// Mock data removed - using passed 'staff' prop
 
 export function ProjectSetupDrawer({ 
     isOpen, 
-    onClose 
+    onClose,
+    staff = []
 }: { 
     isOpen: boolean; 
     onClose: () => void; 
+    staff?: any[];
 }) {
     // Form state
     const [projectName, setProjectName] = useState("")
@@ -82,7 +78,7 @@ export function ProjectSetupDrawer({
     }
 
     // Validation and save
-    const handleSave = () => {
+    const handleSave = async () => {
         // Validate required fields
         if (!projectName.trim()) {
             toast.error("El nombre del proyecto es obligatorio")
@@ -93,26 +89,40 @@ export function ProjectSetupDrawer({
             return
         }
 
-        toast.promise(new Promise((resolve) => setTimeout(resolve, 1000)), {
-            loading: 'Creando proyecto...',
-            success: () => {
-                // Reset form
-                setProjectName("")
-                setProjectCode("")
-                setAddress("")
-                setBudget("")
-                setStartDate("")
-                setEndDate("")
-                setGeofencingEnabled(false)
-                setSuperintendent("")
-                setResidents([])
-                setCoverPhoto(null)
-                setPhotoPreview(null)
-                onClose()
-                return `Proyecto "${projectName}" creado exitosamente`
-            },
-            error: 'Error al crear proyecto'
-        })
+        toast.promise(
+            createProject({
+                name: projectName,
+                contingency_budget: budget ? parseFloat(budget) : 0,
+                start_date: startDate || undefined,
+                end_date: endDate || undefined,
+                geofence_radius_meters: geofencingEnabled ? 100 : null,
+                superintendentId: superintendent,
+                is_active: true,
+                organization_id: '', // Will be overridden by server action
+            }),
+            {
+                loading: 'Creando proyecto...',
+                success: (result: any) => {
+                    if (result.error) throw new Error(result.error)
+                    
+                    // Reset form
+                    setProjectName("")
+                    setProjectCode("")
+                    setAddress("")
+                    setBudget("")
+                    setStartDate("")
+                    setEndDate("")
+                    setGeofencingEnabled(false)
+                    setSuperintendent("")
+                    setResidents([])
+                    setCoverPhoto(null)
+                    setPhotoPreview(null)
+                    onClose()
+                    return `Proyecto "${projectName}" creado exitosamente`
+                },
+                error: (err) => `Error: ${err.message}`
+            }
+        )
     }
 
     return (
@@ -313,11 +323,11 @@ export function ProjectSetupDrawer({
                                         <SelectValue placeholder="Selecciona un superintendente" />
                                     </SelectTrigger>
                                     <SelectContent>
-                                        {mockStaff
-                                            .filter(s => s.role === "Superintendente")
-                                            .map(staff => (
-                                                <SelectItem key={staff.id} value={staff.id}>
-                                                    {staff.name}
+                                        {staff
+                                            .filter((s:any) => s.role?.display_name === "Superintendente" || s.role?.name === "Superintendente")
+                                            .map((s:any) => (
+                                                <SelectItem key={s.id} value={s.id}>
+                                                    {s.full_name}
                                                 </SelectItem>
                                             ))
                                         }
@@ -331,25 +341,25 @@ export function ProjectSetupDrawer({
                             <div className="grid gap-2">
                                 <Label>Residentes (Operativos)</Label>
                                 <div className="border rounded-lg p-3 space-y-2 bg-muted/20">
-                                    {mockStaff
-                                        .filter(s => s.role === "Residente")
-                                        .map(staff => (
+                                    {staff
+                                        .filter((s:any) => s.role?.display_name === "Superintendente" || s.role?.name === "Superintendente") // Adapting to DB role
+                                        .map((s:any) => (
                                             <div 
-                                                key={staff.id}
+                                                key={s.id}
                                                 className="flex items-center gap-2"
                                             >
                                                 <input
                                                     type="checkbox"
-                                                    id={`resident-${staff.id}`}
-                                                    checked={residents.includes(staff.id)}
-                                                    onChange={() => toggleResident(staff.id)}
+                                                    id={`resident-${s.id}`}
+                                                    checked={residents.includes(s.id)}
+                                                    onChange={() => toggleResident(s.id)}
                                                     className="h-4 w-4 rounded border-gray-300"
                                                 />
                                                 <Label 
-                                                    htmlFor={`resident-${staff.id}`}
+                                                    htmlFor={`resident-${s.id}`}
                                                     className="text-sm font-normal cursor-pointer flex-1"
                                                 >
-                                                    {staff.name}
+                                                    {s.full_name}
                                                 </Label>
                                             </div>
                                         ))

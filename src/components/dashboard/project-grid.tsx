@@ -1,137 +1,105 @@
-"use client"
+import { getProjects, getProjectFinancials } from '@/app/actions/projects'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
+import { Badge } from '@/components/ui/badge'
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
+import { Progress } from '@/components/ui/progress'
+import { Button } from '@/components/ui/button'
+import { PlusIcon } from 'lucide-react'
+import Link from 'next/link'
+import { CreateProjectButton } from './create-project-button'
 
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table"
-import { Badge } from "@/components/ui/badge"
-import { Progress } from "@/components/ui/progress"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+export async function ProjectGrid() {
+  const { data: projects, error } = await getProjects()
 
-const projects = [
-  {
-    name: "Torre Meriden",
-    phase: "Acabados",
-    budget: { current: 45000, total: 100000 },
-    incidents: { critical: 5, open: 12 },
-    lastActivity: "Hace 10 min",
-    superintendent: "Ing. Juan Pérez",
-    status: "Activo",
-  },
-  {
-    name: "Plaza Norte",
-    phase: "Obra Negra",
-    budget: { current: 12000, total: 500000 },
-    incidents: { critical: 0, open: 3 },
-    lastActivity: "Ayer",
-    superintendent: "Arq. Luisa M.",
-    status: "Activo",
-  },
-  {
-    name: "Casa Playa",
-    phase: "Cimentación",
-    budget: { current: 0, total: 50000 },
-    incidents: { critical: 0, open: 0 },
-    lastActivity: "Hace 3 días",
-    superintendent: "Ing. Juan Pérez",
-    status: "Pausado",
-  },
-]
+  if (error) {
+    return (
+      <Card>
+        <CardContent className="p-6">
+          <p className="text-sm text-muted-foreground">Error loading projects: {error}</p>
+        </CardContent>
+      </Card>
+    )
+  }
 
-
-
-import { useRouter } from "next/navigation"
-import { Plus } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { useState } from "react"
-import { ProjectSetupDrawer } from "./project-setup-drawer"
-
-export function ProjectGrid() {
-  const router = useRouter()
-  const [isSetupOpen, setIsSetupOpen] = useState(false)
+  if (!projects || projects.length === 0) {
+    return (
+      <Card>
+        <CardContent className="flex flex-col items-center justify-center p-12">
+          <p className="text-sm text-muted-foreground mb-4">No projects yet</p>
+          <Button>
+            <PlusIcon />
+            New Project
+          </Button>
+        </CardContent>
+      </Card>
+    )
+  }
 
   return (
-    <Card className="h-full flex flex-col overflow-hidden">
-      <CardHeader className="pb-2 flex flex-row items-center justify-between space-y-0">
-        <CardTitle>Proyectos Activos</CardTitle>
-        <Button size="sm" className="h-8 gap-1" onClick={() => setIsSetupOpen(true)}>
-            <Plus className="h-4 w-4" />
-            Nuevo
-        </Button>
+    <Card>
+      <CardHeader className="flex flex-row items-center justify-between">
+        <CardTitle>Projects</CardTitle>
+        <CreateProjectButton />
       </CardHeader>
-      <CardContent className="flex-1 overflow-auto p-0">
+      <CardContent>
         <Table>
-          <TableHeader className="sticky top-0 bg-background z-10 shadow-sm">
+          <TableHeader>
             <TableRow>
-              <TableHead>Proyecto</TableHead>
-              <TableHead>Salud ($)</TableHead>
-              <TableHead>Incidencias</TableHead>
-              <TableHead>Última Actividad</TableHead>
-              <TableHead>Superintendente</TableHead>
-              <TableHead>Estado</TableHead>
+              <TableHead>Project</TableHead>
+              <TableHead>Budget Health</TableHead>
+              <TableHead>Incidents</TableHead>
+              <TableHead>Last Activity</TableHead>
+              <TableHead>Status</TableHead>
+              <TableHead className="text-right">Actions</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {projects.map((project) => {
-              const healthPercentage = (project.budget.current / project.budget.total) * 100
-              const isCritical = healthPercentage > 80
-
+              const incidentCount = project.incidents?.[0]?.count || 0
+              // Calculate budget health (this will be enhanced with getProjectFinancials)
+              const budgetUsed = 0 // Placeholder
+              const budgetHealth = budgetUsed > 80 ? 'critical' : budgetUsed > 60 ? 'warning' : 'good'
+              
               return (
-                <TableRow 
-                    key={project.name} 
-                    className="cursor-pointer hover:bg-muted/50"
-                    onClick={() => router.push(`/dashboard/projects/1`)} // Hardcoded for demo
-                >
-                  <TableCell className="font-medium">
-                    <div>{project.name}</div>
-                    <div className="text-xs text-muted-foreground">Fase: {project.phase}</div>
-                  </TableCell>
-                  <TableCell className="w-[200px]">
-                    <div className="flex flex-col gap-1">
-                      <div className="flex justify-between text-xs font-mono">
-                        <span className={isCritical ? "text-destructive font-bold" : ""}>
-                          ${project.budget.current.toLocaleString()}
-                        </span>
-                        <span className="text-muted-foreground">
-                          / ${project.budget.total.toLocaleString()}
-                        </span>
-                      </div>
-                      <Progress 
-                        value={healthPercentage} 
-                        className={`h-2 ${isCritical ? "[&>div]:bg-destructive" : ""}`} 
-                      />
-                    </div>
+                <TableRow key={project.id} className="cursor-pointer hover:bg-muted/50">
+                  <TableCell>
+                    <Link href={`/dashboard/projects/${project.id}`} className="font-medium hover:underline">
+                      {project.name}
+                    </Link>
                   </TableCell>
                   <TableCell>
-                    <div className="flex flex-col text-xs">
-                      {project.incidents.critical > 0 && (
-                        <span className="text-destructive font-bold">
-                          🔴 {project.incidents.critical} Críticas
-                        </span>
-                      )}
-                      <span className="text-muted-foreground">
-                        ⚪ {project.incidents.open} Abiertas
+                    <div className="flex items-center gap-2">
+                      <Progress 
+                        value={budgetUsed} 
+                        className="w-24 h-2"
+                      />
+                      <span className={`text-xs font-medium ${
+                        budgetHealth === 'critical' ? 'text-destructive' :
+                        budgetHealth === 'warning' ? 'text-yellow-600' :
+                        'text-green-600'
+                      }`}>
+                        {budgetUsed}%
                       </span>
                     </div>
                   </TableCell>
-                  <TableCell className="font-mono text-xs">{project.lastActivity}</TableCell>
                   <TableCell>
-                    <div className="flex items-center gap-2">
-                       <Avatar className="h-6 w-6">
-                          <AvatarFallback>{project.superintendent.charAt(0)}</AvatarFallback>
-                        </Avatar>
-                        <span className="text-xs">{project.superintendent}</span>
-                    </div>
+                    <Badge variant="outline">{incidentCount}</Badge>
+                  </TableCell>
+                  <TableCell className="text-sm text-muted-foreground">
+                    {new Date(project.updated_at).toLocaleDateString()}
                   </TableCell>
                   <TableCell>
-                    <Badge variant={project.status === "Activo" ? "default" : "secondary"}>
-                      {project.status}
+                    <Badge variant={project.is_active ? 'default' : 'secondary'}>
+                      {project.is_active ? 'Active' : 'Inactive'}
                     </Badge>
+                  </TableCell>
+                  <TableCell className="text-right">
+                    <Button variant="ghost" size="sm" asChild>
+                      <Link href={`/dashboard/projects/${project.id}`}>
+                        View
+                      </Link>
+                    </Button>
                   </TableCell>
                 </TableRow>
               )
@@ -139,7 +107,6 @@ export function ProjectGrid() {
           </TableBody>
         </Table>
       </CardContent>
-      <ProjectSetupDrawer isOpen={isSetupOpen} onClose={() => setIsSetupOpen(false)} />
     </Card>
   )
 }

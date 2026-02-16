@@ -4,39 +4,9 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Map, MapMarker, MarkerContent, MarkerPopup, MapControls } from "@/components/ui/map"
 import { Badge } from "@/components/ui/badge"
 import { useRouter } from "next/navigation"
+import type { MapProject } from "@/app/actions/dashboard"
 
-// Mock project data with coordinates
-const projectsWithCoords = [
-  {
-    id: "1",
-    name: "Torre Meriden",
-    phase: "Acabados",
-    budget: { current: 45000, total: 100000 },
-    incidents: { critical: 5, open: 12 },
-    status: "Activo",
-    coordinates: [-99.1332, 19.4326] as [number, number], // Mexico City example
-  },
-  {
-    id: "2",
-    name: "Plaza Norte",
-    phase: "Obra Negra",
-    budget: { current: 12000, total: 500000 },
-    incidents: { critical: 0, open: 3 },
-    status: "Activo",
-    coordinates: [-99.1432, 19.4426] as [number, number],
-  },
-  {
-    id: "3",
-    name: "Casa Playa",
-    phase: "Cimentación",
-    budget: { current: 0, total: 50000 },
-    incidents: { critical: 0, open: 0 },
-    status: "Pausado",
-    coordinates: [-99.1232, 19.4226] as [number, number],
-  },
-]
-
-export function ProjectMapView() {
+export function ProjectMapView({ projects = [] }: { projects: MapProject[] }) {
   const router = useRouter()
 
   return (
@@ -47,7 +17,7 @@ export function ProjectMapView() {
       <CardContent className="flex-1 p-0">
         <Map
           center={[-99.1332, 19.4326]}
-          zoom={12}
+          zoom={5}
           className="w-full h-full"
         >
           <MapControls 
@@ -57,8 +27,8 @@ export function ProjectMapView() {
             showFullscreen 
           />
           
-          {projectsWithCoords.map((project) => {
-            const healthPercentage = (project.budget.current / project.budget.total) * 100
+          {projects.map((project) => {
+            const healthPercentage = project.budget.total > 0 ? (project.budget.current / project.budget.total) * 100 : 0
             const isCritical = healthPercentage > 80 || project.incidents.critical > 0
             
             return (

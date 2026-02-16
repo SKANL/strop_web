@@ -29,11 +29,12 @@ import { ProjectSetupDrawer } from "./project-setup-drawer"
 import { useRouter } from "next/navigation"
 
 // --- Types ---
-type Project = {
+// Adapted to match Supabase response shape + mapped props
+export type Project = {
   id: string
   name: string
-  code: string
-  phase: string
+  code: string | null
+  phase: string // TODO: Add phase to DB schema, for now mapped or default
   budget: { current: number; total: number }
   incidents: { critical: number; open: number }
   lastActivity: string
@@ -42,52 +43,15 @@ type Project = {
   status: "Activo" | "Pausado" | "Finalizado"
 }
 
-// --- Mock Data ---
-const data: Project[] = [
-  {
-    id: "1",
-    name: "Torre Meriden",
-    code: "TM-02",
-    phase: "Acabados",
-    budget: { current: 45000, total: 100000 },
-    incidents: { critical: 5, open: 12 },
-    lastActivity: "Hace 10 min",
-    superintendent: "Ing. Juan Pérez",
-    location: "Calle 60 Norte, Mérida",
-    status: "Activo",
-  },
-  {
-    id: "2",
-    name: "Plaza Norte",
-    code: "PN-01",
-    phase: "Obra Negra",
-    budget: { current: 12000, total: 500000 },
-    incidents: { critical: 0, open: 3 },
-    lastActivity: "Ayer",
-    superintendent: "Arq. Luisa M.",
-    location: "Periférico Norte",
-    status: "Activo",
-  },
-  {
-    id: "3",
-    name: "Casa Playa",
-    code: "CP-10",
-    phase: "Cimentación",
-    budget: { current: 0, total: 50000 },
-    incidents: { critical: 0, open: 0 },
-    lastActivity: "Hace 3 días",
-    superintendent: "Ing. Juan Pérez",
-    location: "Progreso, Yuc.",
-    status: "Pausado",
-  },
-]
-
-export function ProjectsTable() {
+export function ProjectsTable({ projects = [], staff = [] }: { projects?: Project[], staff?: any[] }) {
     const router = useRouter()
     const [sorting, setSorting] = React.useState<SortingState>([])
     const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([])
     const [globalFilter, setGlobalFilter] = React.useState("")
     const [isSetupOpen, setIsSetupOpen] = React.useState(false)
+    
+    // Use passed projects directly
+    const data = projects
 
     const columns: ColumnDef<Project>[] = [
         {
@@ -278,7 +242,7 @@ export function ProjectsTable() {
                  </div>
              </div>
 
-             <ProjectSetupDrawer isOpen={isSetupOpen} onClose={() => setIsSetupOpen(false)} />
+             <ProjectSetupDrawer isOpen={isSetupOpen} onClose={() => setIsSetupOpen(false)} staff={staff} />
         </div>
     )
 }

@@ -20,9 +20,9 @@ export function StepPreview({ data }: StepPreviewProps) {
              <p className="text-sm text-muted-foreground">Los elementos desvanecidos no serán visibles para el rol <strong>{data.name}</strong></p>
          </div>
 
-         {/* Mock App Interface - Wireframe style */}
+         {/* App Interface Preview - Wireframe style */}
          <div className="border border-zinc-200 rounded-xl overflow-hidden shadow-xl bg-white flex-1 flex flex-col max-w-3xl mx-auto w-full aspect-video">
-             {/* Mock Header */}
+             {/* Header Preview */}
              <div className="h-14 border-b bg-gray-50 flex items-center px-4 justify-between shrink-0">
                  <div className="flex items-center gap-4">
                      <div className="h-8 w-8 bg-zinc-900 rounded-md" />
@@ -34,7 +34,7 @@ export function StepPreview({ data }: StepPreviewProps) {
                  <div className="h-8 w-8 rounded-full bg-gray-200" />
              </div>
 
-             {/* Mock Content */}
+             {/* Content Preview */}
              <div className="flex-1 p-6 flex gap-6 bg-gray-50/50">
                  {/* Sidebar */}
                  <div className="w-48 space-y-2 hidden md:block">

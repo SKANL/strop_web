@@ -1,0 +1,158 @@
+"use client"
+
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Button } from "@/components/ui/button"
+import { LayoutGrid, Map } from "lucide-react"
+import { useState } from "react"
+
+import type { DashboardKPIs } from "@/app/actions/dashboard"
+
+interface DashboardClientProps {
+  projectGrid: React.ReactNode
+  projectMap: React.ReactNode
+  panicRoom: React.ReactNode
+  kpiData: DashboardKPIs | null
+}
+
+export function DashboardClient({ projectGrid, projectMap, panicRoom, kpiData }: DashboardClientProps) {
+  const [viewMode, setViewMode] = useState<"grid" | "map">("grid")
+
+  const formatCurrency = (amount: number) => {
+    return new Intl.NumberFormat('es-MX', { style: 'currency', currency: 'MXN' }).format(amount)
+  }
+
+  return (
+    <div className="flex flex-col h-full gap-4">
+        {/* Top Row: KPIs - Fixed Height */}
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4 shrink-0">
+            {/* KPI 1: Dinero en Juego */}
+            <Card>
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                    <CardTitle className="text-sm font-medium">Dinero en Riesgo</CardTitle>
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth="2"
+                      className="h-4 w-4 text-muted-foreground"
+                    >
+                      <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
+                    </svg>
+                </CardHeader>
+                <CardContent>
+                    <div className="text-2xl font-bold text-destructive font-mono">{formatCurrency(kpiData?.risk || 0)}</div>
+                    <p className="text-xs text-muted-foreground">En {kpiData?.incidentCount || 0} incidencias abiertas</p>
+                </CardContent>
+            </Card>
+
+            {/* KPI 2: Dinero Recuperado */}
+            <Card>
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                    <CardTitle className="text-sm font-medium">Dinero Recuperado (YTD)</CardTitle>
+                     <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth="2"
+                      className="h-4 w-4 text-muted-foreground"
+                    >
+                      <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
+                      <polyline points="22 4 12 14.01 9 11.01" />
+                    </svg>
+                </CardHeader>
+                 <CardContent>
+                    <div className="text-2xl font-bold text-green-600 font-mono">{formatCurrency(kpiData?.recovered || 0)}</div>
+                    <p className="text-xs text-muted-foreground">Cobradas a contratistas</p>
+                </CardContent>
+            </Card>
+
+             {/* KPI 3: Velocidad */}
+            <Card>
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                    <CardTitle className="text-sm font-medium">Velocidad Resolución</CardTitle>
+                     <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth="2"
+                      className="h-4 w-4 text-muted-foreground"
+                    >
+                      <circle cx="12" cy="12" r="10" />
+                      <polyline points="12 6 12 12 16 14" />
+                    </svg>
+                </CardHeader>
+                 <CardContent>
+                    <div className="text-2xl font-bold font-mono">{kpiData?.velocity || 0} Días</div>
+                    <p className="text-xs text-muted-foreground">Promedio últimos 30 días</p>
+                </CardContent>
+            </Card>
+
+             {/* KPI 4: Proyectos Críticos */}
+            <Card>
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                    <CardTitle className="text-sm font-medium">Proyectos Críticos</CardTitle>
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth="2"
+                      className="h-4 w-4 text-muted-foreground"
+                    >
+                      <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" />
+                      <line x1="12" y1="9" x2="12" y2="13" />
+                      <line x1="12" y1="17" x2="12.01" y2="17" />
+                    </svg>
+                </CardHeader>
+                 <CardContent>
+                    <div className="text-2xl font-bold font-mono">{kpiData?.criticalProjectsCount || 0} / {kpiData?.totalProjectsCount || 0}</div>
+                    <p className="text-xs text-muted-foreground">Requieren atención</p>
+                </CardContent>
+            </Card>
+        </div>
+
+        {/* View Toggle */}
+        <div className="flex items-center gap-2 shrink-0">
+            <Button 
+                variant={viewMode === "grid" ? "default" : "outline"} 
+                size="sm" 
+                className="gap-2"
+                onClick={() => setViewMode("grid")}
+            >
+                <LayoutGrid className="h-4 w-4" />
+                Vista Lista
+            </Button>
+            <Button 
+                variant={viewMode === "map" ? "default" : "outline"} 
+                size="sm" 
+                className="gap-2"
+                onClick={() => setViewMode("map")}
+            >
+                <Map className="h-4 w-4" />
+                Vista Mapa
+            </Button>
+        </div>
+
+        {/* Bottom Section: Grid/Map + Panic Room - Flex Grow to fill rest of screen */}
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-4 flex-1 min-h-0">
+             <div className="lg:col-span-3 h-full min-h-0">
+                {viewMode === "grid" ? projectGrid : projectMap}
+             </div>
+             <div className="lg:col-span-1 h-full min-h-0">
+                {panicRoom}
+             </div>
+        </div>
+    </div>
+  )
+}
