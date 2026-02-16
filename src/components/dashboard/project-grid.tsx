@@ -45,13 +45,13 @@ const projects = [
 
 export function ProjectGrid() {
   return (
-    <Card className="col-span-3">
-      <CardHeader>
+    <Card className="h-full flex flex-col overflow-hidden">
+      <CardHeader className="pb-2">
         <CardTitle>Proyectos Activos</CardTitle>
       </CardHeader>
-      <CardContent>
+      <CardContent className="flex-1 overflow-auto p-0">
         <Table>
-          <TableHeader>
+          <TableHeader className="sticky top-0 bg-background z-10 shadow-sm">
             <TableRow>
               <TableHead>Proyecto</TableHead>
               <TableHead>Salud ($)</TableHead>
@@ -74,7 +74,7 @@ export function ProjectGrid() {
                   </TableCell>
                   <TableCell className="w-[200px]">
                     <div className="flex flex-col gap-1">
-                      <div className="flex justify-between text-xs">
+                      <div className="flex justify-between text-xs font-mono">
                         <span className={isCritical ? "text-destructive font-bold" : ""}>
                           ${project.budget.current.toLocaleString()}
                         </span>
@@ -100,13 +100,13 @@ export function ProjectGrid() {
                       </span>
                     </div>
                   </TableCell>
-                  <TableCell>{project.lastActivity}</TableCell>
+                  <TableCell className="font-mono text-xs">{project.lastActivity}</TableCell>
                   <TableCell>
                     <div className="flex items-center gap-2">
                        <Avatar className="h-6 w-6">
                           <AvatarFallback>{project.superintendent.charAt(0)}</AvatarFallback>
                         </Avatar>
-                        <span>{project.superintendent}</span>
+                        <span className="text-xs">{project.superintendent}</span>
                     </div>
                   </TableCell>
                   <TableCell>

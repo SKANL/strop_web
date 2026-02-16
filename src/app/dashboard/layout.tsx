@@ -40,7 +40,7 @@ export default function DashboardLayout({
             </Breadcrumb>
           </div>
         </header>
-        <main className="flex flex-1 flex-col gap-4 p-4 pt-0">
+        <main className="flex flex-1 flex-col gap-4 p-4 pt-0 overflow-hidden h-[calc(100vh-4rem)]">
           {children}
         </main>
       </SidebarInset>
