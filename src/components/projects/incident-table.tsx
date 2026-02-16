@@ -268,19 +268,51 @@ export const columns: ColumnDef<Incident>[] = [
    {
     id: "actions",
     header: "ACCIONES",
-    cell: ({ row }) => (
-      <Button 
-        variant="ghost" 
-        size="icon" 
-        className="h-8 w-8"
-        onClick={(e) => {
-            e.stopPropagation()
-            toast.success("Enlace copiado al portapapeles")
-        }}
-      >
-        <LinkIcon className="h-4 w-4 text-muted-foreground" />
-      </Button>
-    ),
+    cell: ({ row }) => {
+        const copyPublicLink = async () => {
+            // Generate public link URL (mock token for now)
+            const mockToken = `${row.original.id.replace('#', '')}-${Date.now().toString(36)}`
+            const publicUrl = `${window.location.origin}/r/${mockToken}`
+            
+            try {
+                await navigator.clipboard.writeText(publicUrl)
+                toast.success("Enlace copiado al portapapeles", {
+                    description: publicUrl
+                })
+            } catch (err) {
+                // Fallback for older browsers
+                const textArea = document.createElement("textarea")
+                textArea.value = publicUrl
+                textArea.style.position = "fixed"
+                textArea.style.left = "-999999px"
+                document.body.appendChild(textArea)
+                textArea.select()
+                try {
+                    document.execCommand('copy')
+                    toast.success("Enlace copiado al portapapeles", {
+                        description: publicUrl
+                    })
+                } catch (fallbackErr) {
+                    toast.error("No se pudo copiar el enlace")
+                }
+                document.body.removeChild(textArea)
+            }
+        }
+
+        return (
+            <Button 
+                variant="ghost" 
+                size="icon" 
+                className="h-8 w-8"
+                onClick={(e) => {
+                    e.stopPropagation()
+                    copyPublicLink()
+                }}
+            >
+                <LinkIcon className="h-4 w-4 text-muted-foreground" />
+            </Button>
+        )
+    },
     size: 100
   },
 ]

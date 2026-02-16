@@ -1,407 +1,205 @@
-'use client'
+"use client"
 
-import { use, useEffect, useState } from 'react'
-import { Camera, CheckCircle2, Clock, Upload, X } from 'lucide-react'
-import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardHeader } from '@/components/ui/card'
-import { Badge } from '@/components/ui/badge'
-import { toast } from 'sonner'
-import {
-  storePhotoLocally,
-  compressImage,
-  uploadWithRetry,
-  getStoredPhoto,
-  recoverPendingUploads,
-} from '@/lib/offline-storage'
+import { use, useState, useEffect } from "react"
+import { notFound } from "next/navigation"
+import { Badge } from "@/components/ui/badge"
+import { Button } from "@/components/ui/button"
+import { Loader2, Camera, CheckCircle2, RefreshCw } from "lucide-react"
+import { useEvidencePersistence } from "@/hooks/use-evidence-persistence"
+import { CameraCapture } from "@/components/public-link/camera-capture"
+import { toast } from "sonner"
 
-// Mock data structure - will be replaced with Supabase fetch
-interface IncidentData {
-  incident_id: string
+// Mock Data Types
+type IncidentStatus = 'OPEN' | 'DRAFT' | 'IN_REVIEW' | 'CLOSED'
+
+interface PublicIncident {
+  id: string
   project_name: string
   requester_name: string
   problem_photo_url: string
   problem_description: string
   location: string
-  status: 'OPEN' | 'IN_REVIEW' | 'CLOSED'
-  existing_solution_photo: string | null
+  status: IncidentStatus
+  solution_photo_url?: string | null
 }
 
-type PageParams = Promise<{ token: string }>
-
-export default function PublicLinkPage({ params }: { params: PageParams }) {
+export default function PublicLinkPage({ params }: { params: Promise<{ token: string }> }) {
   const { token } = use(params)
-  const [incident, setIncident] = useState<IncidentData | null>(null)
+  const [status, setStatus] = useState<IncidentStatus>('OPEN')
   const [loading, setLoading] = useState(true)
-  const [capturedPhoto, setCapturedPhoto] = useState<File | null>(null)
-  const [previewUrl, setPreviewUrl] = useState<string | null>(null)
-  const [uploading, setUploading] = useState(false)
-  const [uploadProgress, setUploadProgress] = useState(0)
+  const [incident, setIncident] = useState<PublicIncident | null>(null)
+  
+  // Custom Hook for IDB Persistence
+  const { draftPhoto, saveDraft, clearDraft } = useEvidencePersistence(token)
 
-  // Fetch incident data
+  // Mock Data Fetching
   useEffect(() => {
-    async function fetchIncident() {
-      try {
-        // TODO: Replace with actual Supabase RPC call
-        // const { data } = await supabase.rpc('get_incident_by_token', { token })
+    setTimeout(() => {
+        if (token === 'not-found') {
+            notFound()
+        }
         
-        // Mock data for now
-        const mockData: IncidentData = {
-          incident_id: '1024',
-          project_name: 'Torre Meriden',
-          requester_name: 'Ing. Juan Pérez',
-          problem_photo_url: 'https://images.unsplash.com/photo-1581578731548-c64695cc6952?w=800',
-          problem_description: 'Resanar grieta antes de pintar',
-          location: 'Depto 301',
-          status: 'OPEN',
-          existing_solution_photo: null,
+        const mockData: PublicIncident = {
+            id: "1024",
+            project_name: "Torre Meriden",
+            requester_name: "Ing. Juan Pérez",
+            problem_photo_url: "/placeholder.svg",
+            problem_description: "Resanar grieta antes de pintar",
+            location: "Depto 301 - Nivel 3",
+            status: token === 'closed' ? 'CLOSED' : token === 'review' ? 'IN_REVIEW' : 'OPEN',
+            solution_photo_url: token === 'review' ? '/placeholder.svg' : null
         }
         
         setIncident(mockData)
         
-        // Check for pending uploads
-        const stored = await getStoredPhoto(token)
-        if (stored && stored.photo) {
-          const file = new File([stored.photo], 'repair.jpg', { type: 'image/jpeg' })
-          setCapturedPhoto(file)
-          setPreviewUrl(URL.createObjectURL(stored.photo))
+        // If we have a local draft and status is OPEN, switch to DRAFT
+        if (draftPhoto && mockData.status === 'OPEN') {
+            setStatus('DRAFT')
+            toast("Borrador recuperado", { description: "Restauramos la foto que no enviaste." })
+        } else {
+             setStatus(mockData.status)
         }
-      } catch (error) {
-        console.error('Error fetching incident:', error)
-        toast.error('No se pudo cargar la incidencia')
-      } finally {
+        
         setLoading(false)
-      }
-    }
+    }, 1000)
+  }, [token, draftPhoto])
 
-    fetchIncident()
-
-    // Recover any pending uploads
-    recoverPendingUploads(async (uploadToken, photo) => {
-      if (uploadToken === token) {
-        return await uploadPhoto(photo)
-      }
-      return false
-    })
-  }, [token])
-
-  // Handle photo selection
-  const handlePhotoSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0]
-    if (!file) return
-
-    try {
-      // Compress image
-      const compressed = await compressImage(file)
-      const compressedFile = new File([compressed], file.name, { type: 'image/jpeg' })
-      
-      // Store locally immediately
-      await storePhotoLocally(token, compressed)
-      
-      setCapturedPhoto(compressedFile)
-      setPreviewUrl(URL.createObjectURL(compressed))
-      
-      toast.success('Foto capturada')
-    } catch (error) {
-      console.error('Error processing photo:', error)
-      toast.error('Error al procesar la foto')
-    }
+  const handleCapture = (base64: string) => {
+      saveDraft(base64)
+      setStatus('DRAFT')
   }
 
-  // Upload photo to Supabase
-  const uploadPhoto = async (photoBlob: Blob): Promise<boolean> => {
-    try {
-      // TODO: Replace with actual Supabase upload
-      // const { data, error } = await supabase.storage
-      //   .from('incident-photos')
-      //   .upload(`${incident?.incident_id}/repair_${Date.now()}.jpg`, photoBlob)
-      
-      // Mock upload with delay
-      await new Promise((resolve) => setTimeout(resolve, 2000))
-      
-      return true
-    } catch (error) {
-      console.error('Upload error:', error)
-      return false
-    }
+  const handleSend = () => {
+      // Simulate API call
+      setLoading(true)
+      setTimeout(() => {
+          clearDraft()
+          setStatus('IN_REVIEW')
+          setLoading(false)
+          toast.success("Evidencia enviada correctamente")
+      }, 1500)
   }
 
-  // Handle photo submission
-  const handleSubmit = async () => {
-    if (!capturedPhoto || !incident) return
-
-    setUploading(true)
-    setUploadProgress(0)
-
-    try {
-      const photoBlob = await compressImage(capturedPhoto)
-      
-      // Simulate progress
-      const progressInterval = setInterval(() => {
-        setUploadProgress((prev) => Math.min(prev + 10, 90))
-      }, 200)
-
-      const success = await uploadWithRetry(
-        token,
-        photoBlob,
-        uploadPhoto,
-        5
-      )
-
-      clearInterval(progressInterval)
-      setUploadProgress(100)
-
-      if (success) {
-        toast.success('Evidencia enviada correctamente')
-        // Update incident status
-        setIncident({ ...incident, status: 'IN_REVIEW', existing_solution_photo: previewUrl })
-      } else {
-        toast.error('Error al enviar. Reintentando...', {
-          description: 'La foto se guardó localmente y se enviará automáticamente',
-        })
-      }
-    } catch (error) {
-      console.error('Submit error:', error)
-      toast.error('Error al enviar la evidencia')
-    } finally {
-      setUploading(false)
-      setUploadProgress(0)
-    }
-  }
-
-  // Handle retake photo
   const handleRetake = () => {
-    setCapturedPhoto(null)
-    setPreviewUrl(null)
+      clearDraft()
+      setStatus('OPEN')
   }
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-muted/30">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4" />
-          <p className="text-muted-foreground">Cargando...</p>
+        <div className="flex-1 flex flex-col items-center justify-center p-6 space-y-4">
+            <Loader2 className="h-8 w-8 animate-spin text-primary" />
+            <p className="text-sm text-muted-foreground">Cargando reporte...</p>
         </div>
-      </div>
     )
   }
 
-  if (!incident) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-muted/30 p-4">
-        <Card className="max-w-md w-full">
-          <CardContent className="pt-6 text-center">
-            <X className="h-12 w-12 text-destructive mx-auto mb-4" />
-            <h2 className="text-xl font-semibold mb-2">Enlace Inválido</h2>
-            <p className="text-muted-foreground">
-              Este enlace no es válido o ha expirado.
-            </p>
-          </CardContent>
-        </Card>
-      </div>
-    )
-  }
+  if (!incident) return null
 
-  // STATE A: OPEN - Waiting for contractor to upload photo
-  if (incident.status === 'OPEN' && !capturedPhoto) {
-    return (
-      <div className="min-h-screen bg-muted/30 flex flex-col">
-        {/* Header */}
-        <div className="bg-background border-b px-4 py-3">
-          <div className="max-w-2xl mx-auto">
-            <p className="text-sm text-muted-foreground">Reporte en</p>
-            <h1 className="text-lg font-semibold">{incident.project_name}</h1>
-            <p className="text-sm text-muted-foreground">
-              Solicitado por {incident.requester_name}
-            </p>
-          </div>
-        </div>
-
-        {/* Content */}
-        <div className="flex-1 overflow-auto p-4">
-          <div className="max-w-2xl mx-auto space-y-4">
-            {/* Problem Photo */}
-            <Card>
-              <CardContent className="p-0">
-                <img
-                  src={incident.problem_photo_url}
-                  alt="Problema detectado"
-                  className="w-full h-auto rounded-t-lg"
-                />
-                <div className="p-4 space-y-2">
-                  <h2 className="text-xl font-semibold">
-                    {incident.problem_description}
-                  </h2>
-                  <div className="flex items-center gap-2">
-                    <Badge variant="outline">{incident.location}</Badge>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-        </div>
-
-        {/* Sticky Footer */}
-        <div className="bg-background border-t p-4 sticky bottom-0">
-          <div className="max-w-2xl mx-auto">
-            <label htmlFor="photo-upload">
-              <Button size="lg" className="w-full gap-2 text-lg h-14" asChild>
-                <span>
-                  <Camera className="h-5 w-5" />
-                  Subir Foto de Reparación
-                </span>
-              </Button>
-            </label>
-            <input
-              id="photo-upload"
-              type="file"
-              accept="image/*"
-              capture="environment"
-              className="hidden"
-              onChange={handlePhotoSelect}
-            />
-          </div>
-        </div>
-      </div>
-    )
-  }
-
-  // STATE B: DRAFT - Preview before sending
-  if (incident.status === 'OPEN' && capturedPhoto && previewUrl) {
-    return (
-      <div className="min-h-screen bg-muted/30 flex flex-col">
-        {/* Header */}
-        <div className="bg-background border-b px-4 py-3">
-          <div className="max-w-2xl mx-auto">
-            <h1 className="text-lg font-semibold">Vista Previa</h1>
-            <p className="text-sm text-muted-foreground">
-              Confirma antes de enviar
-            </p>
-          </div>
-        </div>
-
-        {/* Content */}
-        <div className="flex-1 overflow-auto p-4">
-          <div className="max-w-2xl mx-auto">
-            <Card>
-              <CardContent className="p-0">
-                <img
-                  src={previewUrl}
-                  alt="Foto capturada"
-                  className="w-full h-auto rounded-lg"
-                />
-              </CardContent>
-            </Card>
-          </div>
-        </div>
-
-        {/* Actions */}
-        <div className="bg-background border-t p-4 sticky bottom-0">
-          <div className="max-w-2xl mx-auto space-y-2">
-            <Button
-              size="lg"
-              className="w-full gap-2 text-lg h-14"
-              onClick={handleSubmit}
-              disabled={uploading}
-            >
-              {uploading ? (
-                <>
-                  <Upload className="h-5 w-5 animate-pulse" />
-                  Enviando... {uploadProgress}%
-                </>
-              ) : (
-                <>
-                  <CheckCircle2 className="h-5 w-5" />
-                  ENVIAR EVIDENCIA
-                </>
-              )}
-            </Button>
-            <Button
-              size="lg"
-              variant="ghost"
-              className="w-full"
-              onClick={handleRetake}
-              disabled={uploading}
-            >
-              <X className="h-4 w-4 mr-2" />
-              Tomar otra
-            </Button>
-          </div>
-        </div>
-      </div>
-    )
-  }
-
-  // STATE C: IN_REVIEW - Waiting for approval
-  if (incident.status === 'IN_REVIEW') {
-    return (
-      <div className="min-h-screen bg-muted/30 flex flex-col items-center justify-center p-4">
-        <Card className="max-w-2xl w-full">
-          <CardHeader className="text-center pb-4">
-            <Clock className="h-16 w-16 text-yellow-500 mx-auto mb-4" />
-            <h1 className="text-2xl font-semibold">Evidencia Enviada</h1>
-            <p className="text-muted-foreground">
-              Esperando validación del residente
-            </p>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            {incident.existing_solution_photo && (
-              <img
-                src={incident.existing_solution_photo}
-                alt="Foto enviada"
-                className="w-full h-auto rounded-lg"
-              />
-            )}
-            <Button
-              variant="outline"
-              size="sm"
-              className="w-full"
-              onClick={() => {
-                setIncident({ ...incident, status: 'OPEN' })
-                handleRetake()
-              }}
-            >
-              ¿Te equivocaste? Subir nueva foto
-            </Button>
-          </CardContent>
-        </Card>
-      </div>
-    )
-  }
-
-  // STATE D: CLOSED - Mission complete
-  if (incident.status === 'CLOSED') {
-    return (
-      <div className="min-h-screen bg-muted/30 flex flex-col items-center justify-center p-4">
-        <Card className="max-w-2xl w-full">
-          <CardHeader className="text-center pb-4">
-            <CheckCircle2 className="h-16 w-16 text-green-500 mx-auto mb-4" />
-            <h1 className="text-2xl font-semibold">¡Incidencia Cerrada!</h1>
-            <p className="text-muted-foreground">Gracias por tu trabajo</p>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            {incident.existing_solution_photo && (
-              <img
-                src={incident.existing_solution_photo}
-                alt="Reparación aprobada"
-                className="w-full h-auto rounded-lg opacity-90"
-              />
-            )}
-            <div className="text-center text-sm text-muted-foreground pt-4 border-t">
-              <p>Gestionado con Strop</p>
-              <a
-                href="https://strop.app"
-                className="text-primary hover:underline"
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                Controla tus propias obras aquí
-              </a>
+  return (
+    <div className="flex-1 flex flex-col">
+        {/* Header - Always visible */}
+        <div className="p-4 border-b flex items-start justify-between bg-white sticky top-0 z-10 shrink-0">
+            <div>
+                <h1 className="text-sm font-semibold text-gray-900">{incident.project_name}</h1>
+                <p className="text-xs text-muted-foreground">Solicitado por {incident.requester_name}</p>
             </div>
-          </CardContent>
-        </Card>
-      </div>
-    )
-  }
+            {/* Logo placeholder */}
+            <div className="h-6 w-6 bg-primary/20 rounded-full" /> 
+        </div>
 
-  return null
+        {/* Dynamic Content based on State */}
+        <div className="flex-1 overflow-y-auto p-4 space-y-6">
+            
+            {/* Status OPEN: Show Context & Request */}
+            {status === 'OPEN' && (
+                <>
+                   <div className="space-y-4">
+                        <div className="relative aspect-video bg-muted rounded-lg overflow-hidden border">
+                            <div className="absolute inset-0 flex items-center justify-center text-muted-foreground bg-muted/50">
+                                <img src={incident.problem_photo_url} alt="Problem" className="object-cover w-full h-full opacity-50" />
+                            </div>
+                        </div>
+                        
+                        <div className="space-y-2">
+                            <div className="flex items-center gap-2">
+                                <Badge variant="outline" className="border-amber-200 bg-amber-50 text-amber-700">
+                                    Pendiente
+                                </Badge>
+                                <span className="text-xs text-muted-foreground font-mono">#{incident.id}</span>
+                            </div>
+                            <h2 className="text-xl font-bold leading-tight">{incident.problem_description}</h2>
+                            <p className="text-sm text-muted-foreground flex items-center gap-2">
+                                📍 {incident.location}
+                            </p>
+                        </div>
+                   </div>
+                </>
+            )}
+            
+            {/* Status DRAFT */}
+            {status === 'DRAFT' && draftPhoto && (
+                <div className="space-y-4 animate-in fade-in slide-in-from-bottom-4 duration-500">
+                     <div className="relative aspect-3/4 bg-black rounded-lg overflow-hidden border shadow-lg">
+                        <img src={draftPhoto} alt="Draft" className="w-full h-full object-contain" />
+                     </div>
+                     <p className="text-center text-sm text-muted-foreground">Verifica que la foto sea clara antes de enviar.</p>
+                </div>
+            )}
+
+            {/* Status IN_REVIEW or CLOSED */}
+            {(status === 'IN_REVIEW' || status === 'CLOSED') && (
+                <div className="flex flex-col items-center text-center space-y-6 pt-8 animate-in zoom-in duration-300">
+                     <div className={`h-20 w-20 rounded-full flex items-center justify-center ${status === 'CLOSED' ? 'bg-green-100 text-green-600' : 'bg-amber-100 text-amber-600'}`}>
+                        {status === 'CLOSED' ? <CheckCircle2 className="h-10 w-10" /> : <RefreshCw className="h-10 w-10" />}
+                     </div>
+                     <div className="space-y-2">
+                        <h2 className="text-2xl font-bold">
+                            {status === 'CLOSED' ? '¡Misión Cumplida!' : 'En Revisión'}
+                        </h2>
+                        <p className="text-muted-foreground">
+                            {status === 'CLOSED' 
+                                ? 'La incidencia ha sido aprobada y cerrada.' 
+                                : 'Tu evidencia ha sido enviada. Esperando validación.'}
+                        </p>
+                     </div>
+                </div>
+            )}
+
+        </div>
+
+        {/* Footer Actions */}
+        <div className="p-4 border-t bg-white sticky bottom-0 z-10 pb-8 shrink-0">
+            {status === 'OPEN' && (
+                <CameraCapture onCapture={handleCapture} />
+            )}
+            
+            {status === 'DRAFT' && (
+                <div className="space-y-3">
+                    <div className="grid grid-cols-2 gap-3">
+                        <Button variant="outline" size="lg" className="h-12" onClick={handleRetake}>
+                            Reintentar
+                        </Button>
+                        <Button size="lg" className="h-12 bg-green-600 hover:bg-green-700 gap-2" onClick={handleSend}>
+                            <CheckCircle2 className="h-5 w-5" />
+                            Enviar Evidencia
+                        </Button>
+                    </div>
+                </div>
+            )}
+
+            {status === 'IN_REVIEW' && (
+                <Button variant="ghost" size="sm" className="w-full text-muted-foreground" onClick={handleRetake}>
+                    ¿Te equivocaste? Subir nueva foto
+                </Button>
+            )}
+            
+            <div className="mt-6 text-center">
+                <p className="text-[10px] text-muted-foreground/50">
+                    Gestionado con <span className="font-bold">Strop</span>
+                </p>
+            </div>
+        </div>
+    </div>
+  )
 }

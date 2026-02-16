@@ -12,18 +12,27 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Separator } from "@/components/ui/separator"
-import { Textarea } from "@/components/ui/textarea" // Assuming we might need address as textarea or just input
-import { CalendarIcon, UploadCloud } from "lucide-react"
-import { format } from "date-fns"
-import { cn } from "@/lib/utils"
-import { Calendar } from "@/components/ui/calendar" // check if installed, otherwise use simple input type=date
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover"
-import React from "react"
+import { Switch } from "@/components/ui/switch"
+import { 
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
+import { UploadCloud, X, MapPin, Users } from "lucide-react"
+import React, { useState } from "react"
 import { toast } from "sonner"
+import { Badge } from "@/components/ui/badge"
+
+// Mock data for team members
+const mockStaff = [
+  { id: "1", name: "Ing. Juan Pérez", role: "Superintendente" },
+  { id: "2", name: "Arq. Luisa M.", role: "Superintendente" },
+  { id: "3", name: "Ing. Carlos R.", role: "Residente" },
+  { id: "4", name: "Arq. María G.", role: "Residente" },
+  { id: "5", name: "Ing. Pedro L.", role: "Residente" },
+]
 
 export function ProjectSetupDrawer({ 
     isOpen, 
@@ -32,13 +41,75 @@ export function ProjectSetupDrawer({
     isOpen: boolean; 
     onClose: () => void; 
 }) {
-    // Mock save
+    // Form state
+    const [projectName, setProjectName] = useState("")
+    const [projectCode, setProjectCode] = useState("")
+    const [address, setAddress] = useState("")
+    const [budget, setBudget] = useState("")
+    const [startDate, setStartDate] = useState("")
+    const [endDate, setEndDate] = useState("")
+    const [geofencingEnabled, setGeofencingEnabled] = useState(false)
+    const [superintendent, setSuperintendent] = useState("")
+    const [residents, setResidents] = useState<string[]>([])
+    const [coverPhoto, setCoverPhoto] = useState<File | null>(null)
+    const [photoPreview, setPhotoPreview] = useState<string | null>(null)
+
+    // Handle photo upload
+    const handlePhotoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0]
+        if (file) {
+            setCoverPhoto(file)
+            const reader = new FileReader()
+            reader.onloadend = () => {
+                setPhotoPreview(reader.result as string)
+            }
+            reader.readAsDataURL(file)
+        }
+    }
+
+    const removePhoto = () => {
+        setCoverPhoto(null)
+        setPhotoPreview(null)
+    }
+
+    // Handle resident selection
+    const toggleResident = (residentId: string) => {
+        setResidents(prev => 
+            prev.includes(residentId) 
+                ? prev.filter(id => id !== residentId)
+                : [...prev, residentId]
+        )
+    }
+
+    // Validation and save
     const handleSave = () => {
+        // Validate required fields
+        if (!projectName.trim()) {
+            toast.error("El nombre del proyecto es obligatorio")
+            return
+        }
+        if (!superintendent) {
+            toast.error("Debes asignar un superintendente")
+            return
+        }
+
         toast.promise(new Promise((resolve) => setTimeout(resolve, 1000)), {
             loading: 'Creando proyecto...',
             success: () => {
+                // Reset form
+                setProjectName("")
+                setProjectCode("")
+                setAddress("")
+                setBudget("")
+                setStartDate("")
+                setEndDate("")
+                setGeofencingEnabled(false)
+                setSuperintendent("")
+                setResidents([])
+                setCoverPhoto(null)
+                setPhotoPreview(null)
                 onClose()
-                return 'Proyecto "Torre Meriden - Fase 2" creado'
+                return `Proyecto "${projectName}" creado exitosamente`
             },
             error: 'Error al crear proyecto'
         })
@@ -46,11 +117,11 @@ export function ProjectSetupDrawer({
 
     return (
         <Sheet open={isOpen} onOpenChange={onClose}>
-            <SheetContent className="sm:max-w-[500px] w-full p-0 flex flex-col h-full">
-                <SheetHeader className="p-6 pb-2 shrink-0">
+            <SheetContent className="sm:max-w-[600px] w-full p-0 flex flex-col h-full overflow-hidden">
+                <SheetHeader className="p-6 pb-4 shrink-0 border-b">
                     <SheetTitle>Nuevo Proyecto</SheetTitle>
                     <SheetDescription>
-                        Configura la identidad y reglas financieras básicas.
+                        Configura la identidad, ubicación y reglas financieras básicas.
                     </SheetDescription>
                 </SheetHeader>
 
@@ -58,21 +129,73 @@ export function ProjectSetupDrawer({
                     <div className="space-y-6">
                         {/* Sección A: Identidad */}
                         <div className="space-y-4">
-                            <h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wider">Identidad</h3>
+                            <h3 className="text-sm font-semibold text-foreground flex items-center gap-2">
+                                <div className="h-1 w-1 rounded-full bg-primary" />
+                                Identidad del Proyecto
+                            </h3>
+                            
                             <div className="grid gap-2">
-                                <Label htmlFor="project-name">Nombre del Proyecto <span className="text-destructive">*</span></Label>
-                                <Input id="project-name" placeholder="Ej. Torre Meriden - Fase 2" />
+                                <Label htmlFor="project-name">
+                                    Nombre del Proyecto <span className="text-destructive">*</span>
+                                </Label>
+                                <Input 
+                                    id="project-name" 
+                                    placeholder="Ej. Torre Meriden - Fase 2" 
+                                    maxLength={50}
+                                    value={projectName}
+                                    onChange={(e) => setProjectName(e.target.value)}
+                                />
+                                <p className="text-xs text-muted-foreground">
+                                    {projectName.length}/50 caracteres
+                                </p>
                             </div>
+
                             <div className="grid gap-2">
                                 <Label htmlFor="project-code">Código / Alias</Label>
-                                <Input id="project-code" placeholder="Ej. TM-02" className="uppercase font-mono" />
+                                <Input 
+                                    id="project-code" 
+                                    placeholder="Ej. TM-02" 
+                                    className="uppercase font-mono"
+                                    value={projectCode}
+                                    onChange={(e) => setProjectCode(e.target.value.toUpperCase())}
+                                />
                             </div>
+
                             <div className="grid gap-2">
                                 <Label>Foto de Portada</Label>
-                                <div className="h-32 border-2 border-dashed rounded-lg flex flex-col items-center justify-center gap-2 hover:bg-muted/50 transition-colors cursor-pointer text-muted-foreground hover:text-foreground">
-                                    <UploadCloud className="h-8 w-8" />
-                                    <span className="text-xs">Arrastra una imagen o haz clic</span>
-                                </div>
+                                {!photoPreview ? (
+                                    <label 
+                                        htmlFor="cover-photo"
+                                        className="h-40 border-2 border-dashed rounded-lg flex flex-col items-center justify-center gap-2 hover:bg-muted/50 transition-colors cursor-pointer text-muted-foreground hover:text-foreground hover:border-primary/50"
+                                    >
+                                        <UploadCloud className="h-10 w-10" />
+                                        <span className="text-sm font-medium">Sube una foto o render de la fachada</span>
+                                        <span className="text-xs">Arrastra una imagen o haz clic</span>
+                                        <input 
+                                            id="cover-photo" 
+                                            type="file" 
+                                            accept="image/*"
+                                            className="hidden"
+                                            onChange={handlePhotoChange}
+                                        />
+                                    </label>
+                                ) : (
+                                    <div className="relative h-40 rounded-lg overflow-hidden border">
+                                        <img 
+                                            src={photoPreview} 
+                                            alt="Cover preview" 
+                                            className="w-full h-full object-cover"
+                                        />
+                                        <Button
+                                            size="icon"
+                                            variant="destructive"
+                                            className="absolute top-2 right-2 h-6 w-6"
+                                            onClick={removePhoto}
+                                        >
+                                            <X className="h-3 w-3" />
+                                        </Button>
+                                    </div>
+                                )}
                             </div>
                         </div>
 
@@ -80,10 +203,38 @@ export function ProjectSetupDrawer({
 
                         {/* Sección B: Ubicación */}
                         <div className="space-y-4">
-                            <h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wider">Ubicación</h3>
+                            <h3 className="text-sm font-semibold text-foreground flex items-center gap-2">
+                                <MapPin className="h-4 w-4 text-primary" />
+                                Ubicación Geográfica
+                            </h3>
+                            
                             <div className="grid gap-2">
                                 <Label htmlFor="address">Dirección / Coordenadas</Label>
-                                <Input id="address" placeholder="Ej. Calle 60 Norte, Mérida" />
+                                <Input 
+                                    id="address" 
+                                    placeholder="Ej. Calle 60 Norte, Mérida"
+                                    value={address}
+                                    onChange={(e) => setAddress(e.target.value)}
+                                />
+                                <p className="text-xs text-muted-foreground">
+                                    Necesario para validar ubicación en app móvil
+                                </p>
+                            </div>
+
+                            <div className="flex items-center justify-between p-3 rounded-lg border bg-muted/30">
+                                <div className="space-y-0.5">
+                                    <Label htmlFor="geofencing" className="text-sm font-medium cursor-pointer">
+                                        Geofencing Activo
+                                    </Label>
+                                    <p className="text-xs text-muted-foreground">
+                                        ¿Requerir estar en sitio para crear incidencias?
+                                    </p>
+                                </div>
+                                <Switch 
+                                    id="geofencing"
+                                    checked={geofencingEnabled}
+                                    onCheckedChange={setGeofencingEnabled}
+                                />
                             </div>
                         </div>
 
@@ -92,17 +243,29 @@ export function ProjectSetupDrawer({
                         {/* Sección C: Financiera */}
                         <div className="space-y-4">
                             <div className="flex items-center justify-between">
-                                <h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wider">Finanzas</h3>
-                                <span className="text-[10px] bg-sky-100 text-sky-800 px-2 py-0.5 rounded border border-sky-200">KPI: Burn Rate</span>
+                                <h3 className="text-sm font-semibold text-foreground flex items-center gap-2">
+                                    <div className="h-1 w-1 rounded-full bg-primary" />
+                                    Configuración Financiera
+                                </h3>
+                                <Badge variant="secondary" className="text-[10px] h-5">
+                                    KPI: Burn Rate
+                                </Badge>
                             </div>
                             
                             <div className="grid gap-2">
                                 <Label htmlFor="budget">Fondo para Reparaciones (Estimado)</Label>
                                 <div className="relative">
-                                    <span className="absolute left-2 top-2.5 text-muted-foreground text-sm">$</span>
-                                    <Input id="budget" className="pl-6 font-mono text-lg font-bold text-slate-700" placeholder="0.00" />
+                                    <span className="absolute left-3 top-2.5 text-muted-foreground text-sm">$</span>
+                                    <Input 
+                                        id="budget" 
+                                        type="number"
+                                        className="pl-7 font-mono text-lg font-bold" 
+                                        placeholder="0.00"
+                                        value={budget}
+                                        onChange={(e) => setBudget(e.target.value)}
+                                    />
                                 </div>
-                                <p className="text-[10px] text-muted-foreground">
+                                <p className="text-xs text-muted-foreground">
                                     Monto reservado para vicios ocultos. Strop restará incidencias de aquí.
                                 </p>
                             </div>
@@ -110,20 +273,105 @@ export function ProjectSetupDrawer({
                             <div className="grid grid-cols-2 gap-4">
                                 <div className="grid gap-2">
                                     <Label htmlFor="start-date">Inicio Obra</Label>
-                                    <Input id="start-date" type="date" />
+                                    <Input 
+                                        id="start-date" 
+                                        type="date"
+                                        value={startDate}
+                                        onChange={(e) => setStartDate(e.target.value)}
+                                    />
                                 </div>
                                 <div className="grid gap-2">
                                     <Label htmlFor="end-date">Fin Obra</Label>
-                                    <Input id="end-date" type="date" />
+                                    <Input 
+                                        id="end-date" 
+                                        type="date"
+                                        value={endDate}
+                                        onChange={(e) => setEndDate(e.target.value)}
+                                    />
                                 </div>
+                            </div>
+                            <p className="text-xs text-muted-foreground">
+                                Las fechas permiten calcular la velocidad de gasto (Burn Rate)
+                            </p>
+                        </div>
+
+                        <Separator />
+
+                        {/* Sección D: Asignación de Mando */}
+                        <div className="space-y-4">
+                            <h3 className="text-sm font-semibold text-foreground flex items-center gap-2">
+                                <Users className="h-4 w-4 text-primary" />
+                                Asignación de Mando
+                            </h3>
+                            
+                            <div className="grid gap-2">
+                                <Label htmlFor="superintendent">
+                                    Superintendente (Responsable) <span className="text-destructive">*</span>
+                                </Label>
+                                <Select value={superintendent} onValueChange={setSuperintendent}>
+                                    <SelectTrigger id="superintendent">
+                                        <SelectValue placeholder="Selecciona un superintendente" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        {mockStaff
+                                            .filter(s => s.role === "Superintendente")
+                                            .map(staff => (
+                                                <SelectItem key={staff.id} value={staff.id}>
+                                                    {staff.name}
+                                                </SelectItem>
+                                            ))
+                                        }
+                                    </SelectContent>
+                                </Select>
+                                <p className="text-xs text-muted-foreground">
+                                    Recibirá notificación de asignación automáticamente
+                                </p>
+                            </div>
+
+                            <div className="grid gap-2">
+                                <Label>Residentes (Operativos)</Label>
+                                <div className="border rounded-lg p-3 space-y-2 bg-muted/20">
+                                    {mockStaff
+                                        .filter(s => s.role === "Residente")
+                                        .map(staff => (
+                                            <div 
+                                                key={staff.id}
+                                                className="flex items-center gap-2"
+                                            >
+                                                <input
+                                                    type="checkbox"
+                                                    id={`resident-${staff.id}`}
+                                                    checked={residents.includes(staff.id)}
+                                                    onChange={() => toggleResident(staff.id)}
+                                                    className="h-4 w-4 rounded border-gray-300"
+                                                />
+                                                <Label 
+                                                    htmlFor={`resident-${staff.id}`}
+                                                    className="text-sm font-normal cursor-pointer flex-1"
+                                                >
+                                                    {staff.name}
+                                                </Label>
+                                            </div>
+                                        ))
+                                    }
+                                </div>
+                                {residents.length > 0 && (
+                                    <p className="text-xs text-muted-foreground">
+                                        {residents.length} residente{residents.length > 1 ? 's' : ''} seleccionado{residents.length > 1 ? 's' : ''}
+                                    </p>
+                                )}
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <SheetFooter className="p-6 pt-2 shrink-0 border-t mt-0 bg-background/50 backdrop-blur-sm sm:justify-between">
-                    <Button variant="outline" onClick={onClose}>Cancelar</Button>
-                    <Button onClick={handleSave} className="bg-primary text-primary-foreground hover:bg-primary/90">Crear Proyecto</Button>
+                <SheetFooter className="p-6 pt-4 shrink-0 border-t bg-background/95 backdrop-blur-sm flex-row justify-between gap-2">
+                    <Button variant="outline" onClick={onClose} className="flex-1">
+                        Cancelar
+                    </Button>
+                    <Button onClick={handleSave} className="flex-1">
+                        Crear Proyecto
+                    </Button>
                 </SheetFooter>
             </SheetContent>
         </Sheet>

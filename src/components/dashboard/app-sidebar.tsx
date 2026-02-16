@@ -62,6 +62,11 @@ const data = {
   ],
   navSecondary: [
     {
+      title: "Configuración",
+      url: "/dashboard/settings",
+      icon: Settings2,
+    },
+    {
       title: "Soporte",
       url: "#",
       icon: LifeBuoy,
