@@ -1,10 +1,16 @@
-
+"use client"
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { ProjectGrid } from "@/components/dashboard/project-grid"
 import { PanicRoom } from "@/components/dashboard/panic-room"
+import { ProjectMapView } from "@/components/dashboard/project-map-view"
+import { Button } from "@/components/ui/button"
+import { LayoutGrid, Map } from "lucide-react"
+import { useState } from "react"
 
 export default function DashboardPage() {
+  const [viewMode, setViewMode] = useState<"grid" | "map">("grid")
+
   return (
     <div className="flex flex-col h-full gap-4">
         {/* Top Row: KPIs - Fixed Height */}
@@ -107,10 +113,32 @@ export default function DashboardPage() {
             </Card>
         </div>
 
-        {/* Bottom Section: Grid + Panic Room - Flex Grow to fill rest of screen */}
+        {/* View Toggle */}
+        <div className="flex items-center gap-2 shrink-0">
+            <Button 
+                variant={viewMode === "grid" ? "default" : "outline"} 
+                size="sm" 
+                className="gap-2"
+                onClick={() => setViewMode("grid")}
+            >
+                <LayoutGrid className="h-4 w-4" />
+                Vista Lista
+            </Button>
+            <Button 
+                variant={viewMode === "map" ? "default" : "outline"} 
+                size="sm" 
+                className="gap-2"
+                onClick={() => setViewMode("map")}
+            >
+                <Map className="h-4 w-4" />
+                Vista Mapa
+            </Button>
+        </div>
+
+        {/* Bottom Section: Grid/Map + Panic Room - Flex Grow to fill rest of screen */}
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-4 flex-1 min-h-0">
              <div className="lg:col-span-3 h-full min-h-0">
-                <ProjectGrid />
+                {viewMode === "grid" ? <ProjectGrid /> : <ProjectMapView />}
              </div>
              <div className="lg:col-span-1 h-full min-h-0">
                 <PanicRoom />
