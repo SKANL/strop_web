@@ -28,7 +28,7 @@ import {
 } from "lucide-react"
 import { toast } from "sonner"
 import { cn } from "@/lib/utils"
-import { getIncidentById, updateIncidentCost, updateIncidentStatus } from "@/app/actions/incidents"
+import { fetchIncidentByIdAction, updateIncidentCostAction, updateIncidentStatusAction } from "@/actions/incidents"
 
 export function IncidentDetailDrawer({
   isOpen,
@@ -48,8 +48,8 @@ export function IncidentDetailDrawer({
     if (isOpen && incidentId) {
       const fetchIncident = async () => {
         setLoading(true)
-        const { data, error } = await getIncidentById(incidentId)
-        if (error) {
+        const { success, data, error } = await fetchIncidentByIdAction(incidentId)
+        if (!success || error) {
           toast.error("Error al cargar la incidencia")
           console.error(error)
         } else {
@@ -91,19 +91,19 @@ export function IncidentDetailDrawer({
     const numericCost = parseFloat(finalCost)
     
     // Update cost first
-    const { error: costError } = await updateIncidentCost(incident.id, numericCost)
-    if (costError) {
+    const costResult = await updateIncidentCostAction(incident.id, numericCost)
+    if (!costResult.success) {
         toast.dismiss()
-        toast.error("Error al actualizar costo")
+        toast.error("Error al actualizar costo: " + costResult.message)
         return
     }
 
     // Update status to CLOSED
-    const { error: statusError } = await updateIncidentStatus(incident.id, 'CLOSED')
+    const statusResult = await updateIncidentStatusAction(incident.id, 'CLOSED')
     
     toast.dismiss()
-    if (statusError) {
-        toast.error("Error al cerrar incidencia " + statusError)
+    if (!statusResult.success) {
+        toast.error("Error al cerrar incidencia " + statusResult.message)
     } else {
         toast.success(`Incidencia #${incident.folio_number} cerrada exitosamente`)
         onClose()

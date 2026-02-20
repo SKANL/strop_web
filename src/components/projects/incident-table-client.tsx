@@ -2,7 +2,7 @@
 
 import * as React from "react"
 import NextImage from 'next/image'
-import { updateIncidentCost, generatePublicLink } from '@/app/actions/incidents'
+import { updateIncidentCostAction, generatePublicLinkAction } from '@/actions/incidents'
 import type { Database } from '@/types/supabase'
 import {
   ColumnDef,
@@ -63,11 +63,11 @@ function SafeCostInput({ incidentId, value, onSave }: {
 
   const handleSave = async () => {
     setIsLoading(true)
-    const result = await updateIncidentCost(incidentId, parseFloat(tempValue))
+    const result = await updateIncidentCostAction(incidentId, parseFloat(tempValue))
     setIsLoading(false)
     
-    if (result.error) {
-      toast.error(result.error)
+    if (!result.success) {
+      toast.error(result.message || 'Error updating cost')
     } else {
       toast.success("Costo actualizado")
       onSave?.(parseFloat(tempValue))
@@ -114,11 +114,11 @@ export function IncidentTableClient({ incidents }: IncidentTableClientProps) {
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([])
 
   const handleCopyLink = async (incidentId: string) => {
-    const result = await generatePublicLink(incidentId)
-    if (result.error) {
-      toast.error(result.error)
-    } else if (result.data) {
-      navigator.clipboard.writeText(result.data.url)
+    const result = await generatePublicLinkAction(incidentId)
+    if (!result.success) {
+      toast.error(result.message || 'Error generating link')
+    } else if (result.url) {
+      navigator.clipboard.writeText(result.url)
       toast.success("Link copiado al portapapeles")
     }
   }

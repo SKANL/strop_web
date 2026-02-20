@@ -6,8 +6,14 @@ import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Search } from "lucide-react"
 import { GlobalIncidentsTable } from "@/components/incidents/global-incidents-table"
 import { IncidentDetailDrawer } from "@/components/incidents/incident-detail-drawer"
+import { CreateIncidentModal } from "@/components/incidents/create-incident-modal"
 
-export function GlobalIncidentsClient({ incidents }: { incidents: any[] }) {
+interface Project {
+  id: string
+  name: string
+}
+
+export function GlobalIncidentsClient({ incidents, projects }: { incidents: any[], projects: Project[] }) {
   const [searchQuery, setSearchQuery] = useState("")
   const [activeTab, setActiveTab] = useState("all")
   const [selectedIncidentId, setSelectedIncidentId] = useState<string | null>(null)
@@ -25,8 +31,27 @@ export function GlobalIncidentsClient({ incidents }: { incidents: any[] }) {
     <>
       {/* Filters Section */}
       <div className="px-6 py-4 border-b bg-background/95 backdrop-blur-sm z-10">
+        <div className="flex items-center justify-between gap-4 mb-4">
+           {/* Filters will go here or below, organizing layout */}
+        </div>
+
         <div className="flex flex-col gap-4">
-          {/* Tab Filters */}
+          <div className="flex items-center justify-between gap-4">
+            {/* Search Bar */}
+            <div className="relative flex-1 max-w-md">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Input
+                placeholder="Buscar por folio, ubicación, proyecto o contratista..."
+                className="pl-10"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                />
+            </div>
+
+            {/* Create Button */}
+            <CreateIncidentModal projects={projects} />
+          </div>
+
           {/* Tab Filters */}
           <Tabs value={activeTab} onValueChange={setActiveTab}>
             <TabsList className="grid w-full grid-cols-5 h-auto p-1 bg-muted/50">
@@ -53,16 +78,7 @@ export function GlobalIncidentsClient({ incidents }: { incidents: any[] }) {
             </TabsList>
           </Tabs>
 
-          {/* Search Bar */}
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-            <Input
-              placeholder="Buscar por folio, ubicación, proyecto o contratista..."
-              className="pl-10"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-            />
-          </div>
+          {/* Search Bar - Removed as it is now above */}
         </div>
       </div>
 

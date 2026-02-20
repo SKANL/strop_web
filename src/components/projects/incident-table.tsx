@@ -1,4 +1,4 @@
-import { getIncidents } from '@/app/actions/incidents'
+import { fetchIncidentsAction } from '@/actions/incidents'
 import { IncidentTableClient } from './incident-table-client'
 
 interface IncidentTableProps {
@@ -7,7 +7,7 @@ interface IncidentTableProps {
 }
 
 export async function IncidentTable({ projectId, activeFilter }: IncidentTableProps) {
-  const { data: incidents, error } = await getIncidents(projectId)
+  const { data: incidents, error } = await fetchIncidentsAction(projectId)
 
   if (error) {
     return (

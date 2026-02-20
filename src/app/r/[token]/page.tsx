@@ -1,6 +1,6 @@
 import { use } from "react"
 import { notFound } from "next/navigation"
-import { getIncidentByToken } from "@/app/actions/incidents"
+import { fetchIncidentByTokenAction } from "@/actions/incidents"
 import { PublicLinkClient } from "@/components/public-link/public-link-client"
 
 // ISR Configuration
@@ -13,7 +13,7 @@ export default async function PublicLinkPage({ params }: { params: Promise<{ tok
   if (!token) notFound()
 
   // Fetch real data
-  const { data: incidentData } = await getIncidentByToken(token)
+  const { data: incidentData } = await fetchIncidentByTokenAction(token)
 
   if (!incidentData) {
       if (token === 'demo-123') {
