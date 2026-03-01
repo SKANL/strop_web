@@ -177,19 +177,25 @@ export async function generatePublicLink(incidentId: string) {
 
 export async function getIncidentByToken(token: string) {
   const supabase = await getSupabaseClient()
+  // Use a SECURITY DEFINER RPC so anon users can read project/user/photo
+  // data that is otherwise protected by RLS.
   const { data, error } = await supabase
-    .from('incidents')
-    .select(`
-      *,
-      project:projects(name),
-      created_by_user:users!incidents_created_by_fkey(full_name),
-      photos:incident_photos(photo_url, photo_type)
-    `)
-    .eq('public_token', token)
-    .single()
+    .rpc('get_incident_by_public_token', { p_token: token })
 
   if (error) handleDbError(error)
-  return data
+  return data as {
+    id: string
+    folio_number: number
+    status: string
+    description: string
+    public_token: string
+    location_tag: string | null
+    priority: string
+    gps_coords: { lat: number; lng: number } | null
+    project: { name: string } | null
+    created_by_user: { full_name: string } | null
+    photos: { photo_url: string; photo_type: string }[]
+  } | null
 }
 
 export async function getProjectMembersForIncident(incidentId: string) {
