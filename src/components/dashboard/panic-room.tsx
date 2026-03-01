@@ -1,12 +1,15 @@
 "use client"
 
 import { AlertTriangle, DollarSign, ShieldAlert } from "lucide-react"
+import { useRouter } from "next/navigation"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 
 import type { PanicRoomAlert } from "@/app/actions/dashboard"
 
 export function PanicRoom({ alerts = [] }: { alerts: PanicRoomAlert[] }) {
+  const router = useRouter()
+
   return (
     <Card className="h-full flex flex-col border-destructive/50 bg-destructive/5 overflow-hidden">
       <CardHeader className="pb-3 pt-4">
@@ -25,6 +28,8 @@ export function PanicRoom({ alerts = [] }: { alerts: PanicRoomAlert[] }) {
               tabIndex={0}
               aria-label={`Alerta: ${alert.project} — ${alert.message}`}
               className="flex items-start gap-3 rounded-md border bg-background/80 p-3 shadow-sm hover:bg-accent cursor-pointer transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              onClick={() => router.push(`/dashboard/incidents?selected=${alert.id}`)}
+              onKeyDown={(e) => e.key === 'Enter' && router.push(`/dashboard/incidents?selected=${alert.id}`)}
             >
               {alert.type === 'financial' ? 
                   <DollarSign className="mt-px h-4 w-4 text-destructive shrink-0" /> : 

@@ -7,6 +7,8 @@ import { Search } from "lucide-react"
 import { GlobalIncidentsTable } from "@/components/incidents/global-incidents-table"
 import { IncidentDetailDrawer } from "@/components/incidents/incident-detail-drawer"
 import { CreateIncidentModal } from "@/components/incidents/create-incident-modal"
+import { useCapabilities } from "@/hooks/use-capabilities"
+import { useRealtimeIncidents } from "@/hooks/use-realtime-incidents"
 
 interface Project {
   id: string
@@ -17,11 +19,15 @@ export function GlobalIncidentsClient({ incidents, projects }: { incidents: any[
   const [searchQuery, setSearchQuery] = useState("")
   const [activeTab, setActiveTab] = useState("all")
   const [selectedIncidentId, setSelectedIncidentId] = useState<string | null>(null)
+  const { can } = useCapabilities()
+
+  // Subscribe to realtime incident changes
+  useRealtimeIncidents()
 
   // Calculate counts for tabs
   const counts = {
       all: incidents.length,
-      urgent: incidents.filter(i => i.priority === 'CRITICAL' || i.priority === 'HIGH').length,
+      urgent: incidents.filter(i => i.priority === 'CRITICAL' || i.priority === 'URGENT').length,
       pending: incidents.filter(i => i.status === 'IN_REVIEW').length,
       "with-cost": incidents.filter(i => (i.actual_cost || 0) > 0).length,
       closed: incidents.filter(i => i.status === 'CLOSED').length
@@ -49,7 +55,7 @@ export function GlobalIncidentsClient({ incidents, projects }: { incidents: any[
             </div>
 
             {/* Create Button */}
-            <CreateIncidentModal projects={projects} />
+            {can('incident.create') && <CreateIncidentModal projects={projects} />}
           </div>
 
           {/* Tab Filters */}

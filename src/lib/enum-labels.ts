@@ -22,6 +22,9 @@ export function getLabelForStatus(status: string): string {
 
 export const INCIDENT_PRIORITY_LABELS: Record<string, string> = {
   CRITICAL: "Crítica",
+  URGENT:   "Urgente",
+  NORMAL:   "Normal",
+  // Legacy / fallback values kept for backwards compat
   HIGH:     "Alta",
   MEDIUM:   "Media",
   LOW:      "Baja",

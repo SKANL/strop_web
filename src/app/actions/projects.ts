@@ -37,8 +37,11 @@ export async function getProjects() {
     .select(`
       *,
       incidents:incidents(
+        id,
         status,
-        priority
+        priority,
+        estimated_cost,
+        actual_cost
       ),
       project_members:project_members(
         user:users(
@@ -108,7 +111,7 @@ export async function getProjectById(projectId: string) {
  * Create a new project
  */
 export async function createProject(formData: ProjectInsert & { superintendentId?: string }) {
-  if (!await checkPermission('projects.create')) {
+  if (!await checkPermission('project.create')) {
     return { data: null, error: 'No tienes permisos para crear proyectos' }
   }
 
@@ -173,7 +176,7 @@ export async function createProject(formData: ProjectInsert & { superintendentId
  * Update an existing project
  */
 export async function updateProject(projectId: string, updates: Partial<ProjectInsert>) {
-  if (!await checkPermission('projects.edit')) {
+  if (!await checkPermission('project.create')) {
     return { data: null, error: 'No tienes permisos para editar proyectos' }
   }
 
@@ -220,7 +223,7 @@ export async function getProjectFinancials(projectId: string) {
   // Get incident costs
   const { data: incidents, error: incidentsError } = await supabase
     .from('incidents')
-    .select('estimated_cost, actual_cost, status')
+    .select('estimated_cost, actual_cost, status, priority')
     .eq('project_id', projectId)
 
   if (incidentsError) {
@@ -230,7 +233,7 @@ export async function getProjectFinancials(projectId: string) {
   const totalEstimated = incidents?.reduce((sum, inc) => sum + (inc.estimated_cost || 0), 0) || 0
   const totalActual = incidents?.reduce((sum, inc) => sum + (inc.actual_cost || 0), 0) || 0
   const openIncidents = incidents?.filter(inc => inc.status === 'OPEN').length || 0
-  const criticalIncidents = incidents?.filter(inc => inc.status === 'CRITICAL').length || 0
+  const criticalIncidents = incidents?.filter(inc => inc.priority === 'CRITICAL' && inc.status !== 'CLOSED').length || 0
 
   return {
     data: {

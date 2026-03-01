@@ -40,7 +40,8 @@ export default async function PublicLinkPage({ params }: { params: Promise<{ tok
       problem_description: incidentData.description || 'Sin descripción',
       location: incidentData.location_tag || 'Sin ubicación',
       status: incidentData.status,
-      folio_number: incidentData.folio_number
+      folio_number: incidentData.folio_number,
+      gps_coords: incidentData.gps_coords ?? null,
   }
 
   return <PublicLinkClient initialIncident={incident} token={token} />

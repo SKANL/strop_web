@@ -26,17 +26,19 @@ export async function AppSidebar({ ...props }: React.ComponentProps<typeof Sideb
   let userName = user?.email?.split("@")[0] ?? "Usuario"
   let userEmail = user?.email ?? ""
   let userAvatar = ""
+  let isCrew = false
 
   if (user) {
     const { data: profile } = await supabase
       .from("users")
-      .select("full_name, avatar_url")
+      .select("full_name, avatar_url, user_type")
       .eq("id", user.id)
       .single()
 
     if (profile) {
       userName = profile.full_name || userName
       userAvatar = profile.avatar_url || ""
+      isCrew = profile.user_type === "crew"
     }
   }
 
@@ -64,7 +66,7 @@ export async function AppSidebar({ ...props }: React.ComponentProps<typeof Sideb
         <NavSecondary className="mt-auto" />
       </SidebarContent>
       <SidebarFooter>
-        <NavUser user={{ name: userName, email: userEmail, avatar: userAvatar }} />
+        <NavUser user={{ name: userName, email: userEmail, avatar: userAvatar, isCrew }} />
       </SidebarFooter>
     </Sidebar>
   )

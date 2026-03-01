@@ -1,6 +1,7 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
+import { useRouter } from "next/navigation"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
 import { Role } from "./role-card"
@@ -8,7 +9,7 @@ import { StepIdentity } from "./steps/step-identity"
 import { StepPermissions } from "./steps/step-permissions"
 import { StepPreview } from "./steps/step-preview"
 import { toast } from "sonner"
-import { createRole } from '@/app/actions/roles'
+import { createRole, updateRole } from '@/app/actions/roles'
 
 interface RoleWizardProps {
   open: boolean
@@ -33,101 +34,155 @@ const INITIAL_DATA: RoleFormData = {
 }
 
 export function RoleWizard({ open, onOpenChange, roleToEdit }: RoleWizardProps) {
+  const router = useRouter()
   const [step, setStep] = useState<WizardStep>('IDENTITY')
   const [formData, setFormData] = useState<RoleFormData>(INITIAL_DATA)
+  const [isSaving, setIsSaving] = useState(false)
 
-  // Reset on open
-  // In a real app we would populate formData from roleToEdit if it exists
-  
+  // Populate form when editing an existing role
+  useEffect(() => {
+    if (open && roleToEdit) {
+      setFormData({
+        name: roleToEdit.name,
+        description: roleToEdit.description ?? "",
+        archetype: roleToEdit.archetype ?? 'FIELD',
+        permissions: roleToEdit.permissions ?? [],
+      })
+      setStep('IDENTITY')
+    } else if (open && !roleToEdit) {
+      setFormData(INITIAL_DATA)
+      setStep('IDENTITY')
+    }
+  }, [open, roleToEdit])
+
   const handleNext = () => {
-      if (step === 'IDENTITY') setStep('PERMISSIONS')
-      else if (step === 'PERMISSIONS') setStep('PREVIEW')
+    if (step === 'IDENTITY') setStep('PERMISSIONS')
+    else if (step === 'PERMISSIONS') setStep('PREVIEW')
   }
 
   const handleBack = () => {
-      if (step === 'PREVIEW') setStep('PERMISSIONS')
-      else if (step === 'PERMISSIONS') setStep('IDENTITY')
+    if (step === 'PREVIEW') setStep('PERMISSIONS')
+    else if (step === 'PERMISSIONS') setStep('IDENTITY')
   }
 
   const handleSave = async () => {
-    // Call server action to create role
-    const result = await createRole({
-      name: formData.name,
-      description: formData.description,
-      archetype: formData.archetype,
-      permissions: formData.permissions,
-    })
+    setIsSaving(true)
+    try {
+      let result: { data: unknown; error: unknown }
 
-    if (result.error) {
-      toast.error(typeof result.error === 'string' ? result.error : 'Error al guardar el rol')
-    } else {
-      toast.success("Rol guardado correctamente")
-      onOpenChange(false)
-      setStep('IDENTITY')
-      setFormData(INITIAL_DATA)
+      if (roleToEdit) {
+        // EDIT mode
+        result = await updateRole(roleToEdit.id, {
+          name: formData.name,
+          permissions: formData.permissions,
+        })
+      } else {
+        // CREATE mode
+        result = await createRole({
+          name: formData.name,
+          description: formData.description,
+          archetype: formData.archetype,
+          permissions: formData.permissions,
+        })
+      }
+
+      if (result.error) {
+        const errorMsg = typeof result.error === 'string'
+          ? result.error
+          : 'Error al guardar el rol'
+        toast.error(errorMsg)
+      } else {
+        toast.success(roleToEdit ? "Rol actualizado correctamente" : "Rol creado correctamente")
+        onOpenChange(false)
+        setStep('IDENTITY')
+        setFormData(INITIAL_DATA)
+        router.refresh()
+      }
+    } finally {
+      setIsSaving(false)
     }
   }
 
+  const stepIndex = step === 'IDENTITY' ? 0 : step === 'PERMISSIONS' ? 1 : 2
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-4xl h-[80vh] flex flex-col p-0 gap-0">
         <DialogHeader className="p-6 border-b shrink-0">
-            <DialogTitle>
-                {roleToEdit ? "Editar Rol" : "Crear Nuevo Rol"}
-            </DialogTitle>
-            <div className="flex items-center gap-2 mt-2">
-                {['Identidad', 'Permisos', 'Previsualización'].map((label, index) => {
-                    const stepNames: WizardStep[] = ['IDENTITY', 'PERMISSIONS', 'PREVIEW']
-                    const isActive = stepNames[index] === step
-                    const isCompleted = stepNames.indexOf(step) > index
-                    
-                    return (
-                        <div key={label} className="flex items-center gap-2">
-                            <div className={`h-2 w-2 rounded-full ${isActive || isCompleted ? "bg-primary" : "bg-muted"}`} />
-                            <span className={`text-xs ${isActive ? "font-bold text-foreground" : "text-muted-foreground"}`}>
-                                {label}
-                            </span>
-                            {index < 2 && <div className="w-8 h-px bg-muted" />}
-                        </div>
-                    )
-                })}
-            </div>
+          <DialogTitle>
+            {roleToEdit ? "Editar Rol" : "Crear Nuevo Rol"}
+          </DialogTitle>
+          <div className="flex items-center gap-2 mt-2">
+            {['Identidad', 'Permisos', 'Previsualización'].map((label, index) => (
+              <div key={label} className="flex items-center gap-2">
+                <div
+                  className={`flex h-6 w-6 items-center justify-center rounded-full text-xs font-semibold transition-colors ${
+                    index < stepIndex
+                      ? 'bg-primary text-primary-foreground'
+                      : index === stepIndex
+                        ? 'bg-primary text-primary-foreground ring-2 ring-primary ring-offset-2'
+                        : 'bg-muted text-muted-foreground'
+                  }`}
+                >
+                  {index < stepIndex ? '✓' : index + 1}
+                </div>
+                <span
+                  className={`text-xs ${
+                    index === stepIndex
+                      ? 'font-semibold text-foreground'
+                      : 'text-muted-foreground'
+                  }`}
+                >
+                  {label}
+                </span>
+                {index < 2 && (
+                  <div className={`h-px w-8 ${index < stepIndex ? 'bg-primary' : 'bg-muted'}`} />
+                )}
+              </div>
+            ))}
+          </div>
         </DialogHeader>
 
-        <div className="flex-1 overflow-hidden flex">
-            {/* Main Content Area */}
-            <div className="flex-1 overflow-y-auto p-6">
-                {step === 'IDENTITY' && (
-                    <StepIdentity 
-                        data={formData} 
-                        updateData={(updates) => setFormData(prev => ({ ...prev, ...updates }))} 
-                    />
-                )}
-                {step === 'PERMISSIONS' && (
-                    <StepPermissions
-                        data={formData}
-                        updateData={(updates) => setFormData(prev => ({ ...prev, ...updates }))}
-                    />
-                )}
-                {step === 'PREVIEW' && (
-                    <StepPreview data={formData} />
-                )}
-            </div>
+        <div className="flex-1 overflow-auto p-6">
+          {step === 'IDENTITY' && (
+            <StepIdentity
+              data={formData}
+              updateData={(updates) => setFormData(prev => ({ ...prev, ...updates }))}
+            />
+          )}
+          {step === 'PERMISSIONS' && (
+            <StepPermissions
+              data={formData}
+              updateData={(updates) => setFormData(prev => ({ ...prev, ...updates }))}
+            />
+          )}
+          {step === 'PREVIEW' && (
+            <StepPreview data={formData} />
+          )}
         </div>
 
-        <div className="p-4 border-t bg-muted/10 flex justify-between shrink-0">
-            <Button variant="outline" onClick={handleBack} disabled={step === 'IDENTITY'}>
-                Atrás
+        <div className="flex items-center justify-between p-6 border-t shrink-0">
+          <Button
+            variant="outline"
+            onClick={step === 'IDENTITY' ? () => onOpenChange(false) : handleBack}
+            disabled={isSaving}
+          >
+            {step === 'IDENTITY' ? 'Cancelar' : 'Atrás'}
+          </Button>
+          {step !== 'PREVIEW' ? (
+            <Button onClick={handleNext} disabled={!formData.name && step === 'IDENTITY'}>
+              Siguiente
             </Button>
-            
-            {step === 'PREVIEW' ? (
-                <Button onClick={handleSave}>Guardar Rol</Button>
-            ) : (
-                <Button onClick={handleNext} disabled={step === 'IDENTITY' && !formData.name}>
-                    Siguiente
-                </Button>
-            )}
+          ) : (
+            <Button onClick={handleSave} disabled={isSaving} className="min-w-24">
+              {isSaving ? (
+                <span className="flex items-center gap-2">
+                  <span className="h-4 w-4 animate-spin rounded-full border-2 border-background border-t-transparent" />
+                  Guardando...
+                </span>
+              ) : roleToEdit ? 'Actualizar Rol' : 'Crear Rol'}
+            </Button>
+          )}
         </div>
       </DialogContent>
     </Dialog>

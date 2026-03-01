@@ -1,3 +1,5 @@
+"use client"
+
 import { useState, useEffect } from "react"
 import {
   Sheet,
@@ -14,6 +16,7 @@ import { Switch } from "@/components/ui/switch"
 import { Separator } from "@/components/ui/separator"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { ConfirmDialog } from "@/components/ui/confirm-dialog"
+import { useCapabilities } from "@/hooks/use-capabilities"
 import { 
   Share2, 
   Clock, 
@@ -25,11 +28,15 @@ import {
   Upload,
   Send,
   X,
-  Loader2
+  Loader2,
+  Copy,
+  MessageSquare
 } from "lucide-react"
 import { toast } from "sonner"
 import { cn } from "@/lib/utils"
-import { fetchIncidentByIdAction, updateIncidentCostAction, updateIncidentStatusAction } from "@/actions/incidents"
+import { fetchIncidentByIdAction, updateIncidentCostAction, updateIncidentStatusAction, assignIncidentAction, fetchProjectMembersAction } from "@/actions/incidents"
+import { getStaticMapUrl, parseGpsCoords } from "@/lib/geoapify"
+import { IncidentAuditLog } from "@/components/incidents/incident-audit-log"
 
 export function IncidentDetailDrawer({
   isOpen,
@@ -45,6 +52,12 @@ export function IncidentDetailDrawer({
   const [chargeContractor, setChargeContractor] = useState(false)
   const [finalCost, setFinalCost] = useState("")
   const [showConfirmClose, setShowConfirmClose] = useState(false)
+  const [assignedUserId, setAssignedUserId] = useState<string | null>(null)
+  const [projectMembers, setProjectMembers] = useState<{ id: string; full_name: string | null; email: string | null; role_name: string | null }[]>([])
+  const [isAssigning, setIsAssigning] = useState(false)
+  const [showWhatsAppCopy, setShowWhatsAppCopy] = useState(false)
+  const [showAuditLog, setShowAuditLog] = useState(false)
+  const { can } = useCapabilities()
 
   useEffect(() => {
     if (isOpen && incidentId) {
@@ -57,6 +70,10 @@ export function IncidentDetailDrawer({
         } else {
           setIncident(data)
           if (data?.actual_cost) setFinalCost(data.actual_cost.toString())
+          if (data?.assigned_to) setAssignedUserId(data.assigned_to)
+          // Fetch project members for assignment via server action
+          const membersResult = await fetchProjectMembersAction(incidentId)
+          if (membersResult.success) setProjectMembers(membersResult.data)
         }
         setLoading(false)
       }
@@ -64,6 +81,7 @@ export function IncidentDetailDrawer({
     } else {
         setIncident(null)
         setFinalCost("")
+        setShowWhatsAppCopy(false)
     }
   }, [isOpen, incidentId])
 
@@ -157,10 +175,23 @@ export function IncidentDetailDrawer({
       })
   }
 
+  // WhatsApp assignment message
+  const assignedMemberName = projectMembers.find(m => m.id === assignedUserId)?.full_name ?? null
+  const whatsAppMsg = showWhatsAppCopy && incident
+    ? [
+        `\uD83D\uDD27 *Incidencia #${incident.folio_number}* te ha sido asignada`,
+        `\uD83D\uDCCB *Proyecto:* ${incident.project?.name ?? '\u2014'}`,
+        incident.location_tag ? `\uD83D\uDCCD *Ubicaci\u00F3n:* ${incident.location_tag}` : null,
+        `\uD83D\uDEA8 *Prioridad:* ${incident.priority === 'CRITICAL' ? '\uD83D\uDD34 Cr\u00EDtica' : incident.priority === 'URGENT' ? '\uD83D\uDFE0 Urgente' : '\uD83D\uDFE1 Normal'}`,
+        '',
+        `Ver detalles: ${typeof window !== 'undefined' ? window.location.origin : 'https://strop.app'}/r/${incident.public_token}`,
+      ].filter(Boolean).join('\n')
+    : null
+
   return (
     <>
     <Sheet open={isOpen} onOpenChange={onClose}>
-      <SheetContent className="sm:max-w-[600px] w-full p-0 flex flex-col h-full overflow-hidden">
+      <SheetContent className="sm:max-w-150 w-full p-0 flex flex-col h-full overflow-hidden">
         {loading || !incident ? (
            <div className="flex flex-1 items-center justify-center">
                <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
@@ -215,6 +246,31 @@ export function IncidentDetailDrawer({
                 </div>
             </div>
             </SheetHeader>
+
+            {/* Static Map Preview */}
+            {(() => {
+              const coords = parseGpsCoords(incident.gps_coords)
+              if (!coords) return null
+              return (
+                <div className="shrink-0 relative overflow-hidden border-b">
+                  <img
+                    src={getStaticMapUrl(coords[0], coords[1], { width: 800, height: 200, zoom: 16 })}
+                    alt="Ubicación de la incidencia"
+                    className="w-full h-35 object-cover"
+                  />
+                  <div className="absolute bottom-2 right-2">
+                    <a
+                      href={`https://www.google.com/maps/search/?api=1&query=${coords[1]},${coords[0]}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-[10px] bg-white/90 hover:bg-white px-2 py-1 rounded shadow text-foreground font-medium transition-colors"
+                    >
+                      Abrir en Maps ↗
+                    </a>
+                  </div>
+                </div>
+              )
+            })()}
 
             {/* Scrollable Content */}
             <ScrollArea className="flex-1 px-6 py-4">
@@ -288,6 +344,81 @@ export function IncidentDetailDrawer({
 
                 <Separator />
 
+                {/* Assign Section */}
+                {can('incident.assign') && (
+                  <div className="space-y-2">
+                    <Label htmlFor="assign-select">Asignar a</Label>
+                    <div className="flex gap-2">
+                      <select
+                        id="assign-select"
+                        value={assignedUserId || ""}
+                        onChange={(e) => setAssignedUserId(e.target.value || null)}
+                        className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                        disabled={isAssigning}
+                        aria-label="Seleccionar responsable"
+                      >
+                        <option value="">Sin asignar</option>
+                        {projectMembers.map((member) => (
+                          <option key={member.id} value={member.id}>
+                            {member.full_name || member.email}{member.role_name ? ` (${member.role_name})` : ''}
+                          </option>
+                        ))}
+                      </select>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        disabled={isAssigning || !assignedUserId}
+                        aria-label="Confirmar asignación"
+                        onClick={async () => {
+                          if (!assignedUserId || !incident) return
+                          setIsAssigning(true)
+                          const result = await assignIncidentAction(incident.id, assignedUserId)
+                          if (result.success) {
+                            toast.success("Incidencia asignada correctamente")
+                            setShowWhatsAppCopy(true)
+                          } else {
+                            toast.error("Error al asignar")
+                          }
+                          setIsAssigning(false)
+                        }}
+                      >
+                        {isAssigning ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
+                      </Button>
+                    </div>
+
+                    {/* WhatsApp Assignment Message */}
+                    {whatsAppMsg && (
+                      <div className="mt-1 rounded-lg border border-green-200 bg-green-50 p-3 space-y-2">
+                        <div className="flex items-center justify-between">
+                          <p className="text-xs font-semibold text-green-800 flex items-center gap-1.5">
+                            <MessageSquare className="h-3.5 w-3.5" />
+                            Mensaje para WhatsApp
+                            {assignedMemberName && <span className="font-normal text-green-700">— {assignedMemberName}</span>}
+                          </p>
+                          <button onClick={() => setShowWhatsAppCopy(false)} className="text-green-600 hover:text-green-800">
+                            <X className="h-3.5 w-3.5" />
+                          </button>
+                        </div>
+                        <pre className="text-xs text-green-900 whitespace-pre-wrap font-sans leading-relaxed">{whatsAppMsg}</pre>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          className="w-full border-green-300 text-green-800 hover:bg-green-100 text-xs h-8"
+                          onClick={() => {
+                            navigator.clipboard.writeText(whatsAppMsg)
+                            toast.success('Mensaje copiado al portapapeles')
+                          }}
+                        >
+                          <Copy className="h-3.5 w-3.5 mr-1.5" />
+                          Copiar mensaje
+                        </Button>
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                <Separator />
+
                 {/* Closure Zone - Only for Open/InReview */}
                 {incident.status !== 'CLOSED' && (
                 <div className="space-y-4 p-4 rounded-lg border-2 border-dashed border-primary/30 bg-primary/5">
@@ -299,6 +430,7 @@ export function IncidentDetailDrawer({
                 </div>
 
                 {/* Charge Contractor Switch */}
+                {can('financial.manage_chargebacks') && (
                 <div className="flex items-center justify-between p-3 rounded-lg border bg-background">
                     <div className="space-y-0.5">
                     <Label htmlFor="charge-contractor" className="text-sm font-medium cursor-pointer">
@@ -314,8 +446,10 @@ export function IncidentDetailDrawer({
                     onCheckedChange={setChargeContractor}
                     />
                 </div>
+                )}
 
                 {/* Final Cost Input */}
+                {can('financial.edit_costs') && (
                 <div className="space-y-2">
                     <Label htmlFor="final-cost" className="text-sm font-medium">
                     Monto Final Real <span className="text-destructive">*</span>
@@ -337,8 +471,10 @@ export function IncidentDetailDrawer({
                     Costo estimado: ${(incident.estimated_cost || 0).toLocaleString('es-MX', { minimumFractionDigits: 2 })}
                     </p>
                 </div>
+                )}
 
                 {/* Close Button */}
+                {(can('incident.close_final') || can('incident.close_operational')) && (
                 <Button 
                     className="w-full h-12 text-base font-semibold"
                     onClick={() => setShowConfirmClose(true)}
@@ -346,9 +482,30 @@ export function IncidentDetailDrawer({
                     <CheckCircle2 className="h-5 w-5 mr-2" />
                     Cerrar Incidencia
                 </Button>
+                )}
                 </div>
                 )}
             </div>
+                <Separator />
+
+                {/* Audit Log Collapsible */}
+                <div className="space-y-2">
+                  <button
+                    type="button"
+                    className="flex w-full items-center justify-between py-1 text-sm font-medium hover:text-foreground text-muted-foreground transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded-sm"
+                    onClick={() => setShowAuditLog(prev => !prev)}
+                    aria-expanded={showAuditLog}
+                    aria-controls="audit-log-section"
+                  >
+                    <span>Historial de cambios</span>
+                    <span className="text-xs">{showAuditLog ? '▲' : '▼'}</span>
+                  </button>
+                  {showAuditLog && incident && (
+                    <div id="audit-log-section">
+                      <IncidentAuditLog incidentId={incident.id} />
+                    </div>
+                  )}
+                </div>
             </ScrollArea>
            </>
         )}

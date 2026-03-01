@@ -9,9 +9,9 @@ interface StepPreviewProps {
 }
 
 export function StepPreview({ data }: StepPreviewProps) {
-  const hasMoney = data.permissions.includes('view_costs')
-  const hasCreate = data.permissions.includes('create_incidents')
-  const hasTeam = data.permissions.includes('invite_staff') || data.permissions.includes('invite_crew')
+  const hasMoney = data.permissions.includes('financial.view_costs')
+  const hasCreate = data.permissions.includes('incident.create')
+  const hasTeam = data.permissions.includes('org.manage_staff') || data.permissions.includes('project.manage_crew')
 
   return (
     <div className="flex flex-col h-full gap-4">

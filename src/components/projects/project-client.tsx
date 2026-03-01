@@ -6,7 +6,8 @@ import { IncidentTableClient } from "@/components/projects/incident-table-client
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
-import { Search, Users, AlertTriangle, Building2 } from "lucide-react"
+import { Search, Users, AlertTriangle, Building2, MapPin as MapPinIcon } from "lucide-react"
+import { getStaticMapUrl, parseGpsCoords } from "@/lib/geoapify"
 import { CrewInviteDialog } from "@/components/team/crew-invite-dialog"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
@@ -89,6 +90,10 @@ export function ProjectClient({
                     <Users className="h-4 w-4" />
                     Equipo y Accesos
                   </TabsTrigger>
+                  <TabsTrigger value="mapa" className="gap-2">
+                    <MapPinIcon className="h-4 w-4" />
+                    Mapa
+                  </TabsTrigger>
                   <TabsTrigger value="settings" className="gap-2">
                     <Building2 className="h-4 w-4" />
                     Configuracion
@@ -98,7 +103,7 @@ export function ProjectClient({
 
               <TabsContent value="incidents" className="flex-1 flex flex-col gap-4 min-h-0 pt-4 data-[state=inactive]:hidden">
                 <div className="flex items-center justify-between gap-4 shrink-0">
-                    <Tabs defaultValue="all" className="w-[500px]" onValueChange={setActiveFilter}>
+                    <Tabs defaultValue="all" className="w-125" onValueChange={setActiveFilter}>
                         <TabsList className="grid w-full grid-cols-4 h-9 p-1 bg-muted/50">
                             <TabsTrigger value="all" className="text-xs font-medium">Todas</TabsTrigger>
                             <TabsTrigger value="urgent" className="text-xs font-medium">Urgentisimas</TabsTrigger>
@@ -122,6 +127,70 @@ export function ProjectClient({
                          <IncidentTableClient incidents={incidents} />
                     </div>
                 </div>
+              </TabsContent>
+
+              <TabsContent value="mapa" className="flex-1 flex flex-col gap-4 min-h-0 pt-4 data-[state=inactive]:hidden">
+                {(() => {
+                  const incidentsWithCoords = allIncidents.filter(i => i.gps_coords)
+                  if (incidentsWithCoords.length === 0) {
+                    return (
+                      <div className="flex-1 flex flex-col items-center justify-center text-muted-foreground gap-3 border-2 border-dashed rounded-lg min-h-75">
+                        <MapPinIcon className="h-10 w-10 opacity-30" />
+                        <div className="text-center">
+                          <p className="font-medium">Sin ubicaciones registradas</p>
+                          <p className="text-sm">Las incidencias con GPS aparecerán aquí</p>
+                        </div>
+                      </div>
+                    )
+                  }
+
+                  return (
+                    <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 overflow-auto pb-2">
+                      {incidentsWithCoords.map((incident) => {
+                        const coords = parseGpsCoords(incident.gps_coords)
+                        if (!coords) return null
+                        const priorityColor =
+                          incident.priority === 'CRITICAL' ? 'ef4444' :
+                          incident.priority === 'URGENT' ? 'f97316' : '6b7280'
+                        return (
+                          <div key={incident.id} className="rounded-lg border overflow-hidden shadow-sm">
+                            <div className="relative">
+                              <img
+                                src={getStaticMapUrl(coords[0], coords[1], { width: 400, height: 160, zoom: 16, markerColor: priorityColor })}
+                                alt={`Ubicación #${incident.folio_number}`}
+                                className="w-full h-30 object-cover"
+                              />
+                              <a
+                                href={`https://www.google.com/maps/search/?api=1&query=${coords[1]},${coords[0]}`}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="absolute bottom-1.5 right-1.5 text-[10px] bg-white/90 hover:bg-white px-2 py-0.5 rounded shadow font-medium transition-colors"
+                              >
+                                Maps ↗
+                              </a>
+                            </div>
+                            <div className="p-3 space-y-1">
+                              <div className="flex items-center gap-2">
+                                <span className="font-mono text-sm font-bold">#{incident.folio_number}</span>
+                                <span className={`text-xs px-1.5 py-0.5 rounded font-medium ${
+                                  incident.priority === 'CRITICAL' ? 'bg-red-100 text-red-700' :
+                                  incident.priority === 'URGENT' ? 'bg-orange-100 text-orange-700' :
+                                  'bg-gray-100 text-gray-700'
+                                }`}>{incident.priority}</span>
+                              </div>
+                              <p className="text-xs text-muted-foreground line-clamp-1">{incident.description}</p>
+                              {incident.location_tag && (
+                                <p className="text-xs text-muted-foreground flex items-center gap-1">
+                                  <MapPinIcon className="h-3 w-3 shrink-0" />{incident.location_tag}
+                                </p>
+                              )}
+                            </div>
+                          </div>
+                        )
+                      })}
+                    </div>
+                  )
+                })()}
               </TabsContent>
 
               <TabsContent value="team" className="flex-1 overflow-auto pt-4 data-[state=inactive]:hidden">

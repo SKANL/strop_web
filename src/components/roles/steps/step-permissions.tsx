@@ -21,20 +21,33 @@ type Permission = {
 
 const PERMISSIONS: Record<string, Permission[]> = {
     FINANCIAL: [
-        { id: 'view_costs', label: 'Ver Costos Estimados ($)' },
-        { id: 'edit_costs', label: 'Editar/Estimar Costos', requires: 'view_costs' },
-        { id: 'view_total_budget', label: 'Ver Totalizador de Proyecto' },
+        { id: 'financial.view_costs', label: 'Ver Costos Estimados ($)' },
+        { id: 'financial.edit_costs', label: 'Editar/Estimar Costos', requires: 'financial.view_costs' },
+        { id: 'financial.view_project_budget', label: 'Ver Totalizador de Proyecto' },
+        { id: 'financial.manage_chargebacks', label: 'Gestionar Cargos a Subcontratistas', requires: 'financial.view_costs' },
     ],
     INCIDENTS: [
-        { id: 'create_incidents', label: 'Crear Nuevas Incidencias' },
-        { id: 'view_all_incidents', label: 'Ver Todas (incluso ajenas)' },
-        { id: 'close_incidents', label: 'Cierre Definitivo (Legal)' },
-        { id: 'delete_incidents', label: 'Borrar Incidencias', danger: true },
+        { id: 'incident.create', label: 'Crear Nuevas Incidencias' },
+        { id: 'incident.edit_basic', label: 'Editar Descripción y Datos Básicos', requires: 'incident.create' },
+        { id: 'incident.set_priority', label: 'Cambiar Prioridad (Urgente/Crítico)' },
+        { id: 'incident.assign', label: 'Asignar a un Responsable' },
+        { id: 'incident.close_operational', label: 'Cierre Operativo (Residente)' },
+        { id: 'incident.close_final', label: 'Cierre Definitivo / Legal', requires: 'incident.close_operational', danger: true },
+        { id: 'project.view_all', label: 'Ver Todas las Incidencias (incluso ajenas)' },
     ],
     TEAM: [
-        { id: 'invite_staff', label: 'Invitar Staff Interno' },
-        { id: 'invite_crew', label: 'Generar Links de Crew' },
-    ]
+        { id: 'org.manage_staff', label: 'Invitar y Gestionar Staff Interno' },
+        { id: 'project.manage_crew', label: 'Gestionar Crew de Proyectos' },
+        { id: 'org.manage_roles', label: 'Crear y Editar Roles', requires: 'org.manage_staff' },
+        { id: 'comm.share_public_link', label: 'Enviar Link Público a Subcontratistas' },
+        { id: 'comm.send_notifications', label: 'Enviar Notificaciones al Equipo' },
+    ],
+    PROJECTS: [
+        { id: 'project.create', label: 'Crear y Editar Proyectos' },
+        { id: 'project.delete', label: 'Eliminar Proyectos', requires: 'project.create', danger: true },
+        { id: 'org.view_billing', label: 'Ver Facturación de la Organización' },
+        { id: 'org.edit', label: 'Editar Datos de la Organización' },
+    ],
 }
 
 export function StepPermissions({ data, updateData }: StepPermissionsProps) {
@@ -46,15 +59,14 @@ export function StepPermissions({ data, updateData }: StepPermissionsProps) {
       if (checked) {
           newPermissions.add(id)
           // Enable dependencies
-          const perm = [...PERMISSIONS.FINANCIAL, ...PERMISSIONS.INCIDENTS, ...PERMISSIONS.TEAM].find(p => p.id === id)
+          const perm = [...PERMISSIONS.FINANCIAL, ...PERMISSIONS.INCIDENTS, ...PERMISSIONS.TEAM, ...PERMISSIONS.PROJECTS].find(p => p.id === id)
           if (perm?.requires) {
               newPermissions.add(perm.requires)
           }
       } else {
           newPermissions.delete(id)
           // Disable dependent children (Reverse logic)
-          // If I disable 'view_costs', 'edit_costs' must be disabled
-           const children = [...PERMISSIONS.FINANCIAL, ...PERMISSIONS.INCIDENTS, ...PERMISSIONS.TEAM].filter(p => p.requires === id)
+           const children = [...PERMISSIONS.FINANCIAL, ...PERMISSIONS.INCIDENTS, ...PERMISSIONS.TEAM, ...PERMISSIONS.PROJECTS].filter(p => p.requires === id)
            children.forEach(child => newPermissions.delete(child.id))
       }
 
@@ -65,9 +77,9 @@ export function StepPermissions({ data, updateData }: StepPermissionsProps) {
   useEffect(() => {
      if (data.permissions.length === 0) {
          let defaults: string[] = []
-         if (data.archetype === 'MANAGER') defaults = ['view_costs', 'edit_costs', 'view_total_budget', 'create_incidents', 'view_all_incidents', 'close_incidents', 'invite_staff', 'invite_crew']
-         if (data.archetype === 'FIELD') defaults = ['create_incidents', 'view_all_incidents', 'invite_crew']
-         if (data.archetype === 'GUEST') defaults = ['view_all_incidents'] // Read only
+         if (data.archetype === 'MANAGER') defaults = ['financial.view_costs', 'financial.edit_costs', 'financial.view_project_budget', 'financial.manage_chargebacks', 'incident.create', 'incident.edit_basic', 'incident.set_priority', 'incident.assign', 'incident.close_operational', 'incident.close_final', 'project.view_all', 'org.manage_staff', 'project.manage_crew', 'comm.share_public_link', 'comm.send_notifications', 'project.create']
+         if (data.archetype === 'FIELD') defaults = ['incident.create', 'incident.edit_basic', 'incident.set_priority', 'incident.close_operational', 'project.view_all', 'financial.view_costs', 'comm.share_public_link']
+         if (data.archetype === 'GUEST') defaults = ['project.view_all', 'incident.create'] // Read + report only
          
          updateData({ permissions: defaults })
      }
@@ -78,6 +90,30 @@ export function StepPermissions({ data, updateData }: StepPermissionsProps) {
         <div className="bg-blue-50 text-blue-800 p-3 rounded-md text-sm">
             Los permisos se han pre-configurado según el arquetipo <strong>{data.archetype}</strong>. Puedes ajustarlos manualmente.
         </div>
+
+        {/* Projects & Org Block */}
+        <div className="space-y-4">
+            <h3 className="font-semibold text-lg flex items-center gap-2 text-blue-600">
+                <span className="h-2 w-2 rounded-full bg-blue-600" /> Proyectos y Organización
+            </h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pl-4 border-l-2 border-blue-100">
+                {PERMISSIONS.PROJECTS.map(p => (
+                    <div key={p.id} className="flex items-start space-x-2">
+                        <Checkbox
+                            id={p.id}
+                            checked={data.permissions.includes(p.id)}
+                            onCheckedChange={(c: boolean | "indeterminate") => togglePermission(p.id, c === true)}
+                        />
+                        <div className="grid gap-1.5 leading-none">
+                            <Label htmlFor={p.id} className={`cursor-pointer ${p.danger ? 'text-red-600' : ''}`}>{p.label}{p.danger && <Badge variant="destructive" className="ml-2 text-[10px] py-0">Peligroso</Badge>}</Label>
+                            {p.requires && <p className="text-[10px] text-muted-foreground">Requiere: {[...PERMISSIONS.FINANCIAL, ...PERMISSIONS.INCIDENTS, ...PERMISSIONS.TEAM, ...PERMISSIONS.PROJECTS].find(pix => pix.id === p.requires)?.label}</p>}
+                        </div>
+                    </div>
+                ))}
+            </div>
+        </div>
+
+        <Separator />
 
         {/* Financial Block */}
         <div className="space-y-4">
@@ -94,7 +130,7 @@ export function StepPermissions({ data, updateData }: StepPermissionsProps) {
                         />
                         <div className="grid gap-1.5 leading-none">
                             <Label htmlFor={p.id} className="cursor-pointer">{p.label}</Label>
-                            {p.requires && <p className="text-[10px] text-muted-foreground">Requiere: {PERMISSIONS.FINANCIAL.find(pix => pix.id === p.requires)?.label}</p>}
+                            {p.requires && <p className="text-[10px] text-muted-foreground">Requiere: {[...PERMISSIONS.FINANCIAL, ...PERMISSIONS.INCIDENTS, ...PERMISSIONS.TEAM, ...PERMISSIONS.PROJECTS].find(pix => pix.id === p.requires)?.label}</p>}
                         </div>
                     </div>
                 ))}
@@ -115,8 +151,6 @@ export function StepPermissions({ data, updateData }: StepPermissionsProps) {
                             id={p.id} 
                             checked={data.permissions.includes(p.id)}
                             onCheckedChange={(c: boolean | "indeterminate") => togglePermission(p.id, c === true)}
-                            // Prevent Field users from deleting if logic requires strict archetype check
-                            disabled={p.id === 'delete_incidents' && data.archetype !== 'MANAGER'} 
                         />
                         <div className="grid gap-1.5 leading-none">
                             <Label htmlFor={p.id} className={`cursor-pointer ${p.danger ? "text-destructive" : ""}`}>{p.label}</Label>
@@ -144,6 +178,7 @@ export function StepPermissions({ data, updateData }: StepPermissionsProps) {
                        />
                        <div className="grid gap-1.5 leading-none">
                            <Label htmlFor={p.id} className="cursor-pointer">{p.label}</Label>
+                           {p.requires && <p className="text-[10px] text-muted-foreground">Requiere: {[...PERMISSIONS.FINANCIAL, ...PERMISSIONS.INCIDENTS, ...PERMISSIONS.TEAM, ...PERMISSIONS.PROJECTS].find(pix => pix.id === p.requires)?.label}</p>}
                        </div>
                    </div>
                 ))}

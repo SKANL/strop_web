@@ -31,6 +31,7 @@ import { toast } from "sonner"
 
 import { StaffCreationDialog } from "@/components/team/staff-dialog"
 import { deactivateTeamMember, reactivateTeamMember } from "@/app/actions/team"
+import { useCapabilities } from "@/hooks/use-capabilities"
 
 interface TeamMember {
   id: string
@@ -50,6 +51,7 @@ interface TeamMember {
 
 export function TeamClient({ initialMembers }: { initialMembers: any[] }) {
   const router = useRouter()
+  const { can } = useCapabilities()
   const [activeTab, setActiveTab] = useState("staff")
   const [searchQuery, setSearchQuery] = useState("")
   const [isPending, startTransition] = useTransition()
@@ -98,7 +100,7 @@ export function TeamClient({ initialMembers }: { initialMembers: any[] }) {
             </p>
           </div>
           <div className="flex items-center gap-2">
-            <StaffCreationDialog />
+            {can('org.manage_staff') && <StaffCreationDialog />}
           </div>
         </div>
 
@@ -211,7 +213,7 @@ export function TeamClient({ initialMembers }: { initialMembers: any[] }) {
                                 <DropdownMenuItem>Editar perfil</DropdownMenuItem>
                                 <DropdownMenuItem>Gestionar accesos</DropdownMenuItem>
                                 <DropdownMenuSeparator />
-                                <DropdownMenuItem
+                                {can('org.manage_staff') && <DropdownMenuItem
                                   className="text-destructive focus:text-destructive"
                                   disabled={isPending}
                                   onClick={() => setConfirmTarget({
@@ -221,7 +223,7 @@ export function TeamClient({ initialMembers }: { initialMembers: any[] }) {
                                   })}
                                 >
                                   {member.is_active ? 'Revocar acceso' : 'Reactivar acceso'}
-                                </DropdownMenuItem>
+                                </DropdownMenuItem>}
                               </DropdownMenuContent>
                             </DropdownMenu>
                           </TableCell>

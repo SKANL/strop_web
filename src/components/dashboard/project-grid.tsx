@@ -1,8 +1,7 @@
-import { getProjects, getProjectFinancials } from '@/app/actions/projects'
+import { getProjects } from '@/app/actions/projects'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { Badge } from '@/components/ui/badge'
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Progress } from '@/components/ui/progress'
 import { Button } from '@/components/ui/button'
 import Link from 'next/link'
@@ -53,10 +52,13 @@ export async function ProjectGrid() {
           <TableBody>
             {projects.map((project) => {
               // eslint-disable-next-line @typescript-eslint/no-explicit-any
-              const incidentCount = (project.incidents?.[0] as any)?.count || 0
-              // TODO: replace with real financials from getProjectFinancials
-              const budgetUsed: number | null = null
-              const budgetHealth = budgetUsed === null ? null : budgetUsed > 80 ? 'critical' : budgetUsed > 60 ? 'warning' : 'good'
+              const incidents = (project.incidents as any[]) || []
+              const incidentCount = incidents.length
+              const moneyAtRisk = incidents
+                .filter((i: any) => i.status === 'OPEN' || i.status === 'IN_REVIEW')
+                .reduce((sum: number, i: any) => sum + (i.estimated_cost || 0), 0)
+              const budget = (project as any).contingency_budget || 0
+              const budgetUsed = budget > 0 ? Math.round((moneyAtRisk / budget) * 100) : 0
               
               return (
                 <TableRow key={project.id} className="cursor-pointer hover:bg-muted/50">
@@ -66,19 +68,19 @@ export async function ProjectGrid() {
                     </Link>
                   </TableCell>
                   <TableCell>
-                    {budgetUsed === null ? (
-                      <span className="text-xs text-muted-foreground italic">Sin datos</span>
+                    {budget === 0 ? (
+                      <span className="text-xs text-muted-foreground italic">Sin presupuesto</span>
                     ) : (
                       <div className="flex items-center gap-2">
-                        <Progress 
-                          value={budgetUsed} 
+                        <Progress
+                          value={Math.min(budgetUsed, 100)}
                           className="w-24 h-2"
-                          aria-label={`${budgetUsed}% del presupuesto usado`}
+                          aria-label={`${budgetUsed}% del presupuesto en riesgo`}
                         />
-                        <span className={`text-xs font-medium ${
-                          budgetHealth === 'critical' ? 'text-destructive' :
-                          budgetHealth === 'warning' ? 'text-yellow-600' :
-                          'text-green-600'
+                        <span className={`text-xs font-medium font-mono ${
+                          budgetUsed > 80 ? 'text-destructive' :
+                          budgetUsed > 60 ? 'text-yellow-600' :
+                          'text-emerald-600'
                         }`}>
                           {budgetUsed}%
                         </span>

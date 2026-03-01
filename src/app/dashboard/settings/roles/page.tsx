@@ -25,7 +25,8 @@ export default async function RolesPage() {
         description: r.description || "Sin descripción",
         isSystem: r.is_system_role,
         archetype: deriveArchetype(r.display_name || '', r.description || ''),
-        userCount: r.userCount ?? 0
+        userCount: r.userCount ?? 0,
+        permissions: Array.isArray(r.capabilities) ? r.capabilities : [],
     })) || []
 
     return <RolesClient initialRoles={roles} />

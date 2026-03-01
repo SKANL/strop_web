@@ -75,7 +75,7 @@ export function CrewInviteDialog({ projectName }: { projectName?: string }) {
   const getWhatsAppMessage = () => {
     return `👷‍♂️ *Acceso Strop SaaS*
     
-Hola ${formData.name}, te hemos dado acceso al proyecto *${projectName || "Torre Meriden"}*.
+Hola ${formData.name}, te hemos dado acceso al proyecto *${projectName || "este proyecto"}*.
 
 🔗 *Entra aquí:* strop.app/login
 👤 *Usuario:* ${credentials.username}

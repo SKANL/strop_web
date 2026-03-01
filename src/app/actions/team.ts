@@ -134,7 +134,7 @@ export async function inviteStaffMember(formData: {
  * Update team member role
  */
 export async function updateTeamMemberRole(userId: string, roleId: string) {
-  if (!await checkPermission('settings.edit')) {
+  if (!await checkPermission('org.manage_staff')) {
     return { data: null, error: 'No tienes permisos para modificar roles' }
   }
 
@@ -162,7 +162,7 @@ export async function updateTeamMemberRole(userId: string, roleId: string) {
  * Assign team member to projects
  */
 export async function assignToProjects(userId: string, projectIds: string[]) {
-  if (!await checkPermission('projects.edit')) {
+  if (!await checkPermission('project.manage_crew')) {
     return { data: null, error: 'No tienes permisos para asignar proyectos' }
   }
 
@@ -198,7 +198,7 @@ export async function assignToProjects(userId: string, projectIds: string[]) {
  * Deactivate team member
  */
 export async function deactivateTeamMember(userId: string) {
-  if (!await checkPermission('settings.edit')) {
+  if (!await checkPermission('org.manage_staff')) {
     return { data: null, error: 'No tienes permisos para desactivar usuarios' }
   }
 
@@ -284,6 +284,7 @@ export async function inviteCrewMember(formData: {
       email,
       full_name: formData.name,
       organization_id: userData.organization_id,
+      user_type: 'crew',
       is_active: true,
     } as any)
 
@@ -300,7 +301,7 @@ export async function inviteCrewMember(formData: {
  * Reactivate team member
  */
 export async function reactivateTeamMember(userId: string) {
-  if (!await checkPermission('settings.edit')) {
+  if (!await checkPermission('org.manage_staff')) {
     return { data: null, error: 'No tienes permisos para reactivar usuarios' }
   }
 

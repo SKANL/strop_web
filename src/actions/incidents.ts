@@ -217,3 +217,23 @@ export async function submitEvidenceAction(token: string, base64DataUrl: string)
         return { success: false, message: error.message || 'Error desconocido.' }
     }
 }
+
+export async function fetchProjectMembersAction(incidentId: string) {
+  try {
+    const { getProjectMembersForIncident } = await import('@/services/incidents-service')
+    const data = await getProjectMembersForIncident(incidentId)
+    return { success: true, data }
+  } catch (error: any) {
+    return { success: false, data: [], error: error.message }
+  }
+}
+
+export async function fetchAuditLogAction(incidentId: string) {
+  try {
+    const { getIncidentAuditLog } = await import('@/services/audit-service')
+    const data = await getIncidentAuditLog(incidentId)
+    return { success: true, data }
+  } catch (error: any) {
+    return { success: false, data: [], error: error.message }
+  }
+}

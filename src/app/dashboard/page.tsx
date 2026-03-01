@@ -23,12 +23,14 @@ export default async function DashboardPage() {
   // Fetch onboarding flags
   const { data: { user } } = await supabase.auth.getUser()
   let teamMemberCount = 0
+  let isCrew = false
   if (user) {
     const { data: userData } = await supabase
       .from("users")
-      .select("organization_id")
+      .select("organization_id, user_type")
       .eq("id", user.id)
       .single()
+    isCrew = userData?.user_type === "crew"
     if (userData?.organization_id) {
       const { count } = await supabase
         .from("users")
@@ -57,6 +59,12 @@ export default async function DashboardPage() {
   
   return (
     <div className="flex flex-col gap-4">
+      {isCrew && (
+        <div className="mx-6 mt-2 flex items-center gap-2 rounded-lg border border-amber-200 bg-amber-50 px-4 py-2.5 text-sm text-amber-800">
+          <span className="font-semibold">Vista Limitada</span>
+          <span className="text-amber-700">— Solo ves los proyectos e incidencias de tus asignaciones.</span>
+        </div>
+      )}
       <OnboardingChecklist
         hasProject={(kpiData?.totalProjectsCount ?? 0) > 0}
         hasTeamMember={teamMemberCount > 1}

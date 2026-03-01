@@ -92,7 +92,7 @@ export async function createRole(formData: {
   archetype: string
   permissions: string[]
 }) {
-  const hasPermission = await checkPermission('settings.edit') || await checkPermission('roles.create')
+  const hasPermission = await checkPermission('org.manage_roles')
   if (!hasPermission) {
     return { data: null, error: 'No tienes permisos para crear roles' }
   }
@@ -154,7 +154,7 @@ export async function updateRole(roleId: string, updates: {
   name?: string
   permissions?: string[]
 }) {
-  const hasPermission = await checkPermission('settings.edit') || await checkPermission('roles.edit')
+  const hasPermission = await checkPermission('org.manage_roles')
   if (!hasPermission) {
     return { data: null, error: 'No tienes permisos para editar roles' }
   }
@@ -211,7 +211,7 @@ export async function updateRole(roleId: string, updates: {
  * Delete a role
  */
 export async function deleteRole(roleId: string) {
-  const hasPermission = await checkPermission('settings.edit') || await checkPermission('roles.delete')
+  const hasPermission = await checkPermission('org.manage_roles')
   if (!hasPermission) {
     return { data: null, error: 'No tienes permisos para eliminar roles' }
   }

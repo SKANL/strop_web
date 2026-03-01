@@ -8,6 +8,8 @@ import { useEvidencePersistence } from "@/hooks/use-evidence-persistence"
 import { CameraCapture } from "@/components/public-link/camera-capture"
 import { submitEvidenceAction } from "@/actions/incidents"
 import { toast } from "sonner"
+import { createClient } from "@/lib/supabase/client"
+import { getStaticMapUrl, parseGpsCoords } from "@/lib/geoapify"
 
 type IncidentStatus = 'OPEN' | 'DRAFT' | 'IN_REVIEW' | 'CLOSED' | 'REJECTED'
 
@@ -21,6 +23,7 @@ interface PublicIncident {
   status: string // simplified from DB status enum
   solution_photo_url?: string | null
   folio_number: number
+  gps_coords?: any
 }
 
 export function PublicLinkClient({ 
@@ -42,9 +45,43 @@ export function PublicLinkClient({
 
   const [status, setStatus] = useState<IncidentStatus>(mapStatus(initialIncident.status))
   const [loading, setLoading] = useState(false)
-  
+  const [rejectionMessage, setRejectionMessage] = useState<string | null>(null)
+
   // Custom Hook for IDB Persistence
   const { draftPhoto, saveDraft, clearDraft } = useEvidencePersistence(token)
+
+  // Supabase Realtime for live status updates
+  useEffect(() => {
+    if (!initialIncident?.id) return
+
+    const supabase = createClient()
+    const channel = supabase
+      .channel(`public-link:${initialIncident.id}`)
+      .on(
+        "postgres_changes",
+        {
+          event: "UPDATE",
+          schema: "public",
+          table: "incidents",
+          filter: `id=eq.${initialIncident.id}`,
+        },
+        (payload) => {
+          const newStatus = (payload.new as any)?.status as string | undefined
+          if (newStatus === 'CLOSED') {
+            setStatus('CLOSED')
+          } else if (newStatus === 'REJECTED') {
+            setStatus('REJECTED')
+            setRejectionMessage('Tu reparación fue rechazada. Por favor revisa el motivo y vuelve a subir la foto.')
+          } else if (newStatus === 'OPEN' && status === 'IN_REVIEW') {
+            setStatus('OPEN')
+            setRejectionMessage('Tu reparación fue rechazada. Por favor revisa el motivo y vuelve a subir la foto.')
+          }
+        }
+      )
+      .subscribe()
+
+    return () => { supabase.removeChannel(channel) }
+  }, [initialIncident?.id]) // eslint-disable-line react-hooks/exhaustive-deps
 
   // Effect to check for drafts
   useEffect(() => {
@@ -133,6 +170,30 @@ export function PublicLinkClient({
                             <p className="text-sm text-muted-foreground flex items-center gap-2">
                                 📍 {initialIncident.location}
                             </p>
+                            {(() => {
+                              const coords = parseGpsCoords(initialIncident.gps_coords)
+                              if (!coords) return null
+                              return (
+                                <div className="rounded-lg overflow-hidden border shadow-sm">
+                                  <img
+                                    src={getStaticMapUrl(coords[0], coords[1], { width: 600, height: 180, zoom: 17 })}
+                                    alt="Ubicación del problema"
+                                    className="w-full h-35 object-cover"
+                                  />
+                                  <div className="px-3 py-1.5 bg-muted/50 flex items-center justify-between">
+                                    <p className="text-xs text-muted-foreground">Ubicación exacta</p>
+                                    <a
+                                      href={`https://www.google.com/maps/search/?api=1&query=${coords[1]},${coords[0]}`}
+                                      target="_blank"
+                                      rel="noopener noreferrer"
+                                      className="text-xs text-primary hover:underline font-medium"
+                                    >
+                                      Abrir en Maps ↗
+                                    </a>
+                                  </div>
+                                </div>
+                              )
+                            })()}
                         </div>
                    </div>
                 </>
@@ -176,8 +237,7 @@ export function PublicLinkClient({
                     <div className="space-y-2">
                         <h2 className="text-2xl font-bold text-red-700">Evidencia Rechazada</h2>
                         <p className="text-muted-foreground">
-                            El supervisor rechazó la evidencia enviada. Debes subir una nueva foto
-                            que muestre claramente la solución aplicada.
+                            {rejectionMessage || 'El supervisor rechazó la evidencia enviada. Debes subir una nueva foto\n                            que muestre claramente la solución aplicada.'}
                         </p>
                     </div>
                     <Button

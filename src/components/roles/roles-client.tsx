@@ -1,6 +1,7 @@
 "use client"
 
 import { useState } from "react"
+import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
@@ -9,6 +10,7 @@ import { RoleCard, Role } from "@/components/roles/role-card"
 import { RoleWizard } from "@/components/roles/role-wizard"
 
 export function RolesClient({ initialRoles = [] }: { initialRoles?: Role[] }) {
+    const router = useRouter()
     const [roles, setRoles] = useState<Role[]>(initialRoles)
     const [isWizardOpen, setIsWizardOpen] = useState(false)
     const [selectedRole, setSelectedRole] = useState<Role | null>(null)
@@ -22,6 +24,13 @@ export function RolesClient({ initialRoles = [] }: { initialRoles?: Role[] }) {
     const handleCreateRole = () => {
         setSelectedRole(null)
         setIsWizardOpen(true)
+    }
+
+    const handleWizardClose = (open: boolean) => {
+        setIsWizardOpen(open)
+        if (!open) {
+            router.refresh()
+        }
     }
 
     const filteredRoles = roles.filter(role => 
@@ -79,7 +88,7 @@ export function RolesClient({ initialRoles = [] }: { initialRoles?: Role[] }) {
 
             <RoleWizard 
                 open={isWizardOpen} 
-                onOpenChange={setIsWizardOpen} 
+                onOpenChange={handleWizardClose} 
                 roleToEdit={selectedRole}
             />
         </div>

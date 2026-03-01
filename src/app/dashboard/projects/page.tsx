@@ -35,7 +35,7 @@ export default async function ProjectsPage() {
           incidents: { critical: criticalCount, open: openCount },
           lastActivity: new Date(p.created_at).toLocaleDateString('es-MX'),
           superintendent: superName,
-          location: p.location || "Sin ubicación",
+          location: p.location_address || "Sin ubicación",
           status: (p.is_active ? "Activo" : "Finalizado") as "Activo" | "Pausado" | "Finalizado"
       }
   }) || []

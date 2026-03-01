@@ -25,6 +25,8 @@ import React, { useState } from "react"
 import { toast } from "sonner"
 import { Badge } from "@/components/ui/badge"
 import { createProject } from "@/app/actions/projects"
+import { AddressAutocomplete } from "@/components/ui/address-autocomplete"
+import type { GeoSuggestion } from "@/lib/geoapify"
 
 // Mock data removed - using passed 'staff' prop
 
@@ -41,6 +43,7 @@ export function ProjectSetupDrawer({
     const [projectName, setProjectName] = useState("")
     const [projectCode, setProjectCode] = useState("")
     const [address, setAddress] = useState("")
+    const [gpsCoords, setGpsCoords] = useState<[number, number] | null>(null) // [lng, lat]
     const [budget, setBudget] = useState("")
     const [startDate, setStartDate] = useState("")
     const [endDate, setEndDate] = useState("")
@@ -99,7 +102,9 @@ export function ProjectSetupDrawer({
                 superintendentId: superintendent,
                 is_active: true,
                 organization_id: '', // Will be overridden by server action
-            }),
+                location_gps: gpsCoords ? `POINT(${gpsCoords[0]} ${gpsCoords[1]})` : null,
+                location_address: address.trim() || null,
+            } as any),
             {
                 loading: 'Creando proyecto...',
                 success: (result: any) => {
@@ -109,6 +114,7 @@ export function ProjectSetupDrawer({
                     setProjectName("")
                     setProjectCode("")
                     setAddress("")
+                    setGpsCoords(null)
                     setBudget("")
                     setStartDate("")
                     setEndDate("")
@@ -127,7 +133,7 @@ export function ProjectSetupDrawer({
 
     return (
         <Sheet open={isOpen} onOpenChange={onClose}>
-            <SheetContent className="sm:max-w-[600px] w-full p-0 flex flex-col h-full overflow-hidden">
+            <SheetContent className="sm:max-w-150 w-full p-0 flex flex-col h-full overflow-hidden">
                 <SheetHeader className="p-6 pb-4 shrink-0 border-b">
                     <SheetTitle>Nuevo Proyecto</SheetTitle>
                     <SheetDescription>
@@ -219,15 +225,26 @@ export function ProjectSetupDrawer({
                             </h3>
                             
                             <div className="grid gap-2">
-                                <Label htmlFor="address">Dirección / Coordenadas</Label>
-                                <Input 
-                                    id="address" 
-                                    placeholder="Ej. Calle 60 Norte, Mérida"
+                                <Label htmlFor="address">Dirección</Label>
+                                <AddressAutocomplete
+                                    id="address"
                                     value={address}
-                                    onChange={(e) => setAddress(e.target.value)}
+                                    onChange={(val) => {
+                                        setAddress(val)
+                                        // Clear coords if user manually edits
+                                        if (gpsCoords) setGpsCoords(null)
+                                    }}
+                                    onSelect={(suggestion: GeoSuggestion) => {
+                                        setAddress(suggestion.label)
+                                        setGpsCoords([suggestion.lng, suggestion.lat])
+                                    }}
+                                    placeholder="Ej. Calle 60 Norte, Mérida, Yucatán"
                                 />
-                                <p className="text-xs text-muted-foreground">
-                                    Necesario para validar ubicación en app móvil
+                                <p className="text-xs text-muted-foreground flex items-center gap-1">
+                                    {gpsCoords 
+                                        ? <><span className="text-green-600 font-medium">📍 Coordenadas capturadas</span> ({gpsCoords[1].toFixed(5)}, {gpsCoords[0].toFixed(5)})</>
+                                        : 'Escribe para buscar y seleccionar la dirección exacta'
+                                    }
                                 </p>
                             </div>
 

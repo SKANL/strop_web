@@ -47,6 +47,7 @@ export function NavUser({
     name: string
     email: string
     avatar: string
+    isCrew?: boolean
   }
 }) {
   const { isMobile } = useSidebar()
@@ -70,7 +71,13 @@ export function NavUser({
               </Avatar>
               <div className="grid flex-1 text-left text-sm leading-tight">
                 <span className="truncate font-semibold">{user.name}</span>
-                <span className="truncate text-xs text-sidebar-foreground/60">{user.email}</span>
+                {user.isCrew ? (
+                  <span className="truncate text-xs">
+                    <span className="inline-flex items-center rounded-full bg-amber-100 px-1.5 py-0.5 text-[10px] font-medium text-amber-700 border border-amber-200">Externo</span>
+                  </span>
+                ) : (
+                  <span className="truncate text-xs text-sidebar-foreground/60">{user.email}</span>
+                )}
               </div>
               <ChevronsUpDown className="ml-auto size-4" aria-hidden="true" />
             </SidebarMenuButton>

@@ -39,7 +39,6 @@ import { LinkIcon, Check, X, Pencil, Inbox } from "lucide-react"
 import { toast } from "sonner"
 import { cn } from "@/lib/utils"
 import { updateIncidentCostAction, generatePublicLinkAction } from "@/actions/incidents"
-import { getLabelForPriority } from "@/lib/enum-labels"
 
 // Real data types derived from Supabase result
 // We can treat this as "any" for now or define a proper interface matching the query
@@ -49,13 +48,14 @@ interface IncidentRow {
   description: string
   location_detail: string | null
   status: "OPEN" | "IN_REVIEW" | "CLOSED" | "REJECTED" | "DRAFT"
-  priority: "LOW" | "MEDIUM" | "HIGH" | "CRITICAL"
+  priority: "NORMAL" | "URGENT" | "CRITICAL"
   actual_cost: number | null
   created_at: string
   project: { name: string } | null
   created_by_user: { full_name: string | null } | null
-  assigned_to_user: { full_name: string | null } | null
+  assigned_to_user: { full_name: string | null; email?: string | null } | null
   photos: { photo_url: string }[]
+  location_tag: string | null
 }
 
 // Helper to estimate time ago
@@ -176,11 +176,11 @@ export function GlobalIncidentsTable({
       ),
     },
     {
-      accessorKey: "location_detail",
+      accessorKey: "location_tag",
       header: "UBICACIÓN",
       cell: ({ row }) => (
         <Badge variant="outline" className="text-xs font-normal max-w-[150px] truncate">
-          {row.original.location_detail || 'N/A'}
+          {row.original.location_tag || 'N/A'}
         </Badge>
       ),
       size: 150,
@@ -189,16 +189,19 @@ export function GlobalIncidentsTable({
         id: "priority",
         header: "PRIORIDAD",
         accessorKey: "priority",
-        cell: ({ row }) => (
-            <Badge variant="secondary" className={cn("text-xs font-normal", {
-                "bg-red-100 text-red-700 dark:bg-red-950/40 dark:text-red-400": row.original.priority === 'CRITICAL',
-                "bg-orange-100 text-orange-700 dark:bg-orange-950/40 dark:text-orange-400": row.original.priority === 'HIGH',
-                "bg-yellow-100 text-yellow-700 dark:bg-yellow-950/40 dark:text-yellow-400": row.original.priority === 'MEDIUM',
-                "bg-blue-100 text-blue-700 dark:bg-blue-950/40 dark:text-blue-400": row.original.priority === 'LOW',
-            })}>
-                {getLabelForPriority(row.original.priority)}
-            </Badge>
-        ),
+        cell: ({ row }) => {
+            const priorityConfig: Record<string, { label: string; className: string }> = {
+                CRITICAL: { label: 'Crítica', className: 'bg-destructive/10 text-destructive border-destructive/20' },
+                URGENT:   { label: 'Urgente', className: 'bg-orange-50 text-orange-700 border-orange-200 dark:bg-orange-950/30 dark:text-orange-400' },
+                NORMAL:   { label: 'Normal',  className: 'bg-muted text-muted-foreground border-border' },
+            }
+            const cfg = priorityConfig[row.original.priority] ?? { label: row.original.priority, className: '' }
+            return (
+                <Badge variant="outline" className={cn("text-xs font-normal", cfg.className)}>
+                    {cfg.label}
+                </Badge>
+            )
+        },
         size: 100
     },
     {
@@ -304,7 +307,7 @@ export function GlobalIncidentsTable({
     let passesTabFilter = true
     switch (activeTab) {
       case "urgent":
-        passesTabFilter = incident.priority === 'CRITICAL' || incident.priority === 'HIGH'
+        passesTabFilter = incident.priority === 'CRITICAL' || incident.priority === 'URGENT'
         break
       case "pending":
         passesTabFilter = incident.status === "IN_REVIEW"
@@ -326,7 +329,7 @@ export function GlobalIncidentsTable({
       incident.folio_number?.toString().includes(searchLower) ||
       incident.description?.toLowerCase().includes(searchLower) ||
       incident.project?.name?.toLowerCase().includes(searchLower) ||
-      incident.location_detail?.toLowerCase().includes(searchLower) ||
+      incident.location_tag?.toLowerCase().includes(searchLower) ||
       incident.assigned_to_user?.full_name?.toLowerCase().includes(searchLower)
 
     return passesTabFilter && passesSearchFilter

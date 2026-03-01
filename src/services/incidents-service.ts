@@ -18,7 +18,7 @@ export type CreateIncidentParams = {
 export async function getIncidents(
   projectId?: string,
   page = 1,
-  pageSize = 10
+  pageSize = 100
 ) {
   const supabase = await getSupabaseClient()
   const from = (page - 1) * pageSize
@@ -26,7 +26,7 @@ export async function getIncidents(
 
   let query = supabase
     .from('incidents')
-    .select('*, project:projects(name), created_by_user:users!incidents_created_by_fkey(full_name), photos:incident_photos(photo_url, photo_type)', { count: 'exact' })
+    .select('*, project:projects(name), created_by_user:users!incidents_created_by_fkey(full_name), assigned_to_user:users!incidents_assigned_to_fkey(full_name, email), photos:incident_photos(photo_url, photo_type)', { count: 'exact' })
   
   if (projectId) {
     query = query.eq('project_id', projectId)
@@ -49,6 +49,7 @@ export async function getIncidentById(id: string) {
       *,
       project:projects(name),
       created_by_user:users!incidents_created_by_fkey(full_name),
+      assigned_to_user:users!incidents_assigned_to_fkey(full_name, email),
       photos:incident_photos(photo_url, photo_type)
     `)
     .eq('id', id)
@@ -188,4 +189,42 @@ export async function getIncidentByToken(token: string) {
 
   if (error) handleDbError(error)
   return data
+}
+
+export async function getProjectMembersForIncident(incidentId: string) {
+  const supabase = await getSupabaseClient()
+
+  // Get project_id from incident
+  const { data: incident, error: incError } = await supabase
+    .from('incidents')
+    .select('project_id')
+    .eq('id', incidentId)
+    .single()
+
+  if (incError || !incident?.project_id) return []
+
+  // Get members of that project
+  const { data, error } = await supabase
+    .from('project_members')
+    .select(`
+      user:users(
+        id,
+        full_name,
+        email,
+        role:roles(display_name)
+      )
+    `)
+    .eq('project_id', incident.project_id)
+
+  if (error || !data) return []
+
+  return data
+    .map((pm: any) => pm.user)
+    .filter(Boolean)
+    .map((u: any) => ({
+      id: u.id as string,
+      full_name: u.full_name as string | null,
+      email: u.email as string | null,
+      role_name: u.role?.display_name as string | null,
+    }))
 }

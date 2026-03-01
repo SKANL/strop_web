@@ -1,6 +1,7 @@
 "use server"
 
 import { createClient } from '@/lib/supabase/server'
+import { parseGpsCoords } from '@/lib/geoapify'
 
 export interface DashboardKPIs {
   risk: number
@@ -214,26 +215,8 @@ export async function getMapProjects(): Promise<MapProject[]> {
         
         // Parse coordinates
         let coords: [number, number] = [-99.1332, 19.4326] // Default to CDMX
-        try {
-            if (typeof p.location_gps === 'string') {
-                 // Check if it's "lat,lng" or JSON
-                 if (p.location_gps.includes(',')) {
-                    const [lat, lng] = p.location_gps.split(',').map(Number)
-                    coords = [lng, lat] // Map expects [lng, lat]
-                 } else {
-                    const parsed = JSON.parse(p.location_gps)
-                    if (Array.isArray(parsed)) coords = parsed as [number, number]
-                    else if (parsed.lat && parsed.lng) coords = [parsed.lng, parsed.lat]
-                 }
-            } else if (Array.isArray(p.location_gps)) {
-                coords = p.location_gps as [number, number]
-            } else if (typeof p.location_gps === 'object' && p.location_gps !== null) {
-                 const geo = p.location_gps as any
-                 if (geo.lat && geo.lng) coords = [geo.lng, geo.lat]
-            }
-        } catch (e) {
-            console.error('Error parsing coords for project', p.id, e)
-        }
+        const parsed = parseGpsCoords(p.location_gps)
+        if (parsed) coords = parsed
 
         return {
             id: p.id,

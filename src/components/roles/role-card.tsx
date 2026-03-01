@@ -20,6 +20,7 @@ export interface Role {
   isSystem: boolean
   archetype: RoleArchetype
   userCount: number
+  permissions?: string[]
 }
 
 interface RoleCardProps {
