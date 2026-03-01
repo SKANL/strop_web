@@ -24,6 +24,7 @@ export default async function DashboardPage() {
   const { data: { user } } = await supabase.auth.getUser()
   let teamMemberCount = 0
   let isCrew = false
+  let hasConfiguredRoles = false
   if (user) {
     const { data: userData } = await supabase
       .from("users")
@@ -32,11 +33,19 @@ export default async function DashboardPage() {
       .single()
     isCrew = userData?.user_type === "crew"
     if (userData?.organization_id) {
-      const { count } = await supabase
-        .from("users")
-        .select("id", { count: "exact", head: true })
-        .eq("organization_id", userData.organization_id)
-      teamMemberCount = count ?? 0
+      const [{ count: memberCount }, { count: roleCount }] = await Promise.all([
+        supabase
+          .from("users")
+          .select("id", { count: "exact", head: true })
+          .eq("organization_id", userData.organization_id),
+        supabase
+          .from("roles")
+          .select("id", { count: "exact", head: true })
+          .eq("organization_id", userData.organization_id)
+          .eq("is_system_role", false),
+      ])
+      teamMemberCount = memberCount ?? 0
+      hasConfiguredRoles = (roleCount ?? 0) > 0
     }
   }
 
@@ -69,7 +78,7 @@ export default async function DashboardPage() {
         hasProject={(kpiData?.totalProjectsCount ?? 0) > 0}
         hasTeamMember={teamMemberCount > 1}
         hasIncident={(kpiData?.incidentCount ?? 0) > 0}
-        hasConfiguredRoles={false}
+        hasConfiguredRoles={hasConfiguredRoles}
       />
       <DashboardClient 
         projectGrid={<ProjectGrid />}

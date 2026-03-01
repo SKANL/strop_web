@@ -1,9 +1,7 @@
 
 import { ProjectsTable } from "@/components/dashboard/projects-table"
 import { PageHeader } from "@/components/ui/page-header"
-import { Button } from "@/components/ui/button"
-import Link from "next/link"
-import { PlusCircle } from "lucide-react"
+import { CreateProjectButton } from "@/components/projects/create-project-button"
 
 import { getProjects } from "@/app/actions/projects"
 
@@ -45,14 +43,7 @@ export default async function ProjectsPage() {
         <PageHeader
           title="Directorio de Proyectos"
           subtitle="Gestiona, monitorea y crea nuevos proyectos inmobiliarios."
-          actions={
-            <Button asChild>
-              <Link href="/dashboard/projects/new">
-                <PlusCircle className="h-4 w-4 mr-2" />
-                Nuevo Proyecto
-              </Link>
-            </Button>
-          }
+          actions={<CreateProjectButton />}
         />
         <div className="flex-1 min-h-0">
              <ProjectsTable projects={projects} />

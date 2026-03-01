@@ -9,6 +9,7 @@ import {
   getFilteredRowModel,
   getSortedRowModel,
   SortingState,
+  RowSelectionState,
   useReactTable,
 } from "@tanstack/react-table"
 import {
@@ -23,6 +24,7 @@ import { Badge } from "@/components/ui/badge"
 import { StatusBadge } from "@/components/ui/status-badge"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
+import { Checkbox } from "@/components/ui/checkbox"
 import {
   Select,
   SelectContent,
@@ -35,10 +37,11 @@ import {
   HoverCardContent,
   HoverCardTrigger,
 } from "@/components/ui/hover-card"
-import { LinkIcon, Check, X, Pencil, Inbox } from "lucide-react"
+import { LinkIcon, Check, X, Pencil, Inbox, Lock, Download, Loader2 } from "lucide-react"
 import { toast } from "sonner"
 import { cn } from "@/lib/utils"
-import { updateIncidentCostAction, generatePublicLinkAction } from "@/actions/incidents"
+import { updateIncidentCostAction, generatePublicLinkAction, updateIncidentStatusAction } from "@/actions/incidents"
+import { useCapabilities } from "@/hooks/use-capabilities"
 
 // Real data types derived from Supabase result
 // We can treat this as "any" for now or define a proper interface matching the query
@@ -85,6 +88,64 @@ export function GlobalIncidentsTable({
   const [sorting, setSorting] = useState<SortingState>([])
   const [editingCost, setEditingCost] = useState<string | null>(null)
   const [tempCost, setTempCost] = useState<string>("")
+  const [rowSelection, setRowSelection] = useState<RowSelectionState>({})
+  const [bulkLoading, setBulkLoading] = useState(false)
+  const { can } = useCapabilities()
+  const canViewCosts = can('financial.view_costs')
+  const canEditCosts = can('financial.edit_costs')
+  const canShareLink = can('comm.share_public_link')
+  const canBulkUpdate = can('incident.close_operational') || can('incident.close_final')
+
+  const selectedIds = Object.keys(rowSelection).filter(k => rowSelection[k])
+
+  const handleBulkStatusChange = async (newStatus: string) => {
+    if (selectedIds.length === 0) return
+    setBulkLoading(true)
+    try {
+      await Promise.all(
+        selectedIds.map(idx => {
+          const incident = filteredIncidents[parseInt(idx)]
+          return incident
+            ? updateIncidentStatusAction(incident.id, newStatus as any)
+            : Promise.resolve()
+        })
+      )
+      toast.success(`${selectedIds.length} incidencia(s) actualizadas a "${newStatus}"`)
+      setRowSelection({})
+    } catch {
+      toast.error('Error al actualizar algunas incidencias')
+    } finally {
+      setBulkLoading(false)
+    }
+  }
+
+  const handleExportCSV = () => {
+    const selected = selectedIds.length > 0
+      ? selectedIds.map(idx => filteredIncidents[parseInt(idx)]).filter(Boolean)
+      : filteredIncidents
+
+    const header = ['Folio', 'Proyecto', 'Descripción', 'Ubicación', 'Estado', 'Prioridad', 'Costo', 'Asignado a', 'Fecha']
+    const rows = selected.map(i => [
+      `#${i.folio_number}`,
+      i.project?.name || '',
+      `"${(i.description || '').replace(/"/g, '""')}"`,
+      i.location_tag || '',
+      i.status,
+      i.priority,
+      i.actual_cost?.toString() || '',
+      i.assigned_to_user?.full_name || '',
+      new Date(i.created_at).toLocaleDateString('es-MX'),
+    ])
+    const csv = [header, ...rows].map(r => r.join(',')).join('\n')
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `incidencias_${new Date().toISOString().slice(0, 10)}.csv`
+    a.click()
+    URL.revokeObjectURL(url)
+    toast.success(`${selected.length} fila(s) exportadas`)
+  }
 
   const handleCostEdit = (incidentId: string, currentCost: number) => {
     setEditingCost(incidentId)
@@ -110,6 +171,26 @@ export function GlobalIncidentsTable({
   }
 
   const columns: ColumnDef<IncidentRow>[] = [
+    {
+      id: "select",
+      header: ({ table }) => (
+        <Checkbox
+          checked={table.getIsAllPageRowsSelected()}
+          onCheckedChange={(v) => table.toggleAllPageRowsSelected(!!v)}
+          aria-label="Seleccionar todos"
+        />
+      ),
+      cell: ({ row }) => (
+        <Checkbox
+          checked={row.getIsSelected()}
+          onCheckedChange={(v) => row.toggleSelected(!!v)}
+          aria-label="Seleccionar fila"
+          onClick={(e) => e.stopPropagation()}
+        />
+      ),
+      size: 40,
+      enableSorting: false,
+    },
     {
       accessorKey: "id", // Using ID for key but displaying folio
       header: "ID",
@@ -218,48 +299,53 @@ export function GlobalIncidentsTable({
       cell: ({ row }) => {
         const isEditing = editingCost === row.original.id
         const cost = row.original.actual_cost || 0
+
+        if (!canViewCosts) {
+          return (
+            <div className="text-right flex items-center justify-end gap-1 text-muted-foreground">
+              <Lock className="h-3 w-3" />
+              <span className="text-xs">—</span>
+            </div>
+          )
+        }
         
         return (
           <div className="text-right">
             {!isEditing ? (
               <div 
-                className="flex items-center justify-end gap-2 group cursor-pointer"
-                onClick={() => handleCostEdit(row.original.id, cost)}
+                className={cn("flex items-center justify-end gap-2", canEditCosts && "group cursor-pointer")}
+                onClick={() => canEditCosts && handleCostEdit(row.original.id, cost)}
               >
                 <span className="font-mono font-bold text-sm">
                   ${cost.toLocaleString('es-MX', { minimumFractionDigits: 2 })}
                 </span>
-                <Pencil className="h-3 w-3 text-muted-foreground opacity-40 group-hover:opacity-100 transition-opacity" />
+                {canEditCosts && <Pencil className="h-3 w-3 text-muted-foreground opacity-40 group-hover:opacity-100 transition-opacity" />}
               </div>
             ) : (
               <div className="flex items-center gap-1">
-                <Input
+                <input
                   type="number"
                   value={tempCost}
                   onChange={(e) => setTempCost(e.target.value)}
-                  className="h-7 w-24 text-right font-mono text-sm"
+                  className="h-7 w-24 text-right font-mono text-sm rounded border border-input px-2"
                   autoFocus
                   onKeyDown={(e) => {
                     if (e.key === 'Enter') handleCostSave(row.original.id)
                     if (e.key === 'Escape') handleCostCancel()
                   }}
                 />
-                <Button
-                  size="icon"
-                  variant="ghost"
-                  className="h-7 w-7"
+                <button
+                  className="h-7 w-7 flex items-center justify-center hover:bg-muted rounded"
                   onClick={() => handleCostSave(row.original.id)}
                 >
                   <Check className="h-3 w-3 text-green-600" />
-                </Button>
-                <Button
-                  size="icon"
-                  variant="ghost"
-                  className="h-7 w-7"
+                </button>
+                <button
+                  className="h-7 w-7 flex items-center justify-center hover:bg-muted rounded"
                   onClick={handleCostCancel}
                 >
                   <X className="h-3 w-3 text-destructive" />
-                </Button>
+                </button>
               </div>
             )}
           </div>
@@ -284,10 +370,12 @@ export function GlobalIncidentsTable({
         }
 
         return (
+          canShareLink ? (
           <Button 
             variant="ghost" 
             size="icon" 
             className="h-8 w-8"
+            title="Copiar enlace público"
             onClick={(e) => {
               e.stopPropagation()
               copyPublicLink()
@@ -295,6 +383,7 @@ export function GlobalIncidentsTable({
           >
             <LinkIcon className="h-4 w-4 text-muted-foreground" />
           </Button>
+          ) : null
         )
       },
       size: 100
@@ -341,14 +430,57 @@ export function GlobalIncidentsTable({
     getCoreRowModel: getCoreRowModel(),
     getSortedRowModel: getSortedRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
+    enableRowSelection: true,
     onSortingChange: setSorting,
+    onRowSelectionChange: setRowSelection,
     state: {
       sorting,
+      rowSelection,
     },
   })
 
   return (
-    <div className="rounded-lg border bg-card">
+    <div className="space-y-2">
+      {/* Floating bulk action bar */}
+      {selectedIds.length > 0 && (
+        <div className="flex items-center gap-3 rounded-lg border bg-primary text-primary-foreground px-4 py-2.5 shadow-lg animate-in slide-in-from-bottom-2">
+          <span className="text-sm font-semibold shrink-0">{selectedIds.length} seleccionada(s)</span>
+          <div className="flex-1" />
+          {canBulkUpdate && (
+            <Select onValueChange={handleBulkStatusChange} disabled={bulkLoading}>
+              <SelectTrigger className="h-8 w-44 bg-primary-foreground/10 border-primary-foreground/30 text-primary-foreground text-xs">
+                <SelectValue placeholder="Cambiar estado…" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="OPEN">Abrir</SelectItem>
+                <SelectItem value="IN_REVIEW">En Revisión</SelectItem>
+                <SelectItem value="CLOSED">Cerrar</SelectItem>
+                <SelectItem value="REJECTED">Rechazar</SelectItem>
+              </SelectContent>
+            </Select>
+          )}
+          <Button
+            variant="secondary"
+            size="sm"
+            className="h-8 gap-1.5 text-xs"
+            onClick={handleExportCSV}
+            disabled={bulkLoading}
+          >
+            {bulkLoading ? <Loader2 className="h-3 w-3 animate-spin" /> : <Download className="h-3 w-3" />}
+            Exportar CSV
+          </Button>
+          <Button
+            variant="ghost"
+            size="sm"
+            className="h-8 text-xs text-primary-foreground hover:bg-primary-foreground/20"
+            onClick={() => setRowSelection({})}
+          >
+            Deseleccionar
+          </Button>
+        </div>
+      )}
+
+      <div className="rounded-lg border bg-card">
       <Table>
         <TableHeader>
           {table.getHeaderGroups().map((headerGroup) => (
@@ -411,6 +543,7 @@ export function GlobalIncidentsTable({
           )}
         </TableBody>
       </Table>
+    </div>
     </div>
   )
 }

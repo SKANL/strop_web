@@ -31,9 +31,11 @@ import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { StatusBadge } from "@/components/ui/status-badge"
-import { Edit2, Link as LinkIcon } from "lucide-react"
+import { Edit2, Link as LinkIcon, Lock, MapPinOff } from "lucide-react"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { toast } from "sonner"
+import { useCapabilities } from "@/hooks/use-capabilities"
+import { parseGpsCoords, haversineMeters } from "@/lib/geoapify"
 
 type Incident = Database['public']['Tables']['incidents']['Row'] & {
   created_by_user?: {
@@ -50,17 +52,28 @@ type Incident = Database['public']['Tables']['incidents']['Row'] & {
 
 interface IncidentTableClientProps {
   incidents: Incident[]
+  projectLocationGps?: any
+  projectGeofenceRadius?: number | null
 }
 
 // Safe Cost Input Component
-function SafeCostInput({ incidentId, value, onSave }: {
+function SafeCostInput({ incidentId, value, canEdit, onSave }: {
   incidentId: string
   value: number | null
+  canEdit: boolean
   onSave?: (newValue: number) => void
 }) {
   const [open, setOpen] = React.useState(false)
   const [tempValue, setTempValue] = React.useState(value?.toString() || "")
   const [isLoading, setIsLoading] = React.useState(false)
+
+  if (!canEdit) {
+    return (
+      <span className="text-sm font-mono text-muted-foreground">
+        {value ? `$${value.toLocaleString()}` : "—"}
+      </span>
+    )
+  }
 
   const handleSave = async () => {
     setIsLoading(true)
@@ -110,9 +123,29 @@ function SafeCostInput({ incidentId, value, onSave }: {
   )
 }
 
-export function IncidentTableClient({ incidents }: IncidentTableClientProps) {
+export function IncidentTableClient({ incidents, projectLocationGps, projectGeofenceRadius }: IncidentTableClientProps) {
   const [sorting, setSorting] = React.useState<SortingState>([])
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([])
+  const { can } = useCapabilities()
+  const canViewCosts = can('financial.view_costs')
+  const canEditCosts = can('financial.edit_costs')
+  const canShareLink = can('comm.share_public_link')
+
+  // Pre-parse project center for geofencing
+  const projectCenter = React.useMemo(
+    () => parseGpsCoords(projectLocationGps),
+    [projectLocationGps]
+  )
+
+  const isOutsideGeofence = React.useCallback(
+    (incidentGps: any): boolean => {
+      if (!projectCenter || !projectGeofenceRadius || projectGeofenceRadius <= 0) return false
+      const incidentCoords = parseGpsCoords(incidentGps)
+      if (!incidentCoords) return false
+      return haversineMeters(projectCenter, incidentCoords) > projectGeofenceRadius
+    },
+    [projectCenter, projectGeofenceRadius]
+  )
 
   const handleCopyLink = async (incidentId: string) => {
     const result = await generatePublicLinkAction(incidentId)
@@ -175,7 +208,20 @@ export function IncidentTableClient({ incidents }: IncidentTableClientProps) {
     {
       accessorKey: "location_tag",
       header: "UBICACIÓN",
-      cell: ({ row }) => row.original.location_tag || "—",
+      cell: ({ row }) => {
+        const outside = isOutsideGeofence(row.original.gps_coords)
+        return (
+          <div className="flex items-center gap-1.5">
+            <span>{row.original.location_tag || "—"}</span>
+            {outside && (
+              <Badge variant="outline" className="text-orange-600 border-orange-300 bg-orange-50 text-[10px] px-1 py-0 gap-0.5 shrink-0">
+                <MapPinOff className="h-2.5 w-2.5" />
+                Fuera de zona
+              </Badge>
+            )}
+          </div>
+        )
+      },
     },
     {
       accessorKey: "assigned_to_user",
@@ -189,27 +235,34 @@ export function IncidentTableClient({ incidents }: IncidentTableClientProps) {
     },
     {
       accessorKey: "actual_cost",
-      header: "Cost",
-      cell: ({ row }) => (
-        <SafeCostInput
-          incidentId={row.original.id}
-          value={row.original.actual_cost}
-        />
-      ),
+      header: "COSTO",
+      cell: ({ row }) => {
+        if (!canViewCosts) {
+          return <Lock className="h-4 w-4 text-muted-foreground" />
+        }
+        return (
+          <SafeCostInput
+            incidentId={row.original.id}
+            value={row.original.actual_cost}
+            canEdit={canEditCosts}
+          />
+        )
+      },
     },
-    {
+    ...(canShareLink ? [{
       id: "actions",
-      header: "Actions",
-      cell: ({ row }) => (
+      header: "Acciones",
+      cell: ({ row }: { row: any }) => (
         <Button
           variant="ghost"
           size="sm"
           onClick={() => handleCopyLink(row.original.id)}
+          title="Copiar enlace de resolución"
         >
           <LinkIcon className="h-4 w-4" />
         </Button>
       ),
-    },
+    }] : []),
   ]
 
   const table = useReactTable({

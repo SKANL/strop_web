@@ -110,7 +110,7 @@ export async function getProjectById(projectId: string) {
 /**
  * Create a new project
  */
-export async function createProject(formData: ProjectInsert & { superintendentId?: string }) {
+export async function createProject(formData: ProjectInsert & { superintendentId?: string; coverPhotoBase64?: string; coverPhotoMime?: string }) {
   if (!await checkPermission('project.create')) {
     return { data: null, error: 'No tienes permisos para crear proyectos' }
   }
@@ -134,8 +134,8 @@ export async function createProject(formData: ProjectInsert & { superintendentId
     return { data: null, error: 'User not found' }
   }
 
-  // Separate superintendentId from project data
-  const { superintendentId, ...projectData } = formData
+  // Separate non-DB fields from project data
+  const { superintendentId, coverPhotoBase64, coverPhotoMime, ...projectData } = formData
 
   const { data: project, error } = await supabase
     .from('projects')
@@ -149,6 +149,28 @@ export async function createProject(formData: ProjectInsert & { superintendentId
   if (error) {
     console.error('Error creating project:', error)
     return { data: null, error: error.message }
+  }
+
+  // Upload cover photo if provided
+  if (coverPhotoBase64 && coverPhotoMime) {
+    try {
+      const base64Data = coverPhotoBase64.replace(/^data:[^;]+;base64,/, '')
+      const buffer = Buffer.from(base64Data, 'base64')
+      const ext = coverPhotoMime.split('/')[1] || 'jpg'
+      const path = `${project.id}/cover.${ext}`
+      const { data: uploadData, error: uploadError } = await supabase.storage
+        .from('project-covers')
+        .upload(path, buffer, { contentType: coverPhotoMime, upsert: true })
+      if (!uploadError && uploadData) {
+        const { data: { publicUrl } } = supabase.storage.from('project-covers').getPublicUrl(path)
+        await supabase.from('projects').update({ cover_photo_url: publicUrl }).eq('id', project.id)
+        project.cover_photo_url = publicUrl
+      } else {
+        console.error('Error uploading cover photo:', uploadError)
+      }
+    } catch (e) {
+      console.error('Cover photo upload failed:', e)
+    }
   }
 
   // Assign superintendent if provided

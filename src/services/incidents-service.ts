@@ -50,7 +50,8 @@ export async function getIncidentById(id: string) {
       project:projects(name),
       created_by_user:users!incidents_created_by_fkey(full_name),
       assigned_to_user:users!incidents_assigned_to_fkey(full_name, email),
-      photos:incident_photos(photo_url, photo_type)
+      photos:incident_photos(photo_url, photo_type),
+      audit_logs(id, action, old_value, new_value, comment, timestamp)
     `)
     .eq('id', id)
     .single()

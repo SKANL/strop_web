@@ -30,8 +30,14 @@ import {
   X,
   Loader2,
   Copy,
-  MessageSquare
+  MessageSquare,
+  XCircle,
+  Volume2,
+  AlertOctagon,
+  RefreshCw,
+  RotateCcw
 } from "lucide-react"
+import { Textarea } from "@/components/ui/textarea"
 import { toast } from "sonner"
 import { cn } from "@/lib/utils"
 import { fetchIncidentByIdAction, updateIncidentCostAction, updateIncidentStatusAction, assignIncidentAction, fetchProjectMembersAction } from "@/actions/incidents"
@@ -57,6 +63,9 @@ export function IncidentDetailDrawer({
   const [isAssigning, setIsAssigning] = useState(false)
   const [showWhatsAppCopy, setShowWhatsAppCopy] = useState(false)
   const [showAuditLog, setShowAuditLog] = useState(false)
+  const [showRejectConfirm, setShowRejectConfirm] = useState(false)
+  const [rejectReason, setRejectReason] = useState('')
+  const [isRejecting, setIsRejecting] = useState(false)
   const { can } = useCapabilities()
 
   useEffect(() => {
@@ -94,6 +103,27 @@ export function IncidentDetailDrawer({
     toast.success("Abriendo WhatsApp...")
   }
 
+  const handleRejectIncident = async () => {
+    if (!incident) return
+    if (!rejectReason.trim()) {
+      toast.error('Debes indicar el motivo del rechazo')
+      return
+    }
+    setIsRejecting(true)
+    toast.loading('Rechazando...')
+    const result = await updateIncidentStatusAction(incident.id, 'REJECTED', rejectReason.trim())
+    toast.dismiss()
+    setIsRejecting(false)
+    if (result.success) {
+      toast.success(`Incidencia #${incident.folio_number} rechazada`)
+      setShowRejectConfirm(false)
+      setRejectReason('')
+      onClose()
+    } else {
+      toast.error(result.message || 'Error al rechazar')
+    }
+  }
+
   const handleCloseIncident = async () => {
     if (!incident) return
     if (!finalCost) {
@@ -127,6 +157,19 @@ export function IncidentDetailDrawer({
     } else {
         toast.success(`Incidencia #${incident.folio_number} cerrada exitosamente`)
         onClose()
+    }
+  }
+
+  const handleReopenIncident = async () => {
+    if (!incident) return
+    toast.loading("Reabriendo incidencia...")
+    const result = await updateIncidentStatusAction(incident.id, 'OPEN')
+    toast.dismiss()
+    if (!result.success) {
+      toast.error("Error al reabrir incidencia: " + result.message)
+    } else {
+      toast.success(`Incidencia #${incident.folio_number} reabierta — pendiente de nueva reparación`)
+      onClose()
     }
   }
 
@@ -214,13 +257,16 @@ export function IncidentDetailDrawer({
                     {incident.description}
                 </SheetDescription>
                 </div>
+                {can('comm.share_public_link') && (
                 <Button
-                variant="outline"
-                size="icon"
-                onClick={handleShareWhatsApp}
+                  variant="outline"
+                  size="icon"
+                  onClick={handleShareWhatsApp}
+                  title="Compartir vía WhatsApp"
                 >
-                <Share2 className="h-4 w-4" />
+                  <Share2 className="h-4 w-4" />
                 </Button>
+              )}
             </div>
 
             {/* Meta Info */}
@@ -238,12 +284,14 @@ export function IncidentDetailDrawer({
                 <MapPin className="h-4 w-4 text-muted-foreground" />
                 <span className="font-medium">{incident.location_tag || 'Sin ubicación'}</span>
                 </div>
+                {can('financial.view_costs') && (
                 <div className="flex items-center gap-2 text-sm">
                 <DollarSign className="h-4 w-4 text-muted-foreground" />
                 <span className="font-mono font-bold">
                     ${(incident.actual_cost || incident.estimated_cost || 0).toLocaleString('es-MX', { minimumFractionDigits: 2 })}
                 </span>
                 </div>
+                )}
             </div>
             </SheetHeader>
 
@@ -271,6 +319,17 @@ export function IncidentDetailDrawer({
                 </div>
               )
             })()}
+
+            {/* REJECTED Banner */}
+            {incident.status === 'REJECTED' && incident.rejection_reason && (
+              <div className="mx-6 my-3 flex items-start gap-3 rounded-lg border-2 border-destructive/40 bg-destructive/8 px-4 py-3">
+                <AlertOctagon className="h-5 w-5 text-destructive shrink-0 mt-0.5" />
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-semibold text-destructive">Reparación Rechazada</p>
+                  <p className="text-sm text-destructive/80 mt-0.5">{incident.rejection_reason}</p>
+                </div>
+              </div>
+            )}
 
             {/* Scrollable Content */}
             <ScrollArea className="flex-1 px-6 py-4">
@@ -343,6 +402,22 @@ export function IncidentDetailDrawer({
                 </div>
 
                 <Separator />
+
+                {/* Audio Player */}
+                {incident.audio_url && (
+                  <div className="space-y-3">
+                    <h3 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">Nota de Voz</h3>
+                    <div className="flex items-center gap-3 rounded-lg border bg-muted/30 p-3">
+                      <Volume2 className="h-4 w-4 text-muted-foreground shrink-0" />
+                      <audio
+                        controls
+                        src={incident.audio_url}
+                        className="flex-1 h-8"
+                        style={{ minWidth: 0 }}
+                      />
+                    </div>
+                  </div>
+                )}
 
                 {/* Assign Section */}
                 {can('incident.assign') && (
@@ -419,8 +494,11 @@ export function IncidentDetailDrawer({
 
                 <Separator />
 
-                {/* Closure Zone - Only for Open/InReview */}
+                {/* Closure Zone - Only for non-CLOSED incidents where user has actions */}
                 {incident.status !== 'CLOSED' && (
+                  can('incident.close_final') || can('incident.close_operational') ||
+                  can('financial.edit_costs') || can('financial.manage_chargebacks')
+                ) && (
                 <div className="space-y-4 p-4 rounded-lg border-2 border-dashed border-primary/30 bg-primary/5">
                 <div className="flex items-center gap-2">
                     <div className="h-2 w-2 rounded-full bg-primary animate-pulse" />
@@ -473,8 +551,8 @@ export function IncidentDetailDrawer({
                 </div>
                 )}
 
-                {/* Close Button */}
-                {(can('incident.close_final') || can('incident.close_operational')) && (
+                {/* Close Button — hidden for REJECTED (use Reabrir instead) */}
+                {incident.status !== 'REJECTED' && (can('incident.close_final') || can('incident.close_operational')) && (
                 <Button 
                     className="w-full h-12 text-base font-semibold"
                     onClick={() => setShowConfirmClose(true)}
@@ -482,6 +560,64 @@ export function IncidentDetailDrawer({
                     <CheckCircle2 className="h-5 w-5 mr-2" />
                     Cerrar Incidencia
                 </Button>
+                )}
+
+                {/* Reabrir Button — only for REJECTED incidents */}
+                {incident.status === 'REJECTED' && can('incident.close_operational') && (
+                <Button
+                    variant="outline"
+                    className="w-full h-12 text-base font-semibold border-amber-500/50 text-amber-600 hover:bg-amber-50 dark:hover:bg-amber-950/30"
+                    onClick={handleReopenIncident}
+                >
+                    <RotateCcw className="h-5 w-5 mr-2" />
+                    Reabrir Incidencia
+                </Button>
+                )}
+
+                {/* Reject Button - only for IN_REVIEW incidents */}
+                {incident.status === 'IN_REVIEW' && can('incident.close_operational') && (
+                  <div className="mt-3 space-y-2">
+                    {!showRejectConfirm ? (
+                      <Button
+                        variant="outline"
+                        className="w-full border-destructive/50 text-destructive hover:bg-destructive/10"
+                        onClick={() => setShowRejectConfirm(true)}
+                      >
+                        <XCircle className="h-4 w-4 mr-2" />
+                        Rechazar Reparación
+                      </Button>
+                    ) : (
+                      <div className="rounded-lg border border-destructive/30 bg-destructive/5 p-3 space-y-3">
+                        <p className="text-sm font-semibold text-destructive">Motivo del rechazo</p>
+                        <Textarea
+                          placeholder="Ej: La fuga sigue activa, se requiere nueva intervención..."
+                          className="text-sm"
+                          rows={3}
+                          value={rejectReason}
+                          onChange={(e) => setRejectReason(e.target.value)}
+                        />
+                        <div className="flex gap-2">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="flex-1"
+                            onClick={() => { setShowRejectConfirm(false); setRejectReason('') }}
+                          >
+                            Cancelar
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="destructive"
+                            className="flex-1"
+                            disabled={isRejecting || !rejectReason.trim()}
+                            onClick={handleRejectIncident}
+                          >
+                            {isRejecting ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Confirmar rechazo'}
+                          </Button>
+                        </div>
+                      </div>
+                    )}
+                  </div>
                 )}
                 </div>
                 )}

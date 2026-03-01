@@ -12,9 +12,9 @@ const IncidentSchema = z.object({
   estimated_cost: z.number().optional()
 })
 
-export async function fetchIncidentsAction(projectId?: string, page: number = 1) {
+export async function fetchIncidentsAction(projectId?: string, page: number = 1, pageSize: number = 100) {
   try {
-    const { data, count } = await getIncidents(projectId, page)
+    const { data, count } = await getIncidents(projectId, page, pageSize)
     return { success: true, data, count }
   } catch (error: any) {
     return { success: false, error: error.message }
@@ -77,22 +77,33 @@ export async function createIncidentAction(prevState: any, formData: FormData) {
 }
 
 export async function updateIncidentStatusAction(incidentId: string, status: 'OPEN' | 'IN_REVIEW' | 'CLOSED' | 'REJECTED', comment?: string, cost?: number) {
-    // Permission check should be done here or in service. Service doesn't check permissions currently.
-    // Ideally we assume service is raw data access and action enforces permissions?
-    // User said "Abstract Backend", usually service layer handles biz logic including permissions OR action layer handles it.
-    // The old action handled permissions. I'll add them here using the helper.
-    
-    // Import helper dynamically or from updated file
-    // const { checkPermission } = await import('@/lib/auth/permissions') 
-    // Wait, dynamic import might be slow.
-    // For now, I'll assume permissions are handled.
-    
-    // TODO: Add permission checks
-    
     try {
+        const { checkPermission } = await import('@/lib/auth/permissions')
+
+        // Enforce RBAC per transition
+        if (status === 'CLOSED') {
+            const canCloseFinal = await checkPermission('incident.close_final')
+            const canCloseOp   = await checkPermission('incident.close_operational')
+            if (!canCloseFinal && !canCloseOp) {
+                return { success: false, message: 'Sin permiso para cerrar incidencias.' }
+            }
+        } else if (status === 'REJECTED') {
+            if (!(await checkPermission('incident.close_operational'))) {
+                return { success: false, message: 'Sin permiso para rechazar incidencias.' }
+            }
+            if (!comment?.trim()) {
+                return { success: false, message: 'El motivo de rechazo es obligatorio.' }
+            }
+        } else if (status === 'OPEN') {
+            // Reopen — same capability as operational close
+            if (!(await checkPermission('incident.close_operational'))) {
+                return { success: false, message: 'Sin permiso para reabrir incidencias.' }
+            }
+        }
+
         const { updateIncident } = await import('@/services/incidents-service')
         await updateIncident(incidentId, { status, rejection_reason: comment, actual_cost: cost })
-        revalidatePath('/incidents')
+        revalidatePath('/dashboard/incidents')
         return { success: true }
     } catch (error: any) {
         return { success: false, message: error.message }

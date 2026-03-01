@@ -3,16 +3,18 @@
 import { useState, useMemo } from "react"
 import type { Database } from "@/types/supabase"
 import { IncidentTableClient } from "@/components/projects/incident-table-client"
+import { FinancialHeader } from "@/components/projects/financial-header"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
-import { Search, Users, AlertTriangle, Building2, MapPin as MapPinIcon } from "lucide-react"
+import { Search, Users, AlertTriangle, Building2, MapPin as MapPinIcon, Pencil } from "lucide-react"
 import { getStaticMapUrl, parseGpsCoords } from "@/lib/geoapify"
 import { CrewInviteDialog } from "@/components/team/crew-invite-dialog"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
 import Link from "next/link"
+import { ProjectSetupDrawer } from "@/components/dashboard/project-setup-drawer"
 
 type Project = Database['public']['Tables']['projects']['Row']
 type Incident = Database['public']['Tables']['incidents']['Row'] & {
@@ -41,6 +43,7 @@ export function ProjectClient({
     const [activeFilter, setActiveFilter] = useState("all")
     const [searchQuery, setSearchQuery] = useState("")
     const [activeTab, setActiveTab] = useState("incidents")
+    const [editOpen, setEditOpen] = useState(false)
 
     const incidents = useMemo(() => {
         let filtered = allIncidents
@@ -80,6 +83,7 @@ export function ProjectClient({
             </div>
 
             <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1 flex flex-col overflow-hidden">
+              <FinancialHeader incidents={allIncidents} contingencyBudget={project.contingency_budget} />
               <div className="border-b">
                 <TabsList>
                   <TabsTrigger value="incidents" className="gap-2">
@@ -124,7 +128,11 @@ export function ProjectClient({
 
                 <div className="flex-1 min-h-0 overflow-hidden rounded-md border shadow-sm bg-background">
                     <div className="h-full overflow-auto">
-                         <IncidentTableClient incidents={incidents} />
+                         <IncidentTableClient
+                           incidents={incidents}
+                           projectLocationGps={(project as any).location_gps}
+                           projectGeofenceRadius={(project as any).geofence_radius_meters}
+                         />
                     </div>
                 </div>
               </TabsContent>
@@ -260,12 +268,62 @@ export function ProjectClient({
 
               <TabsContent value="settings" className="pt-4 data-[state=inactive]:hidden">
                 <Card>
-                  <CardHeader>
-                    <CardTitle>Configuracion del Proyecto</CardTitle>
-                    <CardDescription>Proximamente: Editar detalles, ubicacion y notificaciones.</CardDescription>
+                  <CardHeader className="flex flex-row items-center justify-between">
+                    <div>
+                      <CardTitle>Configuración del Proyecto</CardTitle>
+                      <CardDescription>Nombre, ubicación, fechas y fondo de contingencia.</CardDescription>
+                    </div>
+                    <Button variant="outline" size="sm" onClick={() => setEditOpen(true)} className="gap-2">
+                      <Pencil className="h-4 w-4" />
+                      Editar
+                    </Button>
                   </CardHeader>
+                  <CardContent className="grid gap-3 text-sm">
+                    <div className="flex justify-between">
+                      <span className="text-muted-foreground">Nombre</span>
+                      <span className="font-medium">{project.name}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-muted-foreground">Dirección</span>
+                      <span className="font-medium">{(project as any).location_address || "—"}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-muted-foreground">Inicio</span>
+                      <span className="font-medium">{project.start_date ? new Date(project.start_date).toLocaleDateString('es-MX') : "—"}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-muted-foreground">Fin</span>
+                      <span className="font-medium">{project.end_date ? new Date(project.end_date).toLocaleDateString('es-MX') : "—"}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-muted-foreground">Fondo</span>
+                      <span className="font-medium font-mono">{project.contingency_budget != null ? `$${Number(project.contingency_budget).toLocaleString('es-MX')}` : "—"}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-muted-foreground">Geofencing</span>
+                      <Badge variant={(project as any).geofence_radius_meters ? "default" : "secondary"}>
+                        {(project as any).geofence_radius_meters ? "Activo" : "Inactivo"}
+                      </Badge>
+                    </div>
+                  </CardContent>
                 </Card>
               </TabsContent>
+
+              {/* Edit project drawer */}
+              <ProjectSetupDrawer
+                isOpen={editOpen}
+                onClose={() => setEditOpen(false)}
+                initialData={{
+                  id: project.id,
+                  name: project.name,
+                  contingency_budget: project.contingency_budget,
+                  start_date: project.start_date,
+                  end_date: project.end_date,
+                  location_address: (project as any).location_address,
+                  location_gps: (project as any).location_gps,
+                  geofence_radius_meters: (project as any).geofence_radius_meters,
+                }}
+              />
             </Tabs>
         </div>
     )

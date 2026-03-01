@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useTransition } from "react"
 import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -8,6 +8,9 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Plus, Search, SlidersHorizontal } from "lucide-react"
 import { RoleCard, Role } from "@/components/roles/role-card"
 import { RoleWizard } from "@/components/roles/role-wizard"
+import { ConfirmDialog } from "@/components/ui/confirm-dialog"
+import { toast } from "sonner"
+import { deleteRole } from "@/app/actions/roles"
 
 export function RolesClient({ initialRoles = [] }: { initialRoles?: Role[] }) {
     const router = useRouter()
@@ -15,6 +18,8 @@ export function RolesClient({ initialRoles = [] }: { initialRoles?: Role[] }) {
     const [isWizardOpen, setIsWizardOpen] = useState(false)
     const [selectedRole, setSelectedRole] = useState<Role | null>(null)
     const [searchQuery, setSearchQuery] = useState("")
+    const [deleteTarget, setDeleteTarget] = useState<Role | null>(null)
+    const [isPending, startTransition] = useTransition()
 
     const handleEditRole = (role: Role) => {
         setSelectedRole(role)
@@ -31,6 +36,25 @@ export function RolesClient({ initialRoles = [] }: { initialRoles?: Role[] }) {
         if (!open) {
             router.refresh()
         }
+    }
+
+    const handleDeleteRole = (role: Role) => {
+        setDeleteTarget(role)
+    }
+
+    const handleConfirmDelete = () => {
+        if (!deleteTarget) return
+        startTransition(async () => {
+            const result = await deleteRole(deleteTarget.id)
+            if (result.error) {
+                toast.error(result.error)
+            } else {
+                toast.success(`Rol "${deleteTarget.name}" eliminado`)
+                setRoles(prev => prev.filter(r => r.id !== deleteTarget.id))
+                router.refresh()
+            }
+            setDeleteTarget(null)
+        })
     }
 
     const filteredRoles = roles.filter(role => 
@@ -76,13 +100,13 @@ export function RolesClient({ initialRoles = [] }: { initialRoles?: Role[] }) {
                 </div>
 
                 <TabsContent value="all" className="mt-0">
-                    <RolesGrid roles={filteredRoles} onEdit={handleEditRole} onCreate={handleCreateRole} />
+                    <RolesGrid roles={filteredRoles} onEdit={handleEditRole} onDelete={handleDeleteRole} onCreate={handleCreateRole} />
                 </TabsContent>
                 <TabsContent value="system" className="mt-0">
-                    <RolesGrid roles={filteredRoles.filter(r => r.isSystem)} onEdit={handleEditRole} onCreate={handleCreateRole} />
+                    <RolesGrid roles={filteredRoles.filter(r => r.isSystem)} onEdit={handleEditRole} onDelete={handleDeleteRole} onCreate={handleCreateRole} />
                 </TabsContent>
                 <TabsContent value="custom" className="mt-0">
-                     <RolesGrid roles={filteredRoles.filter(r => !r.isSystem)} onEdit={handleEditRole} onCreate={handleCreateRole} />
+                     <RolesGrid roles={filteredRoles.filter(r => !r.isSystem)} onEdit={handleEditRole} onDelete={handleDeleteRole} onCreate={handleCreateRole} />
                 </TabsContent>
             </Tabs>
 
@@ -91,11 +115,21 @@ export function RolesClient({ initialRoles = [] }: { initialRoles?: Role[] }) {
                 onOpenChange={handleWizardClose} 
                 roleToEdit={selectedRole}
             />
+
+            <ConfirmDialog
+                open={deleteTarget !== null}
+                onOpenChange={(open) => { if (!open) setDeleteTarget(null) }}
+                title={`¿Eliminar rol "${deleteTarget?.name}"?`}
+                description="Esta acción es permanente. Asegúrate de que ningún usuario esté usando este rol antes de eliminarlo."
+                confirmLabel="Eliminar rol"
+                variant="destructive"
+                onConfirm={handleConfirmDelete}
+            />
         </div>
     )
 }
 
-function RolesGrid({ roles, onEdit, onCreate }: { roles: Role[], onEdit: (role: Role) => void, onCreate: () => void }) {
+function RolesGrid({ roles, onEdit, onDelete, onCreate }: { roles: Role[], onEdit: (role: Role) => void, onDelete: (role: Role) => void, onCreate: () => void }) {
     if (roles.length === 0) {
         return (
             <div className="flex flex-col items-center justify-center py-16 text-center border-2 border-dashed rounded-xl border-muted-foreground/20 bg-muted/5">
@@ -119,7 +153,8 @@ function RolesGrid({ roles, onEdit, onCreate }: { roles: Role[], onEdit: (role: 
                 <RoleCard 
                     key={role.id} 
                     role={role} 
-                    onEdit={onEdit} 
+                    onEdit={onEdit}
+                    onDelete={onDelete}
                 />
             ))}
             

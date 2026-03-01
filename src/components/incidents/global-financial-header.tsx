@@ -3,9 +3,12 @@
 import { Card } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Progress } from "@/components/ui/progress"
-import { TrendingUp, TrendingDown, AlertTriangle, CheckCircle2 } from "lucide-react"
+import { TrendingUp, TrendingDown, AlertTriangle, CheckCircle2, Lock } from "lucide-react"
+import { useCapabilities } from "@/hooks/use-capabilities"
 
 export function GlobalFinancialHeader({ incidents }: { incidents: any[] }) {
+  const { can, loading: capsLoading } = useCapabilities()
+  const canViewCosts = !capsLoading && can('financial.view_costs')
   // Calculate stats from incidents
   const stats = incidents.reduce((acc, incident) => {
     // Active Risk: Cost of open/in_review incidents
@@ -76,9 +79,16 @@ export function GlobalFinancialHeader({ incidents }: { incidents: any[] }) {
                 <TrendingUp className="h-4 w-4 text-destructive" />
               </div>
               <div className="space-y-1">
-                <p className="text-2xl font-bold font-mono text-destructive">
-                  ${stats.activeRisk.toLocaleString('es-MX', { minimumFractionDigits: 2 })}
-                </p>
+                {canViewCosts ? (
+                  <p className="text-2xl font-bold font-mono text-destructive">
+                    ${stats.activeRisk.toLocaleString('es-MX', { minimumFractionDigits: 2 })}
+                  </p>
+                ) : (
+                  <div className="flex items-center gap-1.5">
+                    <Lock className="h-4 w-4 text-muted-foreground" />
+                    <span className="text-sm text-muted-foreground">Restringido</span>
+                  </div>
+                )}
                 <p className="text-xs text-muted-foreground">
                   Suma de incidencias abiertas
                 </p>
@@ -96,9 +106,16 @@ export function GlobalFinancialHeader({ incidents }: { incidents: any[] }) {
                 <TrendingDown className="h-4 w-4 text-green-600" />
               </div>
               <div className="space-y-1">
-                <p className="text-2xl font-bold font-mono text-green-600">
-                  ${stats.recovered.toLocaleString('es-MX', { minimumFractionDigits: 2 })}
-                </p>
+                {canViewCosts ? (
+                  <p className="text-2xl font-bold font-mono text-green-600">
+                    ${stats.recovered.toLocaleString('es-MX', { minimumFractionDigits: 2 })}
+                  </p>
+                ) : (
+                  <div className="flex items-center gap-1.5">
+                    <Lock className="h-4 w-4 text-muted-foreground" />
+                    <span className="text-sm text-muted-foreground">Restringido</span>
+                  </div>
+                )}
                 <p className="text-xs text-muted-foreground">
                   Cargado a contratistas
                 </p>

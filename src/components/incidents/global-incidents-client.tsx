@@ -1,9 +1,11 @@
 "use client"
 
 import { useState } from "react"
+import { useRouter } from "next/navigation"
 import { Input } from "@/components/ui/input"
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Search } from "lucide-react"
+import { Button } from "@/components/ui/button"
+import { Search, ChevronLeft, ChevronRight } from "lucide-react"
 import { GlobalIncidentsTable } from "@/components/incidents/global-incidents-table"
 import { IncidentDetailDrawer } from "@/components/incidents/incident-detail-drawer"
 import { CreateIncidentModal } from "@/components/incidents/create-incident-modal"
@@ -15,7 +17,20 @@ interface Project {
   name: string
 }
 
-export function GlobalIncidentsClient({ incidents, projects }: { incidents: any[], projects: Project[] }) {
+export function GlobalIncidentsClient({
+  incidents,
+  projects,
+  totalCount = 0,
+  page = 1,
+  pageSize = 25,
+}: {
+  incidents: any[]
+  projects: Project[]
+  totalCount?: number
+  page?: number
+  pageSize?: number
+}) {
+  const router = useRouter()
   const [searchQuery, setSearchQuery] = useState("")
   const [activeTab, setActiveTab] = useState("all")
   const [selectedIncidentId, setSelectedIncidentId] = useState<string | null>(null)
@@ -24,9 +39,17 @@ export function GlobalIncidentsClient({ incidents, projects }: { incidents: any[
   // Subscribe to realtime incident changes
   useRealtimeIncidents()
 
-  // Calculate counts for tabs
+  const totalPages = Math.max(1, Math.ceil(totalCount / pageSize))
+
+  const navigatePage = (newPage: number) => {
+    const params = new URLSearchParams()
+    params.set("page", String(newPage))
+    router.push(`/dashboard/incidents?${params.toString()}`)
+  }
+
+  // Calculate counts for tabs (from current page data)
   const counts = {
-      all: incidents.length,
+      all: totalCount,
       urgent: incidents.filter(i => i.priority === 'CRITICAL' || i.priority === 'URGENT').length,
       pending: incidents.filter(i => i.status === 'IN_REVIEW').length,
       "with-cost": incidents.filter(i => (i.actual_cost || 0) > 0).length,
@@ -37,10 +60,6 @@ export function GlobalIncidentsClient({ incidents, projects }: { incidents: any[
     <>
       {/* Filters Section */}
       <div className="px-6 py-4 border-b bg-background/95 backdrop-blur-sm z-10">
-        <div className="flex items-center justify-between gap-4 mb-4">
-           {/* Filters will go here or below, organizing layout */}
-        </div>
-
         <div className="flex flex-col gap-4">
           <div className="flex items-center justify-between gap-4">
             {/* Search Bar */}
@@ -83,8 +102,6 @@ export function GlobalIncidentsClient({ incidents, projects }: { incidents: any[
               </TabsTrigger>
             </TabsList>
           </Tabs>
-
-          {/* Search Bar - Removed as it is now above */}
         </div>
       </div>
 
@@ -97,6 +114,37 @@ export function GlobalIncidentsClient({ incidents, projects }: { incidents: any[
           onIncidentClick={(incidentId) => setSelectedIncidentId(incidentId)}
         />
       </div>
+
+      {/* Pagination Footer */}
+      {totalPages > 1 && (
+        <div className="border-t px-6 py-3 flex items-center justify-between shrink-0 bg-background/95">
+          <p className="text-sm text-muted-foreground">
+            Página {page} de {totalPages} · {totalCount} incidencias
+          </p>
+          <div className="flex items-center gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              disabled={page <= 1}
+              onClick={() => navigatePage(page - 1)}
+              className="gap-1"
+            >
+              <ChevronLeft className="h-4 w-4" />
+              Anterior
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              disabled={page >= totalPages}
+              onClick={() => navigatePage(page + 1)}
+              className="gap-1"
+            >
+              Siguiente
+              <ChevronRight className="h-4 w-4" />
+            </Button>
+          </div>
+        </div>
+      )}
 
       {/* Incident Detail Drawer */}
       <IncidentDetailDrawer

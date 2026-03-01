@@ -1,21 +1,36 @@
-import { Suspense } from "react"
 import { GlobalFinancialHeader } from "@/components/incidents/global-financial-header"
-import { GlobalIncidentsTable } from "@/components/incidents/global-incidents-table"
-import { IncidentDetailDrawer } from "@/components/incidents/incident-detail-drawer"
 import { fetchIncidentsAction } from "@/actions/incidents"
 import { getProjects } from "@/services/projects-service"
 import { GlobalIncidentsClient } from "@/components/incidents/global-incidents-client"
 
-export default async function GlobalIncidentsPage() {
-  const [{ data: incidents }, projects] = await Promise.all([
-    fetchIncidentsAction(undefined, 1), // Fetch all incidents, page 1
+const PAGE_SIZE = 25
+
+export default async function GlobalIncidentsPage({
+  searchParams,
+}: {
+  searchParams?: Promise<{ page?: string }>
+}) {
+  const params = await (searchParams ?? Promise.resolve({} as { page?: string }))
+  const page = Math.max(1, parseInt(params.page ?? "1", 10))
+
+  const [incidentsResult, projects] = await Promise.all([
+    fetchIncidentsAction(undefined, page, PAGE_SIZE),
     getProjects()
   ])
+
+  const incidents = incidentsResult.data ?? []
+  const totalCount = incidentsResult.count ?? 0
   
   return (
     <div className="flex flex-col h-full">
-      <GlobalFinancialHeader incidents={incidents || []} />
-      <GlobalIncidentsClient incidents={incidents || []} projects={projects || []} />
+      <GlobalFinancialHeader incidents={incidents} />
+      <GlobalIncidentsClient
+        incidents={incidents}
+        projects={projects || []}
+        totalCount={totalCount}
+        page={page}
+        pageSize={PAGE_SIZE}
+      />
     </div>
   )
 }

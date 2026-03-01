@@ -22,6 +22,21 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+} from "@/components/ui/dialog"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
@@ -30,7 +45,7 @@ import { ConfirmDialog } from "@/components/ui/confirm-dialog"
 import { toast } from "sonner"
 
 import { StaffCreationDialog } from "@/components/team/staff-dialog"
-import { deactivateTeamMember, reactivateTeamMember } from "@/app/actions/team"
+import { deactivateTeamMember, reactivateTeamMember, updateTeamMemberRole } from "@/app/actions/team"
 import { useCapabilities } from "@/hooks/use-capabilities"
 
 interface TeamMember {
@@ -40,6 +55,7 @@ interface TeamMember {
   avatar_url: string | null
   is_active: boolean
   role: {
+    id?: string
     display_name: string
   } | null
   projects: {
@@ -49,7 +65,15 @@ interface TeamMember {
   }[]
 }
 
-export function TeamClient({ initialMembers }: { initialMembers: any[] }) {
+export function TeamClient({
+  initialMembers,
+  staffLimit = 10,
+  availableRoles = [],
+}: {
+  initialMembers: any[]
+  staffLimit?: number
+  availableRoles?: { id: string; display_name: string }[]
+}) {
   const router = useRouter()
   const { can } = useCapabilities()
   const [activeTab, setActiveTab] = useState("staff")
@@ -57,6 +81,9 @@ export function TeamClient({ initialMembers }: { initialMembers: any[] }) {
   const [isPending, startTransition] = useTransition()
   // Confirm dialog state for destructive toggle action
   const [confirmTarget, setConfirmTarget] = useState<{ id: string; isActive: boolean; name: string } | null>(null)
+  // Role change dialog
+  const [roleTarget, setRoleTarget] = useState<{ id: string; name: string; currentRoleId?: string } | null>(null)
+  const [selectedRoleId, setSelectedRoleId] = useState("")
 
   // Filter members based on search
   const filteredMembers = initialMembers.filter(member => 
@@ -83,6 +110,25 @@ export function TeamClient({ initialMembers }: { initialMembers: any[] }) {
     if (!confirmTarget) return
     handleToggleAccess(confirmTarget.id, confirmTarget.isActive)
     setConfirmTarget(null)
+  }
+
+  const handleOpenRoleDialog = (member: any) => {
+    setSelectedRoleId(member.role?.id ?? "")
+    setRoleTarget({ id: member.id, name: member.full_name || 'este miembro', currentRoleId: member.role?.id })
+  }
+
+  const handleConfirmRoleChange = () => {
+    if (!roleTarget || !selectedRoleId) return
+    startTransition(async () => {
+      const result = await updateTeamMemberRole(roleTarget.id, selectedRoleId)
+      if (result.error) {
+        toast.error(result.error)
+      } else {
+        toast.success('Rol actualizado')
+        router.refresh()
+      }
+      setRoleTarget(null)
+    })
   }
 
   return (
@@ -112,14 +158,14 @@ export function TeamClient({ initialMembers }: { initialMembers: any[] }) {
               <Shield className="h-4 w-4 text-primary" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{activeCount} / 10</div>
+              <div className="text-2xl font-bold">{activeCount} / {staffLimit}</div>
               <p className="text-xs text-muted-foreground">
-                 licencias utilizadas en tu plan Enterprise
+                 licencias utilizadas
               </p>
               <div className="h-1 w-full bg-primary/20 mt-3 rounded-full overflow-hidden">
                 <div 
                     className="h-full bg-primary rounded-full" 
-                    style={{ width: `${(activeCount / 10) * 100}%` }}
+                    style={{ width: `${Math.min((activeCount / staffLimit) * 100, 100)}%` }}
                 />
               </div>
             </CardContent>
@@ -208,9 +254,13 @@ export function TeamClient({ initialMembers }: { initialMembers: any[] }) {
                                   <MoreHorizontal className="h-4 w-4" />
                                 </Button>
                               </DropdownMenuTrigger>
-                              <DropdownMenuContent align="end">
+                                <DropdownMenuContent align="end">
                                 <DropdownMenuLabel>Acciones</DropdownMenuLabel>
-                                <DropdownMenuItem>Editar perfil</DropdownMenuItem>
+                                {can('org.manage_staff') && (
+                                  <DropdownMenuItem onClick={() => handleOpenRoleDialog(member)}>
+                                    Cambiar rol
+                                  </DropdownMenuItem>
+                                )}
                                 <DropdownMenuItem>Gestionar accesos</DropdownMenuItem>
                                 <DropdownMenuSeparator />
                                 {can('org.manage_staff') && <DropdownMenuItem
@@ -282,6 +332,36 @@ export function TeamClient({ initialMembers }: { initialMembers: any[] }) {
         variant={confirmTarget?.isActive ? "destructive" : "default"}
         onConfirm={handleConfirmedToggle}
       />
+
+      {/* Role change dialog */}
+      <Dialog open={roleTarget !== null} onOpenChange={(open) => { if (!open) setRoleTarget(null) }}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Cambiar rol de {roleTarget?.name}</DialogTitle>
+            <DialogDescription>
+              Selecciona el nuevo rol. El cambio es inmediato y afecta los permisos del usuario.
+            </DialogDescription>
+          </DialogHeader>
+          <Select value={selectedRoleId} onValueChange={setSelectedRoleId}>
+            <SelectTrigger>
+              <SelectValue placeholder="Selecciona un rol" />
+            </SelectTrigger>
+            <SelectContent>
+              {availableRoles.map((role) => (
+                <SelectItem key={role.id} value={role.id}>
+                  {role.display_name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setRoleTarget(null)}>Cancelar</Button>
+            <Button disabled={!selectedRoleId || isPending} onClick={handleConfirmRoleChange}>
+              Guardar
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }

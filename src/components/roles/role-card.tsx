@@ -26,6 +26,7 @@ export interface Role {
 interface RoleCardProps {
   role: Role
   onEdit: (role: Role) => void
+  onDelete?: (role: Role) => void
 }
 
 const ArchetypeIcon = ({ type }: { type: RoleArchetype }) => {
@@ -36,7 +37,7 @@ const ArchetypeIcon = ({ type }: { type: RoleArchetype }) => {
   }
 }
 
-export function RoleCard({ role, onEdit }: RoleCardProps) {
+export function RoleCard({ role, onEdit, onDelete }: RoleCardProps) {
   return (
     <Card className="flex flex-col h-full hover:shadow-lg hover:border-primary/20 transition-all duration-300 group">
       <CardHeader className="flex flex-row items-start justify-between space-y-0 pb-3">
@@ -65,7 +66,10 @@ export function RoleCard({ role, onEdit }: RoleCardProps) {
                     <Copy className="mr-2 h-4 w-4" /> Duplicar
                 </DropdownMenuItem>
                 {!role.isSystem && (
-                    <DropdownMenuItem className="text-destructive focus:text-destructive">
+                    <DropdownMenuItem
+                      className="text-destructive focus:text-destructive"
+                      onClick={() => onDelete?.(role)}
+                    >
                         <Trash2 className="mr-2 h-4 w-4" /> Eliminar
                     </DropdownMenuItem>
                 )}

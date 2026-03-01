@@ -21,24 +21,38 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { UploadCloud, X, MapPin, Users } from "lucide-react"
-import React, { useState } from "react"
+import React, { useState, useEffect } from "react"
 import { toast } from "sonner"
 import { Badge } from "@/components/ui/badge"
-import { createProject } from "@/app/actions/projects"
+import { createProject, updateProject } from "@/app/actions/projects"
 import { AddressAutocomplete } from "@/components/ui/address-autocomplete"
 import type { GeoSuggestion } from "@/lib/geoapify"
 
-// Mock data removed - using passed 'staff' prop
+interface ProjectSetupDrawerProps {
+    isOpen: boolean;
+    onClose: () => void;
+    staff?: any[];
+    /** When set, the drawer opens in edit mode for this project */
+    initialData?: {
+        id: string;
+        name: string;
+        contingency_budget?: number | null;
+        start_date?: string | null;
+        end_date?: string | null;
+        location_address?: string | null;
+        location_gps?: string | null;
+        geofence_radius_meters?: number | null;
+    };
+}
 
 export function ProjectSetupDrawer({ 
     isOpen, 
     onClose,
-    staff = []
-}: { 
-    isOpen: boolean; 
-    onClose: () => void; 
-    staff?: any[];
-}) {
+    staff = [],
+    initialData,
+}: ProjectSetupDrawerProps) {
+    const isEditMode = !!initialData
+
     // Form state
     const [projectName, setProjectName] = useState("")
     const [projectCode, setProjectCode] = useState("")
@@ -52,6 +66,30 @@ export function ProjectSetupDrawer({
     const [residents, setResidents] = useState<string[]>([])
     const [coverPhoto, setCoverPhoto] = useState<File | null>(null)
     const [photoPreview, setPhotoPreview] = useState<string | null>(null)
+
+    // Populate fields when editing
+    useEffect(() => {
+        if (isEditMode && isOpen && initialData) {
+            setProjectName(initialData.name ?? "")
+            setBudget(initialData.contingency_budget != null ? String(initialData.contingency_budget) : "")
+            setStartDate(initialData.start_date ? initialData.start_date.substring(0, 10) : "")
+            setEndDate(initialData.end_date ? initialData.end_date.substring(0, 10) : "")
+            setAddress(initialData.location_address ?? "")
+            setGeofencingEnabled((initialData.geofence_radius_meters ?? 0) > 0)
+            // parse GPS from "POINT(lng lat)"
+            if (initialData.location_gps) {
+                const match = initialData.location_gps.match(/POINT\(([^ ]+) ([^ )]+)\)/)
+                if (match) setGpsCoords([parseFloat(match[1]), parseFloat(match[2])])
+            }
+        } else if (!isOpen) {
+            // Reset on close so create mode starts fresh
+            if (!isEditMode) {
+                setProjectName(""); setProjectCode(""); setAddress(""); setGpsCoords(null)
+                setBudget(""); setStartDate(""); setEndDate(""); setGeofencingEnabled(false)
+                setSuperintendent(""); setResidents([]); setCoverPhoto(null); setPhotoPreview(null)
+            }
+        }
+    }, [isOpen, isEditMode, initialData])
 
     // Handle photo upload
     const handlePhotoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -87,57 +125,95 @@ export function ProjectSetupDrawer({
             toast.error("El nombre del proyecto es obligatorio")
             return
         }
-        if (!superintendent) {
+        if (!isEditMode && !superintendent) {
             toast.error("Debes asignar un superintendente")
             return
         }
 
-        toast.promise(
-            createProject({
-                name: projectName,
-                contingency_budget: budget ? parseFloat(budget) : 0,
-                start_date: startDate || undefined,
-                end_date: endDate || undefined,
-                geofence_radius_meters: geofencingEnabled ? 100 : null,
-                superintendentId: superintendent,
-                is_active: true,
-                organization_id: '', // Will be overridden by server action
-                location_gps: gpsCoords ? `POINT(${gpsCoords[0]} ${gpsCoords[1]})` : null,
-                location_address: address.trim() || null,
-            } as any),
-            {
-                loading: 'Creando proyecto...',
-                success: (result: any) => {
-                    if (result.error) throw new Error(result.error)
-                    
-                    // Reset form
-                    setProjectName("")
-                    setProjectCode("")
-                    setAddress("")
-                    setGpsCoords(null)
-                    setBudget("")
-                    setStartDate("")
-                    setEndDate("")
-                    setGeofencingEnabled(false)
-                    setSuperintendent("")
-                    setResidents([])
-                    setCoverPhoto(null)
-                    setPhotoPreview(null)
-                    onClose()
-                    return `Proyecto "${projectName}" creado exitosamente`
-                },
-                error: (err) => `Error: ${err.message}`
+        const payload = {
+            name: projectName,
+            contingency_budget: budget ? parseFloat(budget) : 0,
+            start_date: startDate || null,
+            end_date: endDate || null,
+            geofence_radius_meters: geofencingEnabled ? 100 : null,
+            location_gps: gpsCoords ? `POINT(${gpsCoords[0]} ${gpsCoords[1]})` : null,
+            location_address: address.trim() || null,
+        }
+
+        if (isEditMode) {
+            toast.promise(
+                updateProject(initialData!.id, payload as any),
+                {
+                    loading: 'Guardando cambios...',
+                    success: (result: any) => {
+                        if (result.error) throw new Error(result.error)
+                        onClose()
+                        return `Proyecto actualizado exitosamente`
+                    },
+                    error: (err) => `Error: ${err.message}`
+                }
+            )
+        } else {
+            // Convert cover photo to base64 if present
+            let coverPhotoBase64: string | undefined
+            let coverPhotoMime: string | undefined
+            if (coverPhoto) {
+                const toBase64 = (file: File): Promise<string> =>
+                    new Promise((resolve, reject) => {
+                        const reader = new FileReader()
+                        reader.onload = () => resolve(reader.result as string)
+                        reader.onerror = reject
+                        reader.readAsDataURL(file)
+                    })
+                coverPhotoBase64 = await toBase64(coverPhoto)
+                coverPhotoMime = coverPhoto.type
             }
-        )
+
+            toast.promise(
+                createProject({
+                    ...payload,
+                    superintendentId: superintendent,
+                    is_active: true,
+                    organization_id: '', // Will be overridden by server action
+                    coverPhotoBase64,
+                    coverPhotoMime,
+                } as any),
+                {
+                    loading: 'Creando proyecto...',
+                    success: (result: any) => {
+                        if (result.error) throw new Error(result.error)
+                        
+                        // Reset form
+                        setProjectName("")
+                        setProjectCode("")
+                        setAddress("")
+                        setGpsCoords(null)
+                        setBudget("")
+                        setStartDate("")
+                        setEndDate("")
+                        setGeofencingEnabled(false)
+                        setSuperintendent("")
+                        setResidents([])
+                        setCoverPhoto(null)
+                        setPhotoPreview(null)
+                        onClose()
+                        return `Proyecto "${projectName}" creado exitosamente`
+                    },
+                    error: (err) => `Error: ${err.message}`
+                }
+            )
+        }
     }
 
     return (
         <Sheet open={isOpen} onOpenChange={onClose}>
             <SheetContent className="sm:max-w-150 w-full p-0 flex flex-col h-full overflow-hidden">
                 <SheetHeader className="p-6 pb-4 shrink-0 border-b">
-                    <SheetTitle>Nuevo Proyecto</SheetTitle>
+                    <SheetTitle>{isEditMode ? "Editar Proyecto" : "Nuevo Proyecto"}</SheetTitle>
                     <SheetDescription>
-                        Configura la identidad, ubicación y reglas financieras básicas.
+                        {isEditMode
+                            ? "Modifica los datos del proyecto. Los cambios son inmediatos."
+                            : "Configura la identidad, ubicación y reglas financieras básicas."}
                     </SheetDescription>
                 </SheetHeader>
 
@@ -324,7 +400,8 @@ export function ProjectSetupDrawer({
 
                         <Separator />
 
-                        {/* Sección D: Asignación de Mando */}
+                        {/* Sección D: Asignación de Mando — create mode only */}
+                        {!isEditMode && (
                         <div className="space-y-4">
                             <h3 className="text-sm font-semibold text-foreground flex items-center gap-2">
                                 <Users className="h-4 w-4 text-primary" />
@@ -359,7 +436,7 @@ export function ProjectSetupDrawer({
                                 <Label>Residentes (Operativos)</Label>
                                 <div className="border rounded-lg p-3 space-y-2 bg-muted/20">
                                     {staff
-                                        .filter((s:any) => s.role?.display_name === "Superintendente" || s.role?.name === "Superintendente") // Adapting to DB role
+                                        .filter((s:any) => s.role?.display_name === "Superintendente" || s.role?.name === "Superintendente")
                                         .map((s:any) => (
                                             <div 
                                                 key={s.id}
@@ -389,6 +466,7 @@ export function ProjectSetupDrawer({
                                 )}
                             </div>
                         </div>
+                        )}
                     </div>
                 </div>
 
@@ -397,7 +475,7 @@ export function ProjectSetupDrawer({
                         Cancelar
                     </Button>
                     <Button onClick={handleSave} className="flex-1">
-                        Crear Proyecto
+                        {isEditMode ? "Guardar Cambios" : "Crear Proyecto"}
                     </Button>
                 </SheetFooter>
             </SheetContent>
