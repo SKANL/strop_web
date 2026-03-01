@@ -1,6 +1,8 @@
 "use client"
 
-import { type LucideIcon } from "lucide-react"
+import { AlertTriangle, Building2, LayoutDashboard, Users, type LucideIcon } from "lucide-react"
+import { usePathname } from "next/navigation"
+import Link from "next/link"
 
 import {
   SidebarGroup,
@@ -10,31 +12,35 @@ import {
   SidebarMenuItem,
 } from "@/components/ui/sidebar"
 
-export function NavMain({
-  items,
-}: {
-  items: {
-    title: string
-    url: string
-    icon?: LucideIcon
-    isActive?: boolean
-    items?: {
-      title: string
-      url: string
-    }[]
-  }[]
-}) {
+const NAV_ITEMS: {
+  title: string
+  url: string
+  icon: LucideIcon
+}[] = [
+  { title: "Dashboard",   url: "/dashboard",           icon: LayoutDashboard },
+  { title: "Proyectos",   url: "/dashboard/projects",  icon: Building2 },
+  { title: "Incidencias", url: "/dashboard/incidents", icon: AlertTriangle },
+  { title: "Equipo",      url: "/dashboard/team",      icon: Users },
+]
+
+export function NavMain() {
+  const pathname = usePathname()
+
   return (
     <SidebarGroup>
       <SidebarGroupLabel>Plataforma</SidebarGroupLabel>
       <SidebarMenu>
-        {items.map((item) => (
+        {NAV_ITEMS.map((item) => (
           <SidebarMenuItem key={item.title}>
-            <SidebarMenuButton asChild tooltip={item.title} isActive={item.isActive}>
-              <a href={item.url}>
-                {item.icon && <item.icon />}
+            <SidebarMenuButton
+              asChild
+              tooltip={item.title}
+              isActive={pathname === item.url || pathname.startsWith(item.url + '/')}
+            >
+              <Link href={item.url}>
+                <item.icon />
                 <span>{item.title}</span>
-              </a>
+              </Link>
             </SidebarMenuButton>
           </SidebarMenuItem>
         ))}

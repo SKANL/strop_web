@@ -1,9 +1,14 @@
 import { getProjectById } from "@/app/actions/projects"
 import { notFound } from "next/navigation"
 import { ProjectClient } from "@/components/projects/project-client"
+import { fetchIncidentsAction } from "@/actions/incidents"
 
 export default async function ProjectPage({ params }: { params: { id: string } }) {
-  const { data: project, error } = await getProjectById(params.id)
+  const resolvedParams = await params
+  const [{ data: project, error }, { data: incidents }] = await Promise.all([
+    getProjectById(resolvedParams.id),
+    fetchIncidentsAction(resolvedParams.id),
+  ])
 
   if (error || !project) {
     notFound()
@@ -14,9 +19,9 @@ export default async function ProjectPage({ params }: { params: { id: string } }
       name: pm.user?.full_name || "Usuario Desconocido",
       role: pm.user?.role?.display_name || "Sin Rol",
       avatar: pm.user?.avatar_url,
-      type: "staff" as const, // Todo: Distinguish crew vs staff if needed
+      type: "staff" as const,
       trade: null
   })) || []
 
-  return <ProjectClient project={project} projectMembers={projectMembers} />
+  return <ProjectClient project={project} projectMembers={projectMembers} incidents={incidents || []} />
 }

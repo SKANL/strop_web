@@ -3,9 +3,10 @@
 import { useState, useEffect } from "react"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { Loader2, Camera, CheckCircle2, RefreshCw } from "lucide-react"
+import { Loader2, Camera, CheckCircle2, RefreshCw, XCircle } from "lucide-react"
 import { useEvidencePersistence } from "@/hooks/use-evidence-persistence"
 import { CameraCapture } from "@/components/public-link/camera-capture"
+import { submitEvidenceAction } from "@/actions/incidents"
 import { toast } from "sonner"
 
 type IncidentStatus = 'OPEN' | 'DRAFT' | 'IN_REVIEW' | 'CLOSED' | 'REJECTED'
@@ -34,7 +35,8 @@ export function PublicLinkClient({
       switch(dbStatus) {
           case 'CLOSED': return 'CLOSED'
           case 'IN_REVIEW': return 'IN_REVIEW'
-          default: return 'OPEN' // Treat everything else as open/pending action
+          case 'REJECTED': return 'REJECTED'
+          default: return 'OPEN'
       }
   }
 
@@ -46,6 +48,7 @@ export function PublicLinkClient({
 
   // Effect to check for drafts
   useEffect(() => {
+    // Only restore draft if incident is still actionable
     if (draftPhoto && status === 'OPEN') {
         setStatus('DRAFT')
         toast("Borrador recuperado", { description: "Restauramos la foto que no enviaste." })
@@ -57,15 +60,23 @@ export function PublicLinkClient({
       setStatus('DRAFT')
   }
 
-  const handleSend = () => {
-      // Simulate API call - TODO: Replace with real Server Action
+  const handleSend = async () => {
+      if (!draftPhoto) return
       setLoading(true)
-      setTimeout(() => {
-          clearDraft()
-          setStatus('IN_REVIEW')
+      try {
+          const result = await submitEvidenceAction(token, draftPhoto)
+          if (result.success) {
+              clearDraft()
+              setStatus('IN_REVIEW')
+              toast.success("Evidencia enviada correctamente")
+          } else {
+              toast.error(result.message || "Error al enviar la evidencia")
+          }
+      } catch {
+          toast.error("Error de conexión. Verifica tu internet e intenta de nuevo.")
+      } finally {
           setLoading(false)
-          toast.success("Evidencia enviada correctamente")
-      }, 1500)
+      }
   }
 
   const handleRetake = () => {
@@ -90,8 +101,12 @@ export function PublicLinkClient({
                 <h1 className="text-sm font-semibold text-gray-900">{initialIncident.project_name}</h1>
                 <p className="text-xs text-muted-foreground">Solicitado por {initialIncident.requester_name}</p>
             </div>
-            {/* Logo placeholder */}
-            <div className="h-6 w-6 bg-primary/20 rounded-full" /> 
+            {/* Strop logo */}
+            <div className="flex items-center gap-1.5" aria-label="Strop">
+              <span className="text-sm font-bold tracking-tighter text-foreground">
+                STROP<span className="text-orange-500">.</span>
+              </span>
+            </div> 
         </div>
 
         {/* Dynamic Content based on State */}
@@ -146,9 +161,34 @@ export function PublicLinkClient({
                         <p className="text-muted-foreground">
                             {status === 'CLOSED' 
                                 ? 'La incidencia ha sido aprobada y cerrada.' 
-                                : 'Tu evidencia ha sido enviada. Esperando validación.'}
+                                : 'Tu evidencia ha sido enviada. Esperando validación del supervisor.'}
                         </p>
                      </div>
+                </div>
+            )}
+
+            {/* Status REJECTED */}
+            {status === 'REJECTED' && (
+                <div className="flex flex-col items-center text-center space-y-6 pt-8 animate-in zoom-in duration-300">
+                    <div className="h-20 w-20 rounded-full flex items-center justify-center bg-red-100 text-red-600">
+                        <XCircle className="h-10 w-10" />
+                    </div>
+                    <div className="space-y-2">
+                        <h2 className="text-2xl font-bold text-red-700">Evidencia Rechazada</h2>
+                        <p className="text-muted-foreground">
+                            El supervisor rechazó la evidencia enviada. Debes subir una nueva foto
+                            que muestre claramente la solución aplicada.
+                        </p>
+                    </div>
+                    <Button
+                        variant="default"
+                        size="lg"
+                        className="h-12 gap-2"
+                        onClick={() => setStatus('OPEN')}
+                    >
+                        <Camera className="h-5 w-5" />
+                        Subir nueva evidencia
+                    </Button>
                 </div>
             )}
 

@@ -6,11 +6,10 @@ import { createClient } from "@/lib/supabase/client"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import { PasswordInput } from "@/components/ui/password-input"
 import {
   Card,
   CardContent,
-  CardDescription,
-  CardFooter,
 } from "@/components/ui/card"
 import { AlertCircle, Loader2 } from "lucide-react"
 import Link from "next/link"
@@ -34,10 +33,14 @@ export default function LoginPage() {
     })
 
     if (error) {
-      setError(error.message)
+      setError(
+        error.message === "Invalid login credentials"
+          ? "Correo o contraseña incorrectos"
+          : error.message
+      )
       setLoading(false)
     } else {
-      router.push("/")
+      router.push("/dashboard")
       router.refresh()
     }
   }
@@ -51,15 +54,21 @@ export default function LoginPage() {
               <form onSubmit={handleLogin} className="p-6 md:p-8">
                 <div className="flex flex-col gap-6">
                   <div className="flex flex-col items-center text-center">
+                    <Link href="/" className="mb-1 text-xl font-bold tracking-tighter">
+                      STROP<span className="text-orange-500">.</span>
+                    </Link>
                     <h1 className="text-2xl font-bold">Bienvenido de nuevo</h1>
                     <p className="text-balance text-muted-foreground">
-                      Inicia sesión en tu cuenta de STROP
+                      Inicia sesión en tu cuenta de Strop
                     </p>
                   </div>
                   
                   {error && (
-                    <div className="p-3 text-sm text-destructive bg-destructive/15 border border-destructive/50 rounded-md flex items-center gap-2">
-                      <AlertCircle className="h-4 w-4" />
+                    <div
+                      role="alert"
+                      className="p-3 text-sm text-destructive bg-destructive/15 border border-destructive/50 rounded-md flex items-center gap-2"
+                    >
+                      <AlertCircle className="h-4 w-4 shrink-0" aria-hidden="true" />
                       {error}
                     </div>
                   )}
@@ -69,7 +78,8 @@ export default function LoginPage() {
                     <Input
                       id="email"
                       type="email"
-                      placeholder="m@example.com"
+                      placeholder="juan@constructora.com"
+                      autoComplete="email"
                       required
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
@@ -80,15 +90,15 @@ export default function LoginPage() {
                       <Label htmlFor="password">Contraseña</Label>
                       <Link
                         href="/forgot-password"
-                        className="ml-auto text-sm underline-offset-4 hover:underline"
+                        className="ml-auto text-sm underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded"
                       >
                         ¿Olvidaste tu contraseña?
                       </Link>
                     </div>
-                    <Input
+                    <PasswordInput
                       id="password"
-                      type="password"
                       required
+                      autoComplete="current-password"
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
                     />
@@ -96,7 +106,7 @@ export default function LoginPage() {
                   <Button type="submit" className="w-full" disabled={loading}>
                      {loading ? (
                         <>
-                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                          <Loader2 className="mr-2 h-4 w-4 animate-spin" aria-hidden="true" />
                           Iniciando...
                         </>
                       ) : (
@@ -105,22 +115,31 @@ export default function LoginPage() {
                   </Button>
                   <div className="text-center text-sm">
                     ¿No tienes cuenta?{" "}
-                    <Link href="/signup" className="underline underline-offset-4">
-                      Regístrate
+                    <Link href="/signup" className="underline underline-offset-4 hover:text-primary">
+                      Regístrate gratis
                     </Link>
                   </div>
                 </div>
               </form>
-              <div className="relative hidden bg-muted md:block">
-                <img
-                  src="/placeholder.svg"
-                  alt="Image"
-                  className="absolute inset-0 h-full w-full object-cover dark:brightness-[0.2] dark:grayscale"
-                />
-                 {/* Fallback to a nice gradient if image implies placeholder */}
-                 <div className="absolute inset-0 bg-linear-to-br from-zinc-800 to-black opacity-90 flex items-center justify-center text-white/20 font-bold text-4xl">
-                    STROP
-                 </div>
+              {/* Decorative panel */}
+              <div className="relative hidden md:flex flex-col items-center justify-center bg-zinc-950 p-8 gap-6">
+                <div className="absolute inset-0 bg-linear-to-br from-orange-950/40 via-zinc-950 to-zinc-950" aria-hidden="true" />
+                <div className="relative z-10 text-center space-y-4">
+                  <p className="text-5xl font-bold tracking-tighter text-white">
+                    STROP<span className="text-orange-500">.</span>
+                  </p>
+                  <p className="text-sm text-zinc-400 max-w-[200px] leading-relaxed">
+                    Control financiero total para tus obras de construcción.
+                  </p>
+                </div>
+                <div className="relative z-10 flex flex-col gap-3 w-full max-w-[220px]">
+                  {["Visibilidad en tiempo real", "Control de gastos", "Alertas automáticas"].map((feat) => (
+                    <div key={feat} className="flex items-center gap-2 text-xs text-zinc-400">
+                      <div className="h-1.5 w-1.5 rounded-full bg-orange-500 shrink-0" aria-hidden="true" />
+                      {feat}
+                    </div>
+                  ))}
+                </div>
               </div>
             </CardContent>
           </Card>

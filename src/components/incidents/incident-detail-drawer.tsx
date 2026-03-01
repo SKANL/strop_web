@@ -13,6 +13,7 @@ import { Label } from "@/components/ui/label"
 import { Switch } from "@/components/ui/switch"
 import { Separator } from "@/components/ui/separator"
 import { ScrollArea } from "@/components/ui/scroll-area"
+import { ConfirmDialog } from "@/components/ui/confirm-dialog"
 import { 
   Share2, 
   Clock, 
@@ -43,6 +44,7 @@ export function IncidentDetailDrawer({
   const [incident, setIncident] = useState<any>(null) // TODO: Type this properly
   const [chargeContractor, setChargeContractor] = useState(false)
   const [finalCost, setFinalCost] = useState("")
+  const [showConfirmClose, setShowConfirmClose] = useState(false)
 
   useEffect(() => {
     if (isOpen && incidentId) {
@@ -110,30 +112,53 @@ export function IncidentDetailDrawer({
     }
   }
 
-  // Helper for timeline (simplified for now as DB structure might differ from mock)
+  const ACTION_LABELS: Record<string, string> = {
+    cost_update: 'Costo actualizado',
+    status_change: 'Estado cambiado',
+    created: 'Incidencia creada',
+    assigned: 'Asignado a responsable',
+    photo_uploaded: 'Foto subida',
+    closed: 'Incidencia cerrada',
+    rejected: 'Incidencia rechazada',
+  }
+
   const renderTimeline = () => {
-      // If we had a real timeline/audit log structure we would map it here.
-      // For now, let's just show basic events if available or a placeholder
       if (!incident?.audit_logs || incident.audit_logs.length === 0) {
-          return <p className="text-sm text-muted-foreground italic">No hay actividad registrada reciente.</p>
+          return <p className="text-sm text-muted-foreground italic">No hay actividad registrada.</p>
       }
-      // TODO: Map audit_logs to timeline events
-      return incident.audit_logs.map((log: any, index: number) => (
-          <div key={log.id} className="flex gap-3 mb-4 last:mb-0">
-               <div className="flex flex-col items-center">
-                   <div className="h-2 w-2 rounded-full bg-primary mt-1.5" />
-                   {index !== incident.audit_logs.length - 1 && <div className="w-px h-full bg-border my-1" />}
-               </div>
-               <div>
-                   <p className="text-sm font-medium">{log.action}</p>
-                   <p className="text-xs text-muted-foreground">{new Date(log.timestamp).toLocaleString()}</p>
-                   {log.comment && <p className="text-xs text-muted-foreground mt-1">{log.comment}</p>}
-               </div>
-          </div>
-      ))
+      return incident.audit_logs.map((log: any, index: number) => {
+          const label = ACTION_LABELS[log.action] || log.action
+          const oldVal = log.old_value && typeof log.old_value === 'object'
+              ? Object.values(log.old_value as Record<string,unknown>)[0]
+              : null
+          const newVal = log.new_value && typeof log.new_value === 'object'
+              ? Object.values(log.new_value as Record<string,unknown>)[0]
+              : null
+          return (
+              <div key={log.id} className="flex gap-3 mb-4 last:mb-0">
+                   <div className="flex flex-col items-center">
+                       <div className="h-2 w-2 rounded-full bg-primary mt-1.5 shrink-0" />
+                       {index !== incident.audit_logs.length - 1 && <div className="w-px flex-1 bg-border my-1" />}
+                   </div>
+                   <div className="pb-1">
+                       <p className="text-sm font-medium">{label}</p>
+                       {oldVal != null && newVal != null && (
+                           <p className="text-xs text-muted-foreground">
+                               {String(oldVal)} → {String(newVal)}
+                           </p>
+                       )}
+                       <p className="text-xs text-muted-foreground">
+                           {new Date(log.timestamp).toLocaleString('es-MX', { dateStyle: 'medium', timeStyle: 'short' })}
+                       </p>
+                       {log.comment && <p className="text-xs text-muted-foreground mt-1 italic">{log.comment}</p>}
+                   </div>
+              </div>
+          )
+      })
   }
 
   return (
+    <>
     <Sheet open={isOpen} onOpenChange={onClose}>
       <SheetContent className="sm:max-w-[600px] w-full p-0 flex flex-col h-full overflow-hidden">
         {loading || !incident ? (
@@ -316,7 +341,7 @@ export function IncidentDetailDrawer({
                 {/* Close Button */}
                 <Button 
                     className="w-full h-12 text-base font-semibold"
-                    onClick={handleCloseIncident}
+                    onClick={() => setShowConfirmClose(true)}
                 >
                     <CheckCircle2 className="h-5 w-5 mr-2" />
                     Cerrar Incidencia
@@ -329,5 +354,15 @@ export function IncidentDetailDrawer({
         )}
       </SheetContent>
     </Sheet>
+
+    <ConfirmDialog
+      open={showConfirmClose}
+      onOpenChange={setShowConfirmClose}
+      title="¿Cerrar incidencia?"
+      description={`Esto cerrará definitivamente la incidencia #${incident?.folio_number} con un costo final de $${parseFloat(finalCost || '0').toLocaleString('es-MX', { minimumFractionDigits: 2 })}. Esta acción no se puede deshacer.`}
+      confirmLabel="Sí, cerrar"
+      onConfirm={handleCloseIncident}
+    />
+    </>
   )
 }

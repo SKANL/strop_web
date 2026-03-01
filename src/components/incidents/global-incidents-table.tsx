@@ -20,6 +20,7 @@ import {
   TableRow,
 } from "@/components/ui/table"
 import { Badge } from "@/components/ui/badge"
+import { StatusBadge } from "@/components/ui/status-badge"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import {
@@ -34,9 +35,11 @@ import {
   HoverCardContent,
   HoverCardTrigger,
 } from "@/components/ui/hover-card"
-import { LinkIcon, Check, X, Pencil } from "lucide-react"
+import { LinkIcon, Check, X, Pencil, Inbox } from "lucide-react"
 import { toast } from "sonner"
 import { cn } from "@/lib/utils"
+import { updateIncidentCostAction, generatePublicLinkAction } from "@/actions/incidents"
+import { getLabelForPriority } from "@/lib/enum-labels"
 
 // Real data types derived from Supabase result
 // We can treat this as "any" for now or define a proper interface matching the query
@@ -53,20 +56,6 @@ interface IncidentRow {
   created_by_user: { full_name: string | null } | null
   assigned_to_user: { full_name: string | null } | null
   photos: { photo_url: string }[]
-}
-
-const statusColors: Record<string, "destructive" | "default" | "secondary" | "outline"> = {
-  OPEN: "destructive",
-  IN_REVIEW: "default",
-  CLOSED: "secondary",
-  DRAFT: "outline",
-}
-
-const statusLabels: Record<string, string> = {
-  OPEN: "🔴 Abierto",
-  IN_REVIEW: "🟡 En Revisión",
-  CLOSED: "🟢 Cerrado",
-  DRAFT: "⚪ Borrador",
 }
 
 // Helper to estimate time ago
@@ -104,14 +93,13 @@ export function GlobalIncidentsTable({
 
   const handleCostSave = (incidentId: string) => {
     toast.promise(
-      new Promise((resolve) => setTimeout(resolve, 500)), // TODO: Wire up server action
+      updateIncidentCostAction(incidentId, parseFloat(tempCost)).then(() => {
+        setEditingCost(null)
+      }),
       {
         loading: 'Actualizando costo...',
-        success: () => {
-          setEditingCost(null)
-          return `Costo actualizado a $${parseFloat(tempCost).toLocaleString('es-MX')}`
-        },
-        error: 'Error al actualizar'
+        success: `Costo actualizado a $${parseFloat(tempCost || '0').toLocaleString('es-MX')}`,
+        error: 'Error al actualizar el costo',
       }
     )
   }
@@ -203,12 +191,12 @@ export function GlobalIncidentsTable({
         accessorKey: "priority",
         cell: ({ row }) => (
             <Badge variant="secondary" className={cn("text-xs font-normal", {
-                "bg-red-100 text-red-700": row.original.priority === 'CRITICAL',
-                "bg-orange-100 text-orange-700": row.original.priority === 'HIGH',
-                "bg-yellow-100 text-yellow-700": row.original.priority === 'MEDIUM',
-                "bg-blue-100 text-blue-700": row.original.priority === 'LOW',
+                "bg-red-100 text-red-700 dark:bg-red-950/40 dark:text-red-400": row.original.priority === 'CRITICAL',
+                "bg-orange-100 text-orange-700 dark:bg-orange-950/40 dark:text-orange-400": row.original.priority === 'HIGH',
+                "bg-yellow-100 text-yellow-700 dark:bg-yellow-950/40 dark:text-yellow-400": row.original.priority === 'MEDIUM',
+                "bg-blue-100 text-blue-700 dark:bg-blue-950/40 dark:text-blue-400": row.original.priority === 'LOW',
             })}>
-                {row.original.priority}
+                {getLabelForPriority(row.original.priority)}
             </Badge>
         ),
         size: 100
@@ -216,15 +204,9 @@ export function GlobalIncidentsTable({
     {
       accessorKey: "status",
       header: "ESTADO",
-      cell: ({ row }) => {
-        // Simple display for now, could be a select if we wire up the action
-        // const color = statusColors[row.original.status] || "secondary"
-        return (
-             <Badge variant={statusColors[row.original.status] || "secondary"}>
-                {statusLabels[row.original.status] || row.original.status}
-             </Badge>
-        )
-      },
+      cell: ({ row }) => (
+        <StatusBadge status={row.original.status} showDot />
+      ),
       size: 140,
     },
     {
@@ -287,16 +269,14 @@ export function GlobalIncidentsTable({
       header: "ACCIONES",
       cell: ({ row }) => {
         const copyPublicLink = async () => {
-          // TODO: Use real public token if available, or generate one
-          const publicUrl = `${window.location.origin}/r/demo-${row.original.id}` 
-          
-          try {
-            await navigator.clipboard.writeText(publicUrl)
+          const result = await generatePublicLinkAction(row.original.id)
+          if (!result.success || !result.url) {
+            toast.error("No se pudo generar el enlace")
+          } else {
+            await navigator.clipboard.writeText(result.url)
             toast.success("Enlace copiado al portapapeles", {
-              description: publicUrl
+              description: result.url
             })
-          } catch (err) {
-            toast.error("No se pudo copiar el enlace")
           }
         }
 
@@ -415,8 +395,14 @@ export function GlobalIncidentsTable({
             ))
           ) : (
             <TableRow>
-              <TableCell colSpan={columns.length} className="h-24 text-center">
-                No se encontraron incidencias.
+              <TableCell colSpan={columns.length} className="h-40">
+                <div className="flex flex-col items-center justify-center gap-3 py-8 text-muted-foreground">
+                  <Inbox className="h-10 w-10 opacity-30" aria-hidden="true" />
+                  <p className="text-sm font-medium">Sin incidencias</p>
+                  <p className="text-xs opacity-70">
+                    No hay incidencias que coincidan con los filtros aplicados.
+                  </p>
+                </div>
               </TableCell>
             </TableRow>
           )}

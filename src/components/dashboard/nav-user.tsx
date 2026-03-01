@@ -2,12 +2,12 @@
 
 import {
   BadgeCheck,
-  Bell,
   ChevronsUpDown,
   CreditCard,
   LogOut,
-  Sparkles,
+  UserCircle,
 } from "lucide-react"
+import Link from "next/link"
 
 import {
   Avatar,
@@ -29,6 +29,16 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from "@/components/ui/sidebar"
+import { signout } from "@/app/auth/actions"
+
+function getInitials(name: string): string {
+  return name
+    .split(" ")
+    .slice(0, 2)
+    .map((n) => n[0])
+    .join("")
+    .toUpperCase()
+}
 
 export function NavUser({
   user,
@@ -40,6 +50,7 @@ export function NavUser({
   }
 }) {
   const { isMobile } = useSidebar()
+  const initials = getInitials(user.name)
 
   return (
     <SidebarMenu>
@@ -49,17 +60,19 @@ export function NavUser({
             <SidebarMenuButton
               size="lg"
               className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
-              suppressHydrationWarning
+              aria-label="Menú de usuario"
             >
               <Avatar className="h-8 w-8 rounded-lg">
-                <AvatarImage src={user.avatar} alt={user.name} />
-                <AvatarFallback className="rounded-lg">CN</AvatarFallback>
+                {user.avatar && <AvatarImage src={user.avatar} alt={user.name} />}
+                <AvatarFallback className="rounded-lg text-xs font-medium">
+                  {initials}
+                </AvatarFallback>
               </Avatar>
               <div className="grid flex-1 text-left text-sm leading-tight">
                 <span className="truncate font-semibold">{user.name}</span>
-                <span className="truncate text-xs">{user.email}</span>
+                <span className="truncate text-xs text-sidebar-foreground/60">{user.email}</span>
               </div>
-              <ChevronsUpDown className="ml-auto size-4" />
+              <ChevronsUpDown className="ml-auto size-4" aria-hidden="true" />
             </SidebarMenuButton>
           </DropdownMenuTrigger>
           <DropdownMenuContent
@@ -71,8 +84,10 @@ export function NavUser({
             <DropdownMenuLabel className="p-0 font-normal">
               <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
                 <Avatar className="h-8 w-8 rounded-lg">
-                  <AvatarImage src={user.avatar} alt={user.name} />
-                  <AvatarFallback className="rounded-lg">CN</AvatarFallback>
+                  {user.avatar && <AvatarImage src={user.avatar} alt={user.name} />}
+                  <AvatarFallback className="rounded-lg text-xs font-medium">
+                    {initials}
+                  </AvatarFallback>
                 </Avatar>
                 <div className="grid flex-1 text-left text-sm leading-tight">
                   <span className="truncate font-semibold">{user.name}</span>
@@ -82,30 +97,30 @@ export function NavUser({
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
-              <DropdownMenuItem>
-                <Sparkles className="mr-2 h-4 w-4" />
-                Upgrade to Pro
+              <DropdownMenuItem asChild>
+                <Link href="/dashboard/settings/profile">
+                  <BadgeCheck className="mr-2 h-4 w-4" aria-hidden="true" />
+                  Mi Perfil
+                </Link>
+              </DropdownMenuItem>
+              <DropdownMenuItem asChild>
+                <Link href="/dashboard/settings/billing">
+                  <CreditCard className="mr-2 h-4 w-4" aria-hidden="true" />
+                  Facturación y Plan
+                </Link>
               </DropdownMenuItem>
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
-            <DropdownMenuGroup>
-              <DropdownMenuItem>
-                <BadgeCheck className="mr-2 h-4 w-4" />
-                Account
-              </DropdownMenuItem>
-              <DropdownMenuItem>
-                <CreditCard className="mr-2 h-4 w-4" />
-                Billing
-              </DropdownMenuItem>
-              <DropdownMenuItem>
-                <Bell className="mr-2 h-4 w-4" />
-                Notifications
-              </DropdownMenuItem>
-            </DropdownMenuGroup>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem>
-              <LogOut className="mr-2 h-4 w-4" />
-              Log out
+            <DropdownMenuItem asChild>
+              <form action={signout} className="w-full">
+                <button
+                  type="submit"
+                  className="flex w-full items-center text-sm text-destructive hover:text-destructive focus:text-destructive"
+                >
+                  <LogOut className="mr-2 h-4 w-4" aria-hidden="true" />
+                  Cerrar Sesión
+                </button>
+              </form>
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>

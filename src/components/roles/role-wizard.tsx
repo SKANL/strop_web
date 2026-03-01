@@ -59,7 +59,7 @@ export function RoleWizard({ open, onOpenChange, roleToEdit }: RoleWizardProps) 
     })
 
     if (result.error) {
-      toast.error(result.error)
+      toast.error(typeof result.error === 'string' ? result.error : 'Error al guardar el rol')
     } else {
       toast.success("Rol guardado correctamente")
       onOpenChange(false)

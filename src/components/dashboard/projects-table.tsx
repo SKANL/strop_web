@@ -24,8 +24,7 @@ import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Progress } from "@/components/ui/progress"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
-import { Search, Plus, Filter, ArrowUpDown } from "lucide-react"
-import { ProjectSetupDrawer } from "./project-setup-drawer"
+import { Search, Filter, ArrowUpDown } from "lucide-react"
 import { useRouter } from "next/navigation"
 
 // --- Types ---
@@ -43,12 +42,11 @@ export type Project = {
   status: "Activo" | "Pausado" | "Finalizado"
 }
 
-export function ProjectsTable({ projects = [], staff = [] }: { projects?: Project[], staff?: any[] }) {
+export function ProjectsTable({ projects = [] }: { projects?: Project[] }) {
     const router = useRouter()
     const [sorting, setSorting] = React.useState<SortingState>([])
     const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([])
     const [globalFilter, setGlobalFilter] = React.useState("")
-    const [isSetupOpen, setIsSetupOpen] = React.useState(false)
     
     // Use passed projects directly
     const data = projects
@@ -186,10 +184,6 @@ export function ProjectsTable({ projects = [], staff = [] }: { projects?: Projec
                         <Filter className="h-4 w-4" />
                     </Button>
                 </div>
-                <Button size="sm" className="h-9 gap-1" onClick={() => setIsSetupOpen(true)}>
-                    <Plus className="h-4 w-4" />
-                    Nuevo Proyecto
-                </Button>
              </div>
 
              {/* Table */}
@@ -241,8 +235,6 @@ export function ProjectsTable({ projects = [], staff = [] }: { projects?: Projec
                     </Table>
                  </div>
              </div>
-
-             <ProjectSetupDrawer isOpen={isSetupOpen} onClose={() => setIsSetupOpen(false)} staff={staff} />
         </div>
     )
 }

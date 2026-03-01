@@ -21,7 +21,10 @@ export function PanicRoom({ alerts = [] }: { alerts: PanicRoomAlert[] }) {
           alerts.map((alert) => (
             <div
               key={alert.id}
-              className="flex items-start gap-3 rounded-md border bg-background/80 p-3 shadow-sm hover:bg-accent cursor-pointer transition-colors"
+              role="button"
+              tabIndex={0}
+              aria-label={`Alerta: ${alert.project} — ${alert.message}`}
+              className="flex items-start gap-3 rounded-md border bg-background/80 p-3 shadow-sm hover:bg-accent cursor-pointer transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
             >
               {alert.type === 'financial' ? 
                   <DollarSign className="mt-px h-4 w-4 text-destructive shrink-0" /> : 
@@ -41,8 +44,14 @@ export function PanicRoom({ alerts = [] }: { alerts: PanicRoomAlert[] }) {
             </div>
           ))
         ) : (
-          <div className="flex flex-col items-center justify-center h-full text-muted-foreground text-xs">
-            <p>No critical alerts</p>
+          <div className="flex flex-col items-center justify-center h-full gap-3 py-8">
+            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-emerald-50 dark:bg-emerald-950/30">
+              <ShieldAlert className="h-6 w-6 text-emerald-600 dark:text-emerald-400" aria-hidden="true" />
+            </div>
+            <div className="text-center space-y-1">
+              <p className="text-sm font-medium text-foreground">Todo está bajo control</p>
+              <p className="text-xs text-muted-foreground">Sin alertas críticas en este momento</p>
+            </div>
           </div>
         )}
       </CardContent>

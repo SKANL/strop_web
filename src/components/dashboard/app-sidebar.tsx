@@ -1,22 +1,6 @@
-"use client"
+"use server"
 
 import * as React from "react"
-import {
-  AlertTriangle,
-  BookOpen,
-  Bot,
-  Building2,
-  Command,
-  Frame,
-  LayoutDashboard,
-  LifeBuoy,
-  Map,
-  PieChart,
-  Send,
-  Settings2,
-  SquareTerminal,
-  Users,
-} from "lucide-react"
 
 import { NavMain } from "@/components/dashboard/nav-main"
 import { NavSecondary } from "@/components/dashboard/nav-secondary"
@@ -30,81 +14,57 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar"
+import { createClient } from "@/lib/supabase/server"
+import Link from "next/link"
 
-const data = {
-  user: {
-    name: "Admin User",
-    email: "admin@strop.com",
-    avatar: "https://github.com/shadcn.png",
-  },
-  navMain: [
-    {
-      title: "Dashboard",
-      url: "/dashboard",
-      icon: LayoutDashboard,
-      isActive: true,
-    },
-    {
-      title: "Proyectos",
-      url: "/dashboard/projects",
-      icon: Building2,
-    },
-    {
-      title: "Incidencias",
-      url: "/dashboard/incidents",
-      icon: AlertTriangle,
-    },
-    {
-      title: "Equipo",
-      url: "/dashboard/team",
-      icon: Users,
-    },
-  ],
-  navSecondary: [
-    {
-      title: "Configuración",
-      url: "/dashboard/settings",
-      icon: Settings2,
-    },
-    {
-      title: "Soporte",
-      url: "#",
-      icon: LifeBuoy,
-    },
-    {
-      title: "Feedback",
-      url: "#",
-      icon: Send,
-    },
-  ],
-}
+export async function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
+  // Fetch real authenticated user
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
 
-export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
+  // Get profile from users table for full_name and avatar
+  let userName = user?.email?.split("@")[0] ?? "Usuario"
+  let userEmail = user?.email ?? ""
+  let userAvatar = ""
+
+  if (user) {
+    const { data: profile } = await supabase
+      .from("users")
+      .select("full_name, avatar_url")
+      .eq("id", user.id)
+      .single()
+
+    if (profile) {
+      userName = profile.full_name || userName
+      userAvatar = profile.avatar_url || ""
+    }
+  }
+
   return (
     <Sidebar variant="inset" {...props}>
       <SidebarHeader>
         <SidebarMenu>
           <SidebarMenuItem>
             <SidebarMenuButton size="lg" asChild>
-              <a href="#">
-                <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground">
-                  <Command className="size-4" />
+              <Link href="/dashboard">
+                <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground font-bold text-xs">
+                  ST
                 </div>
                 <div className="grid flex-1 text-left text-sm leading-tight">
-                  <span className="truncate font-semibold">Strop SaaS</span>
-                  <span className="truncate text-xs">Enterprise</span>
+                  <span className="truncate font-semibold">Strop</span>
+                  <span className="truncate text-xs text-sidebar-foreground/60">Gestión de Obras</span>
                 </div>
-              </a>
+              </Link>
             </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>
       </SidebarHeader>
       <SidebarContent>
-        <NavMain items={data.navMain} />
-        <NavSecondary items={data.navSecondary} className="mt-auto" />
+        <NavMain />
+        <NavSecondary className="mt-auto" />
       </SidebarContent>
       <SidebarFooter>
-        <NavUser user={data.user} />
+        <NavUser user={{ name: userName, email: userEmail, avatar: userAvatar }} />
       </SidebarFooter>
     </Sidebar>
   )

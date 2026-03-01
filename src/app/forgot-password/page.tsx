@@ -5,14 +5,7 @@ import { createClient } from "@/lib/supabase/client"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card"
+import { AuthCard } from "@/components/auth/auth-card"
 import { AlertCircle, CheckCircle2, Loader2, ArrowLeft } from "lucide-react"
 import Link from "next/link"
 
@@ -45,71 +38,82 @@ export default function ForgotPasswordPage() {
   }
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-muted/40 px-4">
-      <Card className="w-full max-w-md">
-        <CardHeader className="space-y-1">
-          <CardTitle className="text-2xl font-bold text-center">
-            Recuperar Contraseña
-          </CardTitle>
-          <CardDescription className="text-center">
-            Ingresa tu correo para recibir un enlace de restablecimiento
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          {success ? (
-            <div className="flex flex-col items-center justify-center space-y-4 py-4">
-              <div className="rounded-full bg-emerald-500/15 p-3">
-                <CheckCircle2 className="h-6 w-6 text-emerald-600" />
-              </div>
-              <div className="text-center space-y-2">
-                <h3 className="font-semibold text-lg">¡Correo Enviado!</h3>
-                <p className="text-sm text-balance text-muted-foreground">
-                  Si existe una cuenta asociada a <strong>{email}</strong>, recibirás instrucciones en breve.
-                </p>
-              </div>
-            </div>
-          ) : (
-            <form onSubmit={handleReset} className="space-y-4">
-              {error && (
-                <div className="p-3 text-sm text-destructive bg-destructive/15 border border-destructive/50 rounded-md flex items-center gap-2">
-                  <AlertCircle className="h-4 w-4" />
-                  {error}
-                </div>
-              )}
-              <div className="space-y-2">
-                <Label htmlFor="email">Correo Electrónico</Label>
-                <Input
-                  id="email"
-                  type="email"
-                  placeholder="admin@strop.com"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  required
-                />
-              </div>
-              <Button className="w-full" type="submit" disabled={loading}>
-                {loading ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Enviando...
-                  </>
-                ) : (
-                  "Enviar Enlace"
-                )}
-              </Button>
-            </form>
-          )}
-        </CardContent>
-        <CardFooter className="flex justify-center">
-          <Link
-            href="/login"
-            className="flex items-center text-sm text-muted-foreground hover:text-foreground transition-colors"
-          >
-            <ArrowLeft className="mr-2 h-4 w-4" />
-            Volver al inicio de sesión
+    <AuthCard
+      tagline="Recupera el acceso a tu cuenta en segundos."
+      features={["Enlace seguro por correo", "Expira en 60 minutos", "Sin acceso no autorizado"]}
+    >
+      <div className="flex flex-col gap-6">
+        <div className="flex flex-col items-center text-center">
+          <Link href="/" className="mb-1 text-xl font-bold tracking-tighter">
+            STROP<span className="text-orange-500">.</span>
           </Link>
-        </CardFooter>
-      </Card>
-    </div>
+          <h1 className="text-2xl font-bold">Recuperar Contraseña</h1>
+          <p className="mt-1 text-sm text-muted-foreground">
+            Ingresa tu correo para recibir un enlace de restablecimiento.
+          </p>
+        </div>
+
+        {success ? (
+          <div className="flex flex-col items-center justify-center gap-4 py-4">
+            <div className="rounded-full bg-emerald-500/15 p-3">
+              <CheckCircle2 className="h-6 w-6 text-emerald-600" aria-hidden="true" />
+            </div>
+            <div className="text-center space-y-1">
+              <p className="font-semibold">¡Correo Enviado!</p>
+              <p className="text-sm text-balance text-muted-foreground">
+                Si existe una cuenta con <strong>{email}</strong>, recibirás instrucciones en breve.
+              </p>
+            </div>
+            <Link
+              href="/login"
+              className="flex items-center text-sm text-muted-foreground hover:text-foreground transition-colors"
+            >
+              <ArrowLeft className="mr-2 h-4 w-4" aria-hidden="true" />
+              Volver al inicio de sesión
+            </Link>
+          </div>
+        ) : (
+          <form onSubmit={handleReset} className="flex flex-col gap-4">
+            {error && (
+              <div className="p-3 text-sm text-destructive bg-destructive/15 border border-destructive/50 rounded-md flex items-center gap-2">
+                <AlertCircle className="h-4 w-4" aria-hidden="true" />
+                {error}
+              </div>
+            )}
+            <div className="grid gap-2">
+              <Label htmlFor="email">Correo Electrónico</Label>
+              <Input
+                id="email"
+                type="email"
+                placeholder="admin@strop.com"
+                autoComplete="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+              />
+            </div>
+            <Button className="w-full bg-orange-600 hover:bg-orange-700 text-white" type="submit" disabled={loading}>
+              {loading ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" aria-hidden="true" />
+                  Enviando...
+                </>
+              ) : (
+                "Enviar Enlace"
+              )}
+            </Button>
+            <div className="text-center">
+              <Link
+                href="/login"
+                className="flex items-center justify-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors"
+              >
+                <ArrowLeft className="h-4 w-4" aria-hidden="true" />
+                Volver al inicio de sesión
+              </Link>
+            </div>
+          </form>
+        )}
+      </div>
+    </AuthCard>
   )
 }

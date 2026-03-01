@@ -1,6 +1,7 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useTransition } from "react"
+import { inviteCrewMember } from "@/app/actions/team"
 import { Button } from "@/components/ui/button"
 import {
   Dialog,
@@ -28,6 +29,7 @@ export function CrewInviteDialog({ projectName }: { projectName?: string }) {
   const [open, setOpen] = useState(false)
   const [step, setStep] = useState<"form" | "credentials">("form")
   const [copied, setCopied] = useState(false)
+  const [isPending, startTransition] = useTransition()
   
   const [formData, setFormData] = useState({
     name: "",
@@ -35,27 +37,39 @@ export function CrewInviteDialog({ projectName }: { projectName?: string }) {
     company: "",
   })
 
-  // Generated credentials
   const [credentials, setCredentials] = useState({
     username: "",
     password: ""
   })
 
-  const generateCredentials = () => {
-    // Basic slugify for MVP
-    const cleanName = formData.name.toLowerCase().replace(/[^a-z0-9]/g, '_')
-    const randomSuffix = Math.floor(Math.random() * 1000)
-    
-    setCredentials({
-      username: `${cleanName}_${randomSuffix}`,
-      password: Math.random().toString(36).slice(-8).toUpperCase()
-    })
+  const buildCredentials = (name: string) => {
+    const cleanName = name.toLowerCase().replace(/[^a-z0-9]/g, '_').replace(/_+/g, '_').replace(/^_|_$/g, '')
+    const suffix = Math.floor(Math.random() * 900) + 100
+    const password = Array.from(crypto.getRandomValues(new Uint8Array(6)))
+      .map(b => b.toString(36))
+      .join('')
+      .toUpperCase()
+    return { username: `${cleanName}_${suffix}`, password }
   }
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
-    generateCredentials()
-    setStep("credentials")
+    const generated = buildCredentials(formData.name)
+    setCredentials(generated)
+    startTransition(async () => {
+      const result = await inviteCrewMember({
+        name: formData.name,
+        trade: formData.trade,
+        company: formData.company || undefined,
+        username: generated.username,
+        password: generated.password,
+      })
+      if (!result.data) {
+        toast.error(result.error || 'Error al crear acceso')
+        return
+      }
+      setStep("credentials")
+    })
   }
 
   const getWhatsAppMessage = () => {
@@ -162,8 +176,8 @@ _(Este acceso caduca al finalizar el proyecto)_`
               <Button type="button" variant="ghost" onClick={handleReset}>
                 Cancelar
               </Button>
-              <Button type="submit">
-                Generar Credenciales
+              <Button type="submit" disabled={isPending}>
+                {isPending ? "Creando acceso..." : "Generar Credenciales"}
               </Button>
             </DialogFooter>
           </form>

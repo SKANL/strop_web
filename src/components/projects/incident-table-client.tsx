@@ -30,6 +30,7 @@ import {
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
+import { StatusBadge } from "@/components/ui/status-badge"
 import { Edit2, Link as LinkIcon } from "lucide-react"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { toast } from "sonner"
@@ -164,7 +165,7 @@ export function IncidentTableClient({ incidents }: IncidentTableClientProps) {
     },
     {
       accessorKey: "description",
-      header: "Description",
+      header: "DESCRIPCIÓN",
       cell: ({ row }) => (
         <div className="max-w-md truncate">
           {row.original.description}
@@ -173,27 +174,18 @@ export function IncidentTableClient({ incidents }: IncidentTableClientProps) {
     },
     {
       accessorKey: "location_tag",
-      header: "Location",
+      header: "UBICACIÓN",
       cell: ({ row }) => row.original.location_tag || "—",
     },
     {
       accessorKey: "assigned_to_user",
-      header: "Assigned",
-      cell: ({ row }) => row.original.assigned_to_user?.full_name || "Unassigned",
+      header: "ASIGNADO A",
+      cell: ({ row }) => row.original.assigned_to_user?.full_name || "Sin asignar",
     },
     {
       accessorKey: "status",
-      header: "Status",
-      cell: ({ row }) => {
-        const status = row.original.status
-        const variant = 
-          status === 'CRITICAL' ? 'destructive' :
-          status === 'OPEN' ? 'default' :
-          status === 'IN_REVIEW' ? 'secondary' :
-          'outline'
-        
-        return <Badge variant={variant as any}>{status}</Badge>
-      },
+      header: "ESTADO",
+      cell: ({ row }) => <StatusBadge status={row.original.status} showDot />,
     },
     {
       accessorKey: "actual_cost",
@@ -238,7 +230,7 @@ export function IncidentTableClient({ incidents }: IncidentTableClientProps) {
     <div className="space-y-4">
       <div className="flex items-center gap-2">
         <Input
-          placeholder="Filter by description..."
+          placeholder="Buscar por descripción..."
           value={(table.getColumn("description")?.getFilterValue() as string) ?? ""}
           onChange={(event) =>
             table.getColumn("description")?.setFilterValue(event.target.value)
@@ -278,7 +270,7 @@ export function IncidentTableClient({ incidents }: IncidentTableClientProps) {
             ) : (
               <TableRow>
                 <TableCell colSpan={columns.length} className="h-24 text-center">
-                  No incidents found.
+                  No se encontraron incidencias.
                 </TableCell>
               </TableRow>
             )}

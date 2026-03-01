@@ -64,55 +64,70 @@ export async function inviteStaffMember(formData: {
   email: string
   fullName: string
   roleId: string
+  password: string
   projectIds?: string[]
 }) {
-  if (!await checkPermission('team.invite')) {
-    return { data: null, error: 'No tienes permisos para invitar usuarios' }
-  }
-
   const supabase = await createClient()
-  
-  // Get current user
-  const { data: { user }, error: userError } = await supabase.auth.getUser()
-  if (userError || !user) {
-    return { data: null, error: 'Not authenticated' }
-  }
 
-  // Get user's organization
-  const { data: userData, error: userDataError } = await supabase
+  // Get current user + org
+  const { data: { user }, error: userError } = await supabase.auth.getUser()
+  if (userError || !user) return { data: null, error: 'No autenticado' }
+
+  const { data: userData } = await supabase
     .from('users')
     .select('organization_id')
     .eq('id', user.id)
     .single()
 
-  if (userDataError || !userData) {
-    return { data: null, error: 'User not found' }
-  }
+  if (!userData?.organization_id) return { data: null, error: 'Organización no encontrada' }
 
-  // Check if email already exists
+  // Check duplicate
   const { data: existingUser } = await supabase
     .from('users')
     .select('id')
     .eq('email', formData.email)
     .single()
 
-  if (existingUser) {
-    return { data: null, error: 'User with this email already exists' }
+  if (existingUser) return { data: null, error: 'Ya existe un usuario con ese correo' }
+
+  // Create auth user with admin client
+  const { createAdminClient } = await import('@/lib/supabase/admin')
+  const adminSupabase = createAdminClient()
+
+  const { data: authData, error: authError } = await adminSupabase.auth.admin.createUser({
+    email: formData.email,
+    password: formData.password,
+    email_confirm: true,
+    user_metadata: {
+      full_name: formData.fullName,
+      organization_id: userData.organization_id,
+    },
+  })
+
+  if (authError || !authData.user) {
+    return { data: null, error: authError?.message || 'Error al crear la cuenta' }
   }
 
-  // Create auth user via Supabase Admin API
-  // Note: This requires admin privileges, typically done via Edge Function
-  // For now, we'll return instructions to invite via Supabase Dashboard
-  
-  return {
-    data: {
-      message: 'Please invite user via Supabase Dashboard Auth section',
+  // Create user profile row
+  const { error: profileError } = await adminSupabase
+    .from('users')
+    .insert({
+      id: authData.user.id,
       email: formData.email,
-      roleId: formData.roleId,
-      projectIds: formData.projectIds,
-    },
-    error: null,
+      full_name: formData.fullName,
+      organization_id: userData.organization_id,
+      role_id: formData.roleId || null,
+      is_active: true,
+    } as any)
+
+  if (profileError) {
+    // Roll back auth user
+    await adminSupabase.auth.admin.deleteUser(authData.user.id)
+    return { data: null, error: 'Error al crear el perfil: ' + profileError.message }
   }
+
+  revalidatePath('/dashboard/team')
+  return { data: { userId: authData.user.id }, error: null }
 }
 
 /**
@@ -205,6 +220,80 @@ export async function deactivateTeamMember(userId: string) {
   revalidatePath('/dashboard/team')
   
   return { data: { success: true }, error: null }
+}
+
+/**
+ * Invite a crew / external contractor member (generates username-based access)
+ */
+export async function inviteCrewMember(formData: {
+  name: string
+  trade: string
+  company?: string
+  username: string
+  password: string
+}) {
+  const supabase = await createClient()
+
+  const { data: { user }, error: userError } = await supabase.auth.getUser()
+  if (userError || !user) return { data: null, error: 'No autenticado' }
+
+  const { data: userData } = await supabase
+    .from('users')
+    .select('organization_id')
+    .eq('id', user.id)
+    .single()
+
+  if (!userData?.organization_id) return { data: null, error: 'Organización no encontrada' }
+
+  // Crew members use a synthetic email so Supabase Auth can accept them
+  const email = `${formData.username}@crew.strop.app`
+
+  // Check duplicate username
+  const { data: existing } = await supabase
+    .from('users')
+    .select('id')
+    .eq('email', email)
+    .single()
+
+  if (existing) return { data: null, error: 'Ya existe un usuario con ese nombre de acceso' }
+
+  const { createAdminClient } = await import('@/lib/supabase/admin')
+  const adminSupabase = createAdminClient()
+
+  const { data: authData, error: authError } = await adminSupabase.auth.admin.createUser({
+    email,
+    password: formData.password,
+    email_confirm: true,
+    user_metadata: {
+      full_name: formData.name,
+      trade: formData.trade,
+      company: formData.company,
+      organization_id: userData.organization_id,
+      is_crew: true,
+    },
+  })
+
+  if (authError || !authData.user) {
+    return { data: null, error: authError?.message || 'Error al crear credenciales' }
+  }
+
+  const { error: profileError } = await adminSupabase
+    .from('users')
+    .insert({
+      id: authData.user.id,
+      email,
+      full_name: formData.name,
+      organization_id: userData.organization_id,
+      is_active: true,
+    } as any)
+
+  if (profileError) {
+    await adminSupabase.auth.admin.deleteUser(authData.user.id)
+    return { data: null, error: 'Error al crear perfil: ' + profileError.message }
+  }
+
+  revalidatePath('/dashboard/team')
+  return { data: { userId: authData.user.id, email }, error: null }
 }
 
 /**

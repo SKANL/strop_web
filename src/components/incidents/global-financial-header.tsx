@@ -13,8 +13,7 @@ export function GlobalFinancialHeader({ incidents }: { incidents: any[] }) {
       acc.activeRisk += (incident.estimated_cost || 0)
     }
 
-    // Recovered: Cost of closed incidents (assuming charged/resolved)
-    // TODO: Filter by 'charged_to_contractor' flag when available
+    // Recovered: cost of closed incidents charged to contractor or absorbed
     if (incident.status === 'CLOSED') {
       acc.recovered += (incident.actual_cost || incident.estimated_cost || 0)
     }

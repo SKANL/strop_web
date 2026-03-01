@@ -32,16 +32,33 @@ export async function getRoles() {
     return { data: null, error: 'User not found' }
   }
 
-  const { data, error } = await supabase
-    .from('roles')
-    .select('*')
-    .eq('organization_id', userData.organization_id)
-    .order('created_at', { ascending: false })
+  const [rolesResult, userCountsResult] = await Promise.all([
+    supabase
+      .from('roles')
+      .select('*')
+      .eq('organization_id', userData.organization_id)
+      .order('created_at', { ascending: false }),
+    supabase
+      .from('users')
+      .select('role_id')
+      .eq('organization_id', userData.organization_id)
+      .not('role_id', 'is', null)
+  ])
 
-  if (error) {
-    console.error('Error fetching roles:', error)
-    return { data: null, error: error.message }
+  if (rolesResult.error) {
+    console.error('Error fetching roles:', rolesResult.error)
+    return { data: null, error: rolesResult.error.message }
   }
+
+  const countMap = (userCountsResult.data || []).reduce((acc, u) => {
+    if (u.role_id) acc[u.role_id] = (acc[u.role_id] || 0) + 1
+    return acc
+  }, {} as Record<string, number>)
+
+  const data = rolesResult.data?.map(r => ({
+    ...r,
+    userCount: countMap[r.id] || 0
+  }))
 
   return { data, error: null }
 }

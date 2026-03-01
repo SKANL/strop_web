@@ -4,17 +4,10 @@ import { useState } from "react"
 import { useRouter } from "next/navigation"
 import { createClient } from "@/lib/supabase/client"
 import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card"
-import { AlertCircle, CheckCircle2, Loader2, Lock } from "lucide-react"
+import { PasswordInput } from "@/components/ui/password-input"
+import { AuthCard } from "@/components/auth/auth-card"
+import { AlertCircle, CheckCircle2, Loader2 } from "lucide-react"
 import Link from "next/link"
 
 export default function ResetPasswordPage() {
@@ -23,6 +16,7 @@ export default function ResetPasswordPage() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState(false)
+  const [tokenExpired, setTokenExpired] = useState(false)
   const router = useRouter()
   const supabase = createClient()
 
@@ -47,13 +41,23 @@ export default function ResetPasswordPage() {
         password: password
       })
 
-      if (error) throw error
+      if (error) {
+        // Detect expired / invalid token errors
+        if (
+          error.message?.toLowerCase().includes('expired') ||
+          error.message?.toLowerCase().includes('invalid') ||
+          error.status === 401 || error.status === 403
+        ) {
+          setTokenExpired(true)
+        }
+        throw error
+      }
 
       setSuccess(true)
       
       // Redirect after short delay
       setTimeout(() => {
-        router.push("/")
+        router.push("/dashboard")
       }, 2000)
     } catch (err: any) {
       setError(err.message || "No se pudo actualizar la contraseña. Es posible que el enlace haya expirado.")
@@ -63,18 +67,37 @@ export default function ResetPasswordPage() {
   }
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-muted/40 px-4">
-      <Card className="w-full max-w-md">
-        <CardHeader className="space-y-1">
-          <CardTitle className="text-2xl font-bold text-center">
-            Nueva Contraseña
-          </CardTitle>
-          <CardDescription className="text-center">
-            Ingresa tu nueva contraseña para segura tu cuenta
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          {success ? (
+    <AuthCard
+      tagline="Casi listo. Elige una contraseña segura."
+      features={["Mínimo 6 caracteres", "Enlace de un solo uso", "Cifrado de extremo a extremo"]}
+    >
+      <div className="flex flex-col gap-6">
+        <div className="flex flex-col items-center text-center">
+          <Link href="/" className="mb-1 text-xl font-bold tracking-tighter">
+            STROP<span className="text-orange-500">.</span>
+          </Link>
+          <h1 className="text-2xl font-bold">Nueva Contraseña</h1>
+          <p className="mt-1 text-sm text-muted-foreground">
+            Ingresa tu nueva contraseña para asegurar tu cuenta.
+          </p>
+        </div>
+          {/* ── Token expired state ── */}
+          {tokenExpired ? (
+            <div className="flex flex-col items-center justify-center space-y-4 py-4">
+              <div className="rounded-full bg-destructive/15 p-3">
+                <AlertCircle className="h-6 w-6 text-destructive" />
+              </div>
+              <div className="text-center space-y-2">
+                <h3 className="font-semibold text-lg">Enlace Expirado</h3>
+                <p className="text-sm text-balance text-muted-foreground">
+                  Este enlace ya no es válido. Solicita uno nuevo desde la pantalla de recuperación.
+                </p>
+              </div>
+              <Button asChild className="w-full bg-orange-600 hover:bg-orange-700 text-white">
+                <Link href="/forgot-password">Solicitar nuevo enlace</Link>
+              </Button>
+            </div>
+          ) : success ? (
             <div className="flex flex-col items-center justify-center space-y-4 py-4">
               <div className="rounded-full bg-emerald-500/15 p-3">
                 <CheckCircle2 className="h-6 w-6 text-emerald-600" />
@@ -94,37 +117,29 @@ export default function ResetPasswordPage() {
                   {error}
                 </div>
               )}
-              
+
               <div className="space-y-2">
                 <Label htmlFor="password">Nueva Contraseña</Label>
-                <div className="relative">
-                  <Lock className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
-                  <Input
-                    id="password"
-                    type="password"
-                    className="pl-9"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    required
-                    minLength={6}
-                  />
-                </div>
+                <PasswordInput
+                  id="password"
+                  autoComplete="new-password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  required
+                  minLength={6}
+                />
               </div>
 
               <div className="space-y-2">
                 <Label htmlFor="confirmPassword">Confirmar Contraseña</Label>
-                <div className="relative">
-                  <Lock className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
-                  <Input
-                    id="confirmPassword"
-                    type="password"
-                    className="pl-9"
-                    value={confirmPassword}
-                    onChange={(e) => setConfirmPassword(e.target.value)}
-                    required
-                    minLength={6}
-                  />
-                </div>
+                <PasswordInput
+                  id="confirmPassword"
+                  autoComplete="new-password"
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  required
+                  minLength={6}
+                />
               </div>
 
               <Button className="w-full" type="submit" disabled={loading}>
@@ -139,8 +154,7 @@ export default function ResetPasswordPage() {
               </Button>
             </form>
           )}
-        </CardContent>
-      </Card>
-    </div>
+      </div>
+    </AuthCard>
   )
 }

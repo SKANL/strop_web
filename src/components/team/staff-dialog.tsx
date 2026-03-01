@@ -1,6 +1,7 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
+import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import {
   Dialog,
@@ -20,38 +21,60 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import { Plus, Loader2, CheckCircle2 } from "lucide-react"
+import { Plus, Loader2 } from "lucide-react"
 import { toast } from "sonner"
+import { inviteStaffMember } from "@/app/actions/team"
+import { getRoles } from "@/app/actions/roles"
+
+type Role = { id: string; display_name: string }
+
+const INITIAL_FORM = {
+  name: "",
+  email: "",
+  roleId: "",
+  initialPassword: "Strop" + new Date().getFullYear(),
+}
 
 export function StaffCreationDialog() {
+  const router = useRouter()
   const [open, setOpen] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
-  const [formData, setFormData] = useState({
-    name: "",
-    email: "",
-    role: "resident",
-    initialPassword: "Strop" + new Date().getFullYear()
-  })
+  const [roles, setRoles] = useState<Role[]>([])
+  const [formData, setFormData] = useState(INITIAL_FORM)
+
+  // Fetch real roles when dialog opens
+  useEffect(() => {
+    if (!open) return
+    getRoles().then(({ data }) => {
+      if (data) setRoles(data as unknown as Role[])
+    })
+  }, [open])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+    if (!formData.roleId) {
+      toast.error("Selecciona un rol antes de continuar")
+      return
+    }
     setIsLoading(true)
-
-    // Simulate API delay
-    await new Promise((resolve) => setTimeout(resolve, 1500))
-
-    toast.success("Miembro creado exitosamente", {
-      description: `Se ha enviado una invitación a ${formData.email}`
+    const result = await inviteStaffMember({
+      email: formData.email,
+      fullName: formData.name,
+      roleId: formData.roleId,
+      password: formData.initialPassword,
     })
-
     setIsLoading(false)
-    setOpen(false)
-    setFormData({
-      name: "",
-      email: "",
-      role: "resident",
-      initialPassword: "Strop" + new Date().getFullYear()
-    })
+
+    if (result.error) {
+      toast.error(result.error)
+    } else {
+      toast.success("Miembro creado exitosamente", {
+        description: `Cuenta creada para ${formData.email}`,
+      })
+      setOpen(false)
+      setFormData(INITIAL_FORM)
+      router.refresh()
+    }
   }
 
   return (
@@ -67,7 +90,7 @@ export function StaffCreationDialog() {
           <DialogHeader>
             <DialogTitle>Agregar Nuevo Miembro</DialogTitle>
             <DialogDescription>
-              Crea una cuenta para personal interno de la empresa. Esto consumirá una licencia disponible.
+              Crea una cuenta para personal interno. Esto consumirá una licencia disponible.
             </DialogDescription>
           </DialogHeader>
           <div className="grid gap-4 py-4">
@@ -81,7 +104,7 @@ export function StaffCreationDialog() {
                 required
               />
             </div>
-            
+
             <div className="grid gap-2">
               <Label htmlFor="email">Correo Electrónico</Label>
               <Input
@@ -93,21 +116,25 @@ export function StaffCreationDialog() {
                 required
               />
             </div>
-            
+
             <div className="grid gap-2">
               <Label htmlFor="role">Rol en la Organización</Label>
-              <Select 
-                value={formData.role} 
-                onValueChange={(value) => setFormData({ ...formData, role: value })}
+              <Select
+                value={formData.roleId}
+                onValueChange={(value) => setFormData({ ...formData, roleId: value })}
               >
                 <SelectTrigger>
                   <SelectValue placeholder="Selecciona un rol" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="admin">Administrador</SelectItem>
-                  <SelectItem value="superintendent">Superintendente</SelectItem>
-                  <SelectItem value="resident">Residente de Obra</SelectItem>
-                  <SelectItem value="analyst">Analista de Costos</SelectItem>
+                  {roles.length === 0 && (
+                    <SelectItem value="_loading" disabled>Cargando roles...</SelectItem>
+                  )}
+                  {roles.map((role) => (
+                    <SelectItem key={role.id} value={role.id}>
+                      {role.display_name}
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
             </div>
@@ -120,19 +147,22 @@ export function StaffCreationDialog() {
                   value={formData.initialPassword}
                   onChange={(e) => setFormData({ ...formData, initialPassword: e.target.value })}
                   className="font-mono bg-muted/50"
+                  required
                 />
                 <Button
                   type="button"
                   variant="ghost"
                   size="icon"
                   className="absolute right-0 top-0 h-full px-3 text-muted-foreground hover:text-foreground"
-                  onClick={() => {
-                    const newPass = Math.random().toString(36).slice(-8)
-                    setFormData({ ...formData, initialPassword: newPass })
-                  }}
+                  onClick={() =>
+                    setFormData({
+                      ...formData,
+                      initialPassword: Math.random().toString(36).slice(-10).toUpperCase(),
+                    })
+                  }
                   title="Generar nueva"
                 >
-                  <CheckCircle2 className="h-4 w-4" />
+                  ↺
                 </Button>
               </div>
               <p className="text-[10px] text-muted-foreground">

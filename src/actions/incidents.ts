@@ -138,3 +138,82 @@ export async function generatePublicLinkAction(incidentId: string) {
     }
 }
 
+/**
+ * Submit evidence for a public-link incident (no auth required).
+ * Accepts a base64 data-URL, uploads it to Supabase Storage,
+ * saves the URL to the incident, and sets status → IN_REVIEW.
+ */
+export async function submitEvidenceAction(token: string, base64DataUrl: string) {
+    try {
+        const { createClient } = await import('@/lib/supabase/server')
+        const supabase = await createClient()
+
+        // 1. Find the incident by token (RLS: public anon read on incidents via token)
+        const { data: incident, error: fetchError } = await supabase
+            .from('incidents')
+            .select('id, folio_number, status')
+            .eq('public_token', token)
+            .single()
+
+        if (fetchError || !incident) {
+            return { success: false, message: 'Incidencia no encontrada o token inválido.' }
+        }
+
+        if (incident.status === 'CLOSED' || incident.status === 'REJECTED') {
+            return { success: false, message: 'Esta incidencia ya fue cerrada o rechazada.' }
+        }
+
+        // 2. Decode base64 → Buffer and upload to Storage
+        const base64 = base64DataUrl.replace(/^data:image\/\w+;base64,/, '')
+        const buffer = Buffer.from(base64, 'base64')
+        const mimeMatch = base64DataUrl.match(/^data:(image\/\w+);base64,/)
+        const mimeType = mimeMatch ? mimeMatch[1] : 'image/jpeg'
+        const ext = mimeType.split('/')[1] || 'jpg'
+        const fileName = `evidence/${incident.id}/${Date.now()}.${ext}`
+
+        const { data: uploadData, error: uploadError } = await supabase.storage
+            .from('incident-photos')
+            .upload(fileName, buffer, { contentType: mimeType, upsert: false })
+
+        if (uploadError) {
+            console.error('Storage upload error:', uploadError)
+            return { success: false, message: 'Error al subir la foto. Intenta de nuevo.' }
+        }
+
+        const { data: { publicUrl } } = supabase.storage
+            .from('incident-photos')
+            .getPublicUrl(uploadData.path)
+
+        // 3. Insert photo record + update incident status in a single RPC if available,
+        //    otherwise do both operations sequentially.
+        const { error: photoError } = await supabase
+            .from('incident_photos')
+            .insert({
+                incident_id: incident.id,
+                photo_url: publicUrl,
+                photo_type: 'SOLUTION',
+            })
+
+        if (photoError) {
+            console.error('Photo insert error:', photoError)
+            // Don't hard-fail — status update is more important
+        }
+
+        const { error: statusError } = await supabase
+            .from('incidents')
+            .update({ status: 'IN_REVIEW' })
+            .eq('id', incident.id)
+
+        if (statusError) {
+            return { success: false, message: 'Error al actualizar el estado de la incidencia.' }
+        }
+
+        revalidatePath(`/r/${token}`)
+        revalidatePath('/dashboard/incidents')
+
+        return { success: true, photoUrl: publicUrl }
+    } catch (error: any) {
+        console.error('submitEvidenceAction error:', error)
+        return { success: false, message: error.message || 'Error desconocido.' }
+    }
+}

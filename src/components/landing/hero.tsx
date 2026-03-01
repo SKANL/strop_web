@@ -23,8 +23,8 @@ export function Hero() {
           </p>
           <div className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-6">
             <Button asChild size="lg" className="h-14 px-8 text-lg bg-orange-600 hover:bg-orange-700 text-white border-0 shadow-lg shadow-orange-900/20">
-              <Link href="/login">
-                Tomar el Control Ahora <ArrowRight className="ml-2 h-5 w-5" />
+              <Link href="/signup">
+                Empezar Gratis <ArrowRight className="ml-2 h-5 w-5" />
               </Link>
             </Button>
             <Link href="#features" className="text-sm font-semibold leading-6 text-white hover:text-orange-400 transition-colors">
@@ -44,9 +44,12 @@ export function Hero() {
           </div>
         </div>
         
-        {/* Background elements */}
-        <div className="absolute top-0 left-1/2 -z-10 -translate-x-1/2 blur-3xl opacity-20 pointer-events-none" aria-hidden="true">
-           <div className="aspect-1155/678 w-288.75 bg-linear-to-tr from-[#ff80b5] to-[#9089fc] opacity-30" style={{ clipPath: 'polygon(74.1% 44.1%, 100% 61.6%, 97.5% 26.9%, 85.5% 0.1%, 80.7% 2%, 72.5% 32.5%, 60.2% 62.4%, 52.4% 68.1%, 47.5% 58.3%, 45.2% 34.5%, 27.5% 76.7%, 0.1% 64.9%, 17.9% 100%, 27.6% 76.8%, 76.1% 97.7%, 74.1% 44.1%)' }}></div>
+        {/* Background elements — brand orange gradient, no off-brand purple */}
+        <div className="absolute top-0 left-1/2 -z-10 -translate-x-1/2 blur-3xl opacity-15 pointer-events-none" aria-hidden="true">
+           <div
+             className="aspect-1155/678 w-288.75 bg-linear-to-tr from-orange-600 to-red-700"
+             style={{ clipPath: 'polygon(74.1% 44.1%, 100% 61.6%, 97.5% 26.9%, 85.5% 0.1%, 80.7% 2%, 72.5% 32.5%, 60.2% 62.4%, 52.4% 68.1%, 47.5% 58.3%, 45.2% 34.5%, 27.5% 76.7%, 0.1% 64.9%, 17.9% 100%, 27.6% 76.8%, 76.1% 97.7%, 74.1% 44.1%)' }}
+           />
         </div>
       </div>
     </section>

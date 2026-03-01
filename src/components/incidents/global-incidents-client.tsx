@@ -23,7 +23,7 @@ export function GlobalIncidentsClient({ incidents, projects }: { incidents: any[
       all: incidents.length,
       urgent: incidents.filter(i => i.priority === 'CRITICAL' || i.priority === 'HIGH').length,
       pending: incidents.filter(i => i.status === 'IN_REVIEW').length,
-      withCost: incidents.filter(i => (i.actual_cost || 0) > 0).length,
+      "with-cost": incidents.filter(i => (i.actual_cost || 0) > 0).length,
       closed: incidents.filter(i => i.status === 'CLOSED').length
   }
 
@@ -69,7 +69,7 @@ export function GlobalIncidentsClient({ incidents, projects }: { incidents: any[
               </TabsTrigger>
               <TabsTrigger value="with-cost" className="text-xs font-medium">
                 Con Costo
-                <span className="ml-2 text-[10px] text-muted-foreground bg-background/50 px-1.5 py-0.5 rounded-full">{counts.withCost}</span>
+                <span className="ml-2 text-[10px] text-muted-foreground bg-background/50 px-1.5 py-0.5 rounded-full">{counts["with-cost"]}</span>
               </TabsTrigger>
               <TabsTrigger value="closed" className="text-xs font-medium">
                 Cerradas

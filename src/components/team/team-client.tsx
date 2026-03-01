@@ -1,9 +1,11 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useTransition } from "react"
+import { useRouter } from "next/navigation"
 import { Search, Users, Shield, UserCog, MoreHorizontal, Building2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
+import Link from "next/link"
 import {
   Table,
   TableBody,
@@ -24,8 +26,11 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { ConfirmDialog } from "@/components/ui/confirm-dialog"
+import { toast } from "sonner"
 
 import { StaffCreationDialog } from "@/components/team/staff-dialog"
+import { deactivateTeamMember, reactivateTeamMember } from "@/app/actions/team"
 
 interface TeamMember {
   id: string
@@ -44,8 +49,12 @@ interface TeamMember {
 }
 
 export function TeamClient({ initialMembers }: { initialMembers: any[] }) {
+  const router = useRouter()
   const [activeTab, setActiveTab] = useState("staff")
   const [searchQuery, setSearchQuery] = useState("")
+  const [isPending, startTransition] = useTransition()
+  // Confirm dialog state for destructive toggle action
+  const [confirmTarget, setConfirmTarget] = useState<{ id: string; isActive: boolean; name: string } | null>(null)
 
   // Filter members based on search
   const filteredMembers = initialMembers.filter(member => 
@@ -54,6 +63,25 @@ export function TeamClient({ initialMembers }: { initialMembers: any[] }) {
   )
 
   const activeCount = initialMembers.filter(m => m.is_active).length
+
+  const handleToggleAccess = (memberId: string, isCurrentlyActive: boolean) => {
+    startTransition(async () => {
+      const action = isCurrentlyActive ? deactivateTeamMember : reactivateTeamMember
+      const result = await action(memberId)
+      if (result.error) {
+        toast.error(result.error)
+      } else {
+        toast.success(isCurrentlyActive ? 'Acceso revocado' : 'Acceso reactivado')
+        router.refresh()
+      }
+    })
+  }
+
+  const handleConfirmedToggle = () => {
+    if (!confirmTarget) return
+    handleToggleAccess(confirmTarget.id, confirmTarget.isActive)
+    setConfirmTarget(null)
+  }
 
   return (
     <div className="flex flex-col h-full bg-muted/10 overflow-hidden">
@@ -183,7 +211,15 @@ export function TeamClient({ initialMembers }: { initialMembers: any[] }) {
                                 <DropdownMenuItem>Editar perfil</DropdownMenuItem>
                                 <DropdownMenuItem>Gestionar accesos</DropdownMenuItem>
                                 <DropdownMenuSeparator />
-                                <DropdownMenuItem className="text-destructive">
+                                <DropdownMenuItem
+                                  className="text-destructive focus:text-destructive"
+                                  disabled={isPending}
+                                  onClick={() => setConfirmTarget({
+                                    id: member.id,
+                                    isActive: member.is_active,
+                                    name: member.full_name || 'este miembro',
+                                  })}
+                                >
                                   {member.is_active ? 'Revocar acceso' : 'Reactivar acceso'}
                                 </DropdownMenuItem>
                               </DropdownMenuContent>
@@ -222,13 +258,28 @@ export function TeamClient({ initialMembers }: { initialMembers: any[] }) {
                   </p>
                 </div>
                 <Button variant="outline" asChild>
-                  <a href="/dashboard/projects">Ir a Proyectos</a>
+                  <Link href="/dashboard/projects">Ir a Proyectos</Link>
                 </Button>
               </CardContent>
             </Card>
           </TabsContent>
         </Tabs>
       </div>
+
+      {/* Confirm dialog for deactivate / reactivate */}
+      <ConfirmDialog
+        open={confirmTarget !== null}
+        onOpenChange={(open) => { if (!open) setConfirmTarget(null) }}
+        title={confirmTarget?.isActive ? `¿Revocar acceso a ${confirmTarget?.name}?` : `¿Reactivar acceso a ${confirmTarget?.name}?`}
+        description={
+          confirmTarget?.isActive
+            ? "El usuario ya no podrá iniciar sesión en Strop. Puedes reactivarlo en cualquier momento."
+            : "El usuario podrá volver a iniciar sesión y acceder a los proyectos asignados."
+        }
+        confirmLabel={confirmTarget?.isActive ? "Revocar acceso" : "Reactivar acceso"}
+        variant={confirmTarget?.isActive ? "destructive" : "default"}
+        onConfirm={handleConfirmedToggle}
+      />
     </div>
   )
 }

@@ -3,8 +3,20 @@ import { SettingsNav } from "@/components/dashboard/settings-nav"
 
 const sidebarNavItems = [
   {
+    title: "Mi Perfil",
+    href: "/dashboard/settings/profile",
+  },
+  {
+    title: "Organización",
+    href: "/dashboard/settings/organization",
+  },
+  {
     title: "Roles y Permisos",
     href: "/dashboard/settings/roles",
+  },
+  {
+    title: "Facturación y Plan",
+    href: "/dashboard/settings/billing",
   },
 ]
 
