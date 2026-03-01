@@ -70,7 +70,7 @@ function SafeCostInput({ incidentId, value, canEdit, onSave }: {
   if (!canEdit) {
     return (
       <span className="text-sm font-mono text-muted-foreground">
-        {value ? `$${value.toLocaleString()}` : "—"}
+        {value != null ? `$${value.toLocaleString()}` : "—"}
       </span>
     )
   }
@@ -93,7 +93,7 @@ function SafeCostInput({ incidentId, value, canEdit, onSave }: {
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
         <Button variant="ghost" size="sm" className="h-8 font-mono">
-          {value ? `$${value.toLocaleString()}` : "—"}
+          {value != null ? `$${value.toLocaleString()}` : "—"}
           <Edit2 className="ml-2 h-3 w-3" />
         </Button>
       </PopoverTrigger>

@@ -5,6 +5,15 @@ export type Incident = Database['public']['Tables']['incidents']['Row']
 export type InsertIncidentDTO = Database['public']['Tables']['incidents']['Insert']
 export type UpdateIncidentDTO = Database['public']['Tables']['incidents']['Update']
 
+// Resolves relative storage paths to full public URLs.
+// Old rows may have been stored as "incidentId/filename.jpg" before the bucket
+// was made public and the mobile client was fixed to store full URLs.
+function resolvePhotoUrl(url: string): string {
+  if (!url || url.startsWith('http')) return url
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+  return `${supabaseUrl}/storage/v1/object/public/incident-evidence/${url}`
+}
+
 export type CreateIncidentParams = {
   project_id: string
   description: string
@@ -38,7 +47,13 @@ export async function getIncidents(
 
   if (error) handleDbError(error)
 
-  return { data, count }
+  // Resolve any relative photo_url paths to full public storage URLs
+  const resolvedData = (data as any[])?.map((inc: any) => ({
+    ...inc,
+    photos: inc.photos?.map((p: any) => ({ ...p, photo_url: resolvePhotoUrl(p.photo_url) })) ?? [],
+  })) ?? null
+
+  return { data: resolvedData as typeof data, count }
 }
 
 export async function getIncidentById(id: string) {
@@ -58,7 +73,14 @@ export async function getIncidentById(id: string) {
 
   if (error) handleDbError(error)
 
-  return data
+  if (!data) return data
+  // Resolve any relative photo_url paths to full public storage URLs
+  const resolved = {
+    ...(data as any),
+    photos: (data as any).photos?.map((p: any) => ({ ...p, photo_url: resolvePhotoUrl(p.photo_url) })) ?? [],
+  } as typeof data
+
+  return resolved
 }
 
 export async function createIncident(incident: CreateIncidentParams) {
@@ -95,7 +117,7 @@ export async function updateIncident(id: string, updates: UpdateIncidentDTO) {
         p_incident_id: id,
         p_new_status: updates.status,
         p_comment: updates.rejection_reason || undefined, 
-        p_actual_cost: updates.actual_cost || undefined
+        p_actual_cost: updates.actual_cost != null ? updates.actual_cost : undefined
      })
      if (error) handleDbError(error)
      return data
@@ -183,7 +205,8 @@ export async function getIncidentByToken(token: string) {
     .rpc('get_incident_by_public_token', { p_token: token })
 
   if (error) handleDbError(error)
-  return data as {
+
+  type PublicIncident = {
     id: string
     folio_number: number
     status: string
@@ -195,7 +218,16 @@ export async function getIncidentByToken(token: string) {
     project: { name: string } | null
     created_by_user: { full_name: string } | null
     photos: { photo_url: string; photo_type: string }[]
-  } | null
+  }
+
+  const raw = data as PublicIncident | null
+  if (!raw) return null
+
+  // Resolve any relative photo_url paths to full public storage URLs
+  return {
+    ...raw,
+    photos: raw.photos?.map(p => ({ ...p, photo_url: resolvePhotoUrl(p.photo_url) })) ?? [],
+  }
 }
 
 export async function getProjectMembersForIncident(incidentId: string) {

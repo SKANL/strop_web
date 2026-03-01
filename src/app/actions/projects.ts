@@ -253,16 +253,21 @@ export async function getProjectFinancials(projectId: string) {
   }
 
   const totalEstimated = incidents?.reduce((sum, inc) => sum + (inc.estimated_cost || 0), 0) || 0
-  const totalActual = incidents?.reduce((sum, inc) => sum + (inc.actual_cost || 0), 0) || 0
+  // Only count CLOSED incidents as "spent" — open incidents have not confirmed actual cost
+  const totalActual = incidents
+    ?.filter(inc => inc.status === 'CLOSED')
+    .reduce((sum, inc) => sum + (inc.actual_cost ?? 0), 0) || 0
   const openIncidents = incidents?.filter(inc => inc.status === 'OPEN').length || 0
   const criticalIncidents = incidents?.filter(inc => inc.priority === 'CRITICAL' && inc.status !== 'CLOSED').length || 0
 
+  const budget = project.contingency_budget || 0
+
   return {
     data: {
-      budget: project.contingency_budget,
+      budget,
       spent: totalActual,
       atRisk: totalEstimated - totalActual,
-      percentUsed: (totalActual / project.contingency_budget) * 100,
+      percentUsed: budget > 0 ? (totalActual / budget) * 100 : 0,
       openIncidents,
       criticalIncidents,
     },

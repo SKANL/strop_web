@@ -78,7 +78,7 @@ export function IncidentDetailDrawer({
           console.error(error)
         } else {
           setIncident(data)
-          if (data?.actual_cost) setFinalCost(data.actual_cost.toString())
+          if (data?.actual_cost != null) setFinalCost(data.actual_cost.toString())
           if (data?.assigned_to) setAssignedUserId(data.assigned_to)
           // Fetch project members for assignment via server action
           const membersResult = await fetchProjectMembersAction(incidentId)
@@ -96,7 +96,7 @@ export function IncidentDetailDrawer({
 
   const handleShareWhatsApp = () => {
     if (!incident) return
-    const cost = incident.actual_cost || incident.estimated_cost
+    const cost = incident.actual_cost ?? incident.estimated_cost
     const message = `🔧 Incidencia #${incident.folio_number} - ${incident.description}\n\n📍 ${incident.location_tag || 'Sin ubicación'}\n💰 Costo: $${cost?.toLocaleString('es-MX') || '0.00'}\n\nVer detalles: ${window.location.origin}/r/${incident.public_token || 'error'}`
     const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(message)}`
     window.open(whatsappUrl, '_blank')
@@ -288,7 +288,7 @@ export function IncidentDetailDrawer({
                 <div className="flex items-center gap-2 text-sm">
                 <DollarSign className="h-4 w-4 text-muted-foreground" />
                 <span className="font-mono font-bold">
-                    ${(incident.actual_cost || incident.estimated_cost || 0).toLocaleString('es-MX', { minimumFractionDigits: 2 })}
+                    ${(incident.actual_cost != null ? incident.actual_cost : (incident.estimated_cost ?? 0)).toLocaleString('es-MX', { minimumFractionDigits: 2 })}
                 </span>
                 </div>
                 )}

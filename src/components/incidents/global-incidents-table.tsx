@@ -298,7 +298,7 @@ export function GlobalIncidentsTable({
       header: () => <div className="text-right">COSTO ($)</div>,
       cell: ({ row }) => {
         const isEditing = editingCost === row.original.id
-        const cost = row.original.actual_cost || 0
+        const cost = row.original.actual_cost  // null = not set; 0 = explicitly zero
 
         if (!canViewCosts) {
           return (
@@ -308,7 +308,15 @@ export function GlobalIncidentsTable({
             </div>
           )
         }
-        
+
+        if (cost == null) {
+          return (
+            <div className="text-right">
+              <span className="text-sm text-muted-foreground font-mono">—</span>
+            </div>
+          )
+        }
+
         return (
           <div className="text-right">
             {!isEditing ? (

@@ -20,19 +20,19 @@ export function FinancialHeader({ incidents, contingencyBudget }: ProjectFinanci
   const kpis = useMemo(() => {
     const budget = contingencyBudget || 0
 
-    // Riesgo activo: costs tied to open/in-review incidents
+    // Riesgo activo: estimated_cost of open/in-review incidents (what we may still pay)
     const activeRisk = incidents
       .filter(i => i.status === 'OPEN' || i.status === 'IN_REVIEW')
-      .reduce((sum, i) => sum + ((i.actual_cost as number) || (i.estimated_cost as number) || 0), 0)
+      .reduce((sum, i) => sum + ((i.estimated_cost as number) || 0), 0)
 
     // Recuperado: actual costs on closed incidents (resolved/charged)
     const recovered = incidents
       .filter(i => i.status === 'CLOSED')
       .reduce((sum, i) => sum + ((i.actual_cost as number) || 0), 0)
 
-    // Budget consumed (all incidents)
+    // Budget consumed: use actual_cost when set, else estimated_cost (best available figure per incident)
     const allCosts = incidents.reduce(
-      (sum, i) => sum + ((i.actual_cost as number) || (i.estimated_cost as number) || 0),
+      (sum, i) => sum + (i.actual_cost != null ? (i.actual_cost as number) : ((i.estimated_cost as number) || 0)),
       0
     )
     const budgetUsedPct = budget > 0 ? Math.min(100, (allCosts / budget) * 100) : 0

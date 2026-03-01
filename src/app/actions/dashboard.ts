@@ -41,23 +41,22 @@ export async function getDashboardKPIs(): Promise<{ data: DashboardKPIs | null, 
 
   const orgId = userData.organization_id
 
-  // 1. Calculate Risk (Sum of estimated cost of OPEN incidents)
+  // 1. Calculate Risk (Sum of estimated_cost of OPEN/IN_REVIEW incidents)
   const { data: riskData, error: riskError } = await supabase
     .from('incidents')
     .select('estimated_cost')
-    .neq('status', 'CLOSED')
-    //.eq('organization_id', orgId) // Assuming RLS handles this or we filter by projects in org
+    .in('status', ['OPEN', 'IN_REVIEW'])
   
   if (riskError) console.error('Error fetching risk data:', riskError)
   
   const risk = riskData?.reduce((sum, inc) => sum + (inc.estimated_cost || 0), 0) || 0
   const incidentCount = riskData?.length || 0
 
-  // 2. Calculate Recovered (Sum of actual cost of BILLABLE incidents)
+  // 2. Calculate Recovered (Sum of actual_cost of CLOSED incidents charged to contractor)
   const { data: recoveredData } = await supabase
     .from('incidents')
     .select('actual_cost')
-    .eq('is_billable', true)
+    .eq('status', 'CLOSED')
     
   const recovered = recoveredData?.reduce((sum, inc) => sum + (inc.actual_cost || 0), 0) || 0
 
@@ -211,7 +210,10 @@ export async function getMapProjects(): Promise<MapProject[]> {
         const incidents = p.incidents || []
         const critical = incidents.filter((i: any) => i.priority === 'CRITICAL' && i.status !== 'CLOSED').length
         const open = incidents.filter((i: any) => i.status !== 'CLOSED').length
-        const spent = incidents.reduce((sum: number, i: any) => sum + (i.actual_cost || 0), 0)
+        // Only CLOSED incidents count as spent budget
+        const spent = incidents
+            .filter((i: any) => i.status === 'CLOSED')
+            .reduce((sum: number, i: any) => sum + (i.actual_cost ?? 0), 0)
         
         // Parse coordinates
         let coords: [number, number] = [-99.1332, 19.4326] // Default to CDMX
@@ -222,7 +224,7 @@ export async function getMapProjects(): Promise<MapProject[]> {
             id: p.id,
             name: p.name,
             phase: 'En ejecución', // Placeholder logic
-            budget: { current: spent, total: p.contingency_budget },
+            budget: { current: spent, total: p.contingency_budget ?? 0 },
             incidents: { critical, open },
             status: p.is_active ? 'Activo' : 'Inactivo',
             coordinates: coords

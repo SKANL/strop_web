@@ -14,11 +14,11 @@ export default async function ProjectsPage() {
       const criticalCount = activeIncidents.filter((i: any) => i.priority === 'CRITICAL' && i.status !== 'CLOSED').length
       const openCount = activeIncidents.filter((i: any) => i.status === 'OPEN').length
       
-      // Calculate budget spent from closed incidents
+      // Calculate budget spent from closed incidents (use actual_cost when set, else estimated_cost)
       const totalBudget = p.contingency_budget || 0
       const spent = activeIncidents
         .filter((i: any) => i.status === 'CLOSED')
-        .reduce((sum: number, i: any) => sum + (i.actual_cost || i.estimated_cost || 0), 0)
+        .reduce((sum: number, i: any) => sum + (i.actual_cost != null ? i.actual_cost : (i.estimated_cost || 0)), 0)
 
       // Find superintendent
       const superInt = p.project_members?.find((m: any) => m.user?.role?.display_name === 'Superintendente' || m.user?.role?.name === 'Superintendente')
