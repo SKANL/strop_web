@@ -227,7 +227,7 @@ export function IncidentDetailDrawer({
         incident.location_tag ? `\uD83D\uDCCD *Ubicaci\u00F3n:* ${incident.location_tag}` : null,
         `\uD83D\uDEA8 *Prioridad:* ${incident.priority === 'CRITICAL' ? '\uD83D\uDD34 Cr\u00EDtica' : incident.priority === 'URGENT' ? '\uD83D\uDFE0 Urgente' : '\uD83D\uDFE1 Normal'}`,
         '',
-        `Ver detalles: ${typeof window !== 'undefined' ? window.location.origin : 'https://strop.app'}/r/${incident.public_token}`,
+        `Ver detalles: ${typeof window !== 'undefined' ? window.location.origin : 'https://constructora.zentyar.com'}/r/${incident.public_token}`,
       ].filter(Boolean).join('\n')
     : null
 

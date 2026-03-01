@@ -245,6 +245,14 @@ export async function inviteCrewMember(formData: {
 
   if (!userData?.organization_id) return { data: null, error: 'Organización no encontrada' }
 
+  // Find the default crew role ("Consultor Externo") for this org
+  const { data: crewRole } = await supabase
+    .from('roles')
+    .select('id')
+    .eq('organization_id', userData.organization_id)
+    .eq('display_name', 'Consultor Externo')
+    .single()
+
   // Crew members use a synthetic email so Supabase Auth can accept them
   const email = `${formData.username}@crew.strop.app`
 
@@ -285,6 +293,7 @@ export async function inviteCrewMember(formData: {
       full_name: formData.name,
       organization_id: userData.organization_id,
       user_type: 'crew',
+      role_id: crewRole?.id ?? null,
       is_active: true,
     } as any)
 

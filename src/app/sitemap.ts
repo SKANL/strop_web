@@ -1,7 +1,7 @@
 import type { MetadataRoute } from 'next'
 
 export default function sitemap(): MetadataRoute.Sitemap {
-  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://strop.app'
+  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://constructora.zentyar.com'
 
   return [
     {

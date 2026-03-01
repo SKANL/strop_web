@@ -19,7 +19,7 @@ export const metadata: Metadata = {
   openGraph: {
     type: 'website',
     locale: 'es_MX',
-    url: 'https://strop.app',
+    url: 'https://constructora.zentyar.com',
     siteName: 'Strop',
     title: 'Strop - Gestión de Proyectos de Construcción',
     description: 'Sistema de gestión de incidencias y proyectos de construcción',

@@ -73,11 +73,12 @@ export function CrewInviteDialog({ projectName }: { projectName?: string }) {
   }
 
   const getWhatsAppMessage = () => {
-    return `👷‍♂️ *Acceso Strop SaaS*
+    const loginUrl = typeof window !== 'undefined' ? `${window.location.origin}/login` : 'https://constructora.zentyar.com/login'
+    return `👷‍♂️ *Acceso Strop*
     
 Hola ${formData.name}, te hemos dado acceso al proyecto *${projectName || "este proyecto"}*.
 
-🔗 *Entra aquí:* strop.app/login
+🔗 *Entra aquí:* ${loginUrl}
 👤 *Usuario:* ${credentials.username}
 🔑 *Clave:* ${credentials.password}
 

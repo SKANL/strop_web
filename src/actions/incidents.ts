@@ -142,7 +142,7 @@ export async function generatePublicLinkAction(incidentId: string) {
         const { token } = await generatePublicLink(incidentId)
         revalidatePath('/incidents')
         
-        const publicUrl = `${process.env.NEXT_PUBLIC_APP_URL || ''}/r/${token}`
+        const publicUrl = `${process.env.NEXT_PUBLIC_APP_URL || 'https://constructora.zentyar.com'}/r/${token}`
         return { success: true, url: publicUrl }
     } catch (error: any) {
         return { success: false, message: error.message }
