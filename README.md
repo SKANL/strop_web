@@ -69,14 +69,23 @@ src/
 
 Unir de manera fluida un Frontend SSR interactivo con la crueldad y la desincronización natural de reportes móviles de la construcción es resultado de un ensamble de arquitectura sólido orquestado por talento real:
 
-*   **Braulio** - *Lead Architect & Modelado C4*: Fundó las bases del Next.js App Router, integró la filosofía arquitectónica global y la interacción del ecosistema de componentes. 
-*   **Luis** - *Frontend Web System & UI/UX*: Master visual que integró las primitivas de Radix UI y Tailwind CSS con React 19 para garantizar el aspecto estético, moderno, lúgubre y corporativo de los tableros analíticos.
-*   **Andri** - *Server Actions & Data Engineering*: Experto que vinculó los componentes del SSR hacia los esquemas fuertemente tipados de Supabase (`zod` validations a PostgreSQL), manteniendo seguros los pipelines API.
-*   **Jose** - *Flujos de Operacionales & QA Mastery*: Mantenimiento de rigurosos controles de calidad entre lo enviado por el Módulo Móvil Offline, cruce de presupuestos reportados y lo dibujado fidedignamente en las gráficas directivas.
+*   **Braulio Isaias Bernal Padron** - *Lead Architect & Modelado C4*: Fundó las bases del Next.js App Router, integró la filosofía arquitectónica global y la interacción del ecosistema de componentes. 
+*   **Luis Yael Zapata Paredez** - *Frontend Web System & UI/UX*: Master visual que integró las primitivas de Radix UI y Tailwind CSS con React 19 para garantizar el aspecto estético, moderno, lúgubre y corporativo de los tableros analíticos.
+*   **Andri Yael Rodriguez Flota** - *Server Actions & Data Engineering*: Experto que vinculó los componentes del SSR hacia los esquemas fuertemente tipados de Supabase (`zod` validations a PostgreSQL), manteniendo seguros los pipelines API.
+*   **Jose Gaspar Anguas Ku** - *Flujos de Operacionales & QA Mastery*: Mantenimiento de rigurosos controles de calidad entre lo enviado por el Módulo Móvil Offline, cruce de presupuestos reportados y lo dibujado fidedignamente en las gráficas directivas.
+*   **Francia Faride Ojeda Estrella** - *UI/UX Liaison & Sinergia Operacional*: Coordinación transversal de las jerarquías de diseño, consolidando la experiencia responsiva integral del Web Dashboard para los gerentes de proyecto.
 
 ---
 
-## 6. Prerrequisitos e Instalación (Comandos Node.js/Next)
+## 6. 🤖 Desarrollo Impulsado por Inteligencia Artificial (+IA)
+
+Este no es un proyecto de software tradicional. **STROP Web** fue orquestado y fundamentado utilizando metodologías de vanguardia en **Agentic AI Workflow y Prompt Engineering**.
+
+A través de la co-creación con avanzados modelos de Inteligencia Artificial actuando como arquitectos de co-piloto, logramos catalizar drásticamente la eficiencia del ciclo de desarrollo. Desde la inyección de tipos rígidos de TypeScript para la validación End-to-End con la Base de datos, hasta el veloz acoplamiento de métricas complejas en Next.js SSR; la IA funcionó como una extensión hiper-optimizada de las capacidades humanas de nuestro equipo, destrozando las barreras del desarrollo de software convencional.
+
+---
+
+## 7. Prerrequisitos e Instalación (Comandos Node.js/Next)
 
 Para correr la plataforma en modo Servidor de Desarrollo, clona el repositorio e instala los paquetes:
 
